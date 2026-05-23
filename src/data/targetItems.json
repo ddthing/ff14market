@@ -1,0 +1,32 @@
+[
+  {
+    "id": 39727,
+    "name": "8등급 힘의 환혹약",
+    "icon": "https://xivapi.com/i/020000/020661.png",
+    "category": "소모품"
+  },
+  {
+    "id": 39728,
+    "name": "8등급 민첩성의 환혹약",
+    "icon": "https://xivapi.com/i/020000/020662.png",
+    "category": "소모품"
+  },
+  {
+    "id": 39730,
+    "name": "8등급 지능의 환혹약",
+    "icon": "https://xivapi.com/i/020000/020664.png",
+    "category": "소모품"
+  },
+  {
+    "id": 44005,
+    "name": "타코 알 파스토르",
+    "icon": "https://xivapi.com/i/029000/029061.png",
+    "category": "요리"
+  },
+  {
+    "id": 44006,
+    "name": "모스 버거",
+    "icon": "https://xivapi.com/i/029000/029062.png",
+    "category": "요리"
+  }
+]
