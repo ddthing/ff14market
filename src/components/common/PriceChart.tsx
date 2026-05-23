@@ -29,7 +29,7 @@ export const PriceChart = ({ history }: ChartProps) => {
         <LineChart data={sortedHistory}>
           <YAxis domain={['auto', 'auto']} hide />
           <Tooltip 
-            formatter={(value: any) => [`${Number(value).toLocaleString()} G`, '판매가']}
+            formatter={(value: unknown) => [`${Number(value).toLocaleString()} G`, '판매가']}
             labelFormatter={() => ''}
             contentStyle={{ 
               borderRadius: '10px', 
