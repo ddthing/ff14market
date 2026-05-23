@@ -14,21 +14,37 @@ export interface EnrichedItem {
   lastUploadTime?: number;
 }
 
+// 서버별 통합 쿼리 키 생성 함수 — 모달의 캐시 역방향 동기화에서 공유 사용
+export const getBulkQueryKey = (server: string) => ['universalis', server] as const;
+
+// 진짜 최저가: NQ/HQ 중 낮은 값, 없으면 minPrice fallback
+export const computeTrueMinPrice = (
+  minPrice: number,
+  minPriceNQ: number,
+  minPriceHQ: number
+): number => {
+  const candidates = [minPrice, minPriceNQ, minPriceHQ].filter(v => v > 0);
+  return candidates.length > 0 ? Math.min(...candidates) : 0;
+};
+
 export const useItemData = () => {
   const { server } = useServerStore();
   const itemIds = masterItems.map(item => item.id);
-  
+
+  // 현재 선택된 서버 기준으로 통합 조회
   const { data: apiData, isLoading } = useQuery({
-    queryKey: ['universalis', server, itemIds],
+    queryKey: [...getBulkQueryKey(server), itemIds],
     queryFn: () => fetchUniversalisData(server, itemIds),
   });
 
   const enrichedItems: EnrichedItem[] = masterItems.map(item => {
     const data = apiData?.[item.id];
-    // If not loaded or not found, default to 0
-    const minPrice = data?.minPrice || 0;
+    // NQ/HQ 관계없이 절대 최저가
+    const minPrice = data
+      ? computeTrueMinPrice(data.minPrice, data.minPriceNQ, data.minPriceHQ)
+      : 0;
     const currentAverage = data?.currentAveragePrice || data?.averagePrice || minPrice;
-    
+
     // Calculate fluctuation based on current average vs minimum price
     let fluctuation = 0;
     if (currentAverage > 0 && minPrice > 0) {

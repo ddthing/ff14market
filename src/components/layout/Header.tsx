@@ -7,6 +7,8 @@ import { Search, X, ChevronDown, Share2, Sun, Moon, RefreshCw, HelpCircle } from
 import { NavLink, Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchKoreaDCData } from '../../api/universalis';
+import { getBulkQueryKey, computeTrueMinPrice } from '../../hooks/useItemData';
+import type { UniversalisItemData } from '../../api/universalis';
 import { formatFreshness } from '../../utils/time';
 import { PriceChart } from '../common/PriceChart';
 import itemsData from '../../data/items.json';
@@ -113,15 +115,6 @@ export const Header = () => {
               {isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
             </button>
 
-            {/* 실시간 Live 인디케이터 (증권사 앱 스타일) */}
-            <div className="flex items-center space-x-1.5 bg-green-50 dark:bg-green-950/20 border border-green-100/50 dark:border-green-900/30 rounded-lg px-2.5 py-[8px] select-none">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-              </span>
-              <span className="text-[11px] font-bold text-green-600 dark:text-green-400 tracking-wider">LIVE</span>
-            </div>
-
             {/* 서버 선택 드롭다운 */}
             <div className="relative hidden sm:block">
               <select 
@@ -198,12 +191,43 @@ const ItemModal = ({ item, onClose }: { item: Item, onClose: () => void }) => {
   const [isCopied, setIsCopied] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
   const queryClient = useQueryClient();
+  const { server } = useServerStore();
 
   const { data, isLoading } = useQuery({
     queryKey: ['searchItem', 'Korea', item.id],
     queryFn: () => fetchKoreaDCData(item.id),
     staleTime: 300000, // 5 minutes
   });
+
+  // 모달에서 받은 최신 데이터를 리스트 벌크 캐시에 역방향 동기화
+  // → 모달을 닫았을 때 리스트 가격이 즉시 최신화됨
+  useEffect(() => {
+    if (!data) return;
+    const freshMinPrice = computeTrueMinPrice(
+      data.minPrice ?? 0,
+      data.minPriceNQ ?? 0,
+      data.minPriceHQ ?? 0
+    );
+    if (freshMinPrice <= 0) return;
+
+    queryClient.setQueriesData<Record<string, UniversalisItemData>>(
+      { queryKey: getBulkQueryKey(server), exact: false },
+      (oldData) => {
+        if (!oldData) return oldData;
+        const prev = oldData[item.id];
+        return {
+          ...oldData,
+          [item.id]: {
+            ...prev,
+            minPrice: freshMinPrice,
+            minPriceNQ: data.minPriceNQ ?? prev?.minPriceNQ ?? 0,
+            minPriceHQ: data.minPriceHQ ?? prev?.minPriceHQ ?? 0,
+            lastUploadTime: data.lastUploadTime ?? prev?.lastUploadTime,
+          },
+        };
+      }
+    );
+  }, [data, item.id, queryClient, server]);
 
   const handleRefresh = async () => {
     setIsSpinning(true);
@@ -216,9 +240,12 @@ const ItemModal = ({ item, onClose }: { item: Item, onClose: () => void }) => {
   };
 
   const itemData = data;
-  const globalMinPrice = itemData?.minPrice || 0;
+  // 모달 헤드라인: NQ/HQ 무관 절대 최저가
+  const globalMinPrice = itemData
+    ? computeTrueMinPrice(itemData.minPrice ?? 0, itemData.minPriceNQ ?? 0, itemData.minPriceHQ ?? 0)
+    : 0;
   const netPrice = Math.floor(globalMinPrice * 0.95);
-  
+
   const serverPrices = ['초코보', '모그리', '카벙클', '톤베리', '펜리르'].map(serverName => {
     const serverListings = itemData?.listings?.filter(l => l.worldName === serverName) || [];
     const minPrice = serverListings.length > 0 ? Math.min(...serverListings.map(l => l.pricePerUnit)) : 0;
@@ -362,9 +389,13 @@ const ItemModal = ({ item, onClose }: { item: Item, onClose: () => void }) => {
                 serverPrices.map(s => {
                   const isLowest = s.minPrice > 0 && s.minPrice === absoluteMin;
                   return (
-                    <div key={s.serverName} className={`flex justify-between items-center p-2 rounded-lg transition-colors ${isLowest ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-gray-100 dark:hover:bg-gray-800/50'}`}>
+                    <div key={s.serverName} className={`flex justify-between items-center p-2 rounded-lg transition-colors ${
+                      isLowest ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-gray-100 dark:hover:bg-gray-800/50'
+                    }`}>
                       <div className="flex items-center space-x-2">
-                        <span className={`text-[13px] font-bold ${isLowest ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}>
+                        <span className={`text-[13px] font-bold ${
+                          isLowest ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
+                        }`}>
                           {s.serverName}
                         </span>
                         {isLowest && (
