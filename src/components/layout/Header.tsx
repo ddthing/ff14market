@@ -113,7 +113,7 @@ export const Header = () => {
               {isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
             </button>
 
-            {/* 실시간 Live 인디케이터 (토스 스타일) */}
+            {/* 실시간 Live 인디케이터 (증권사 앱 스타일) */}
             <div className="flex items-center space-x-1.5 bg-green-50 dark:bg-green-950/20 border border-green-100/50 dark:border-green-900/30 rounded-lg px-2.5 py-[8px] select-none">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
