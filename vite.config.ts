@@ -9,6 +9,9 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: {
+        maximumFileSizeToCacheInBytes: 15 * 1024 * 1024
+      },
       manifest: {
         name: 'FF14 장터탐지기',
         short_name: '장터탐지기',
