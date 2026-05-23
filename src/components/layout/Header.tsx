@@ -236,35 +236,44 @@ const ItemModal = ({ item, onClose }: { item: Item, onClose: () => void }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-6">
       <div 
         className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-sm bg-white dark:bg-[#26282b] rounded-xl p-5 sm:p-6 shadow-2xl animate-pop-in">
-        <div className="absolute top-4 right-4 flex items-center space-x-2">
+      <div className="relative w-full max-w-sm max-h-[90vh] bg-white dark:bg-[#26282b] rounded-t-2xl sm:rounded-xl flex flex-col shadow-2xl animate-slide-up sm:animate-pop-in overflow-hidden">
+        
+        {/* 모바일 바텀시트 핸들바 */}
+        <div className="w-full flex justify-center pt-3 pb-1 sm:hidden flex-shrink-0 cursor-pointer" onClick={onClose}>
+          <div className="w-10 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+        </div>
+
+        {/* 상단 액션 버튼 */}
+        <div className="absolute top-3 sm:top-4 right-3 sm:right-4 flex items-center space-x-2 z-10">
           <button 
             onClick={handleShare} 
-            className="flex items-center space-x-1 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-gray-500 dark:text-[#9ea4aa] hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            className="flex items-center space-x-1 px-3 py-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg text-gray-500 dark:text-[#9ea4aa] hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shadow-sm"
           >
             {isCopied ? (
               <span className="text-[13px] font-bold text-blue-600 dark:text-blue-400">복사됨!</span>
             ) : (
               <>
                 <Share2 className="w-4 h-4" />
-                <span className="text-[13px] font-bold">공유</span>
+                <span className="text-[13px] font-bold hidden sm:inline">공유</span>
               </>
             )}
           </button>
           <button 
             onClick={onClose} 
-            className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-gray-500 dark:text-[#9ea4aa] hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            className="p-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg text-gray-500 dark:text-[#9ea4aa] hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shadow-sm hidden sm:flex"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
-        
-        <div className="flex flex-col items-center pt-8 pb-5">
+
+        {/* 스크롤 가능한 내부 컨텐츠 */}
+        <div className="overflow-y-auto px-4 sm:px-6 pb-24 sm:pb-28 pt-4 sm:pt-6 flex-1 scrollbar-hide">
+          <div className="flex flex-col items-center sm:pt-4 pb-5">
           <img 
             src={getIconUrl(item.icon)} 
             alt={item.name} 
@@ -374,13 +383,17 @@ const ItemModal = ({ item, onClose }: { item: Item, onClose: () => void }) => {
             </div>
           </div>
         </div>
+        </div>
         
-        <button 
-          onClick={onClose}
-          className="w-full mt-5 bg-blue-600 hover:bg-blue-700 text-white font-bold py-[14px] rounded-lg transition-colors text-[16px]"
-        >
-          확인
-        </button>
+        {/* 하단 고정 버튼 영역 */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 bg-gradient-to-t from-white via-white to-transparent dark:from-[#26282b] dark:via-[#26282b] dark:to-transparent pt-8 sm:pt-10 pointer-events-none">
+          <button 
+            onClick={onClose}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-[14px] rounded-lg transition-colors text-[16px] pointer-events-auto shadow-lg"
+          >
+            확인
+          </button>
+        </div>
       </div>
     </div>
   );

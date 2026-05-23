@@ -55,5 +55,14 @@ body {
   animation: fadeIn 0.2s ease-out forwards;
 }
 
+@keyframes slideUp {
+  0% { opacity: 0; transform: translateY(100%); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 .emoji { height: 1.1em; width: 1.1em; margin: 0 0.1em; vertical-align: -0.15em; display: inline-block; }
 
