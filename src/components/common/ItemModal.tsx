@@ -23,6 +23,8 @@ const SERVERS = [
   { id: 'Fenrir', name: '펜리르' },
 ];
 
+import masterItems from '../../data/masterItems.json';
+
 export const ItemModal = ({ item, onClose }: { item: Item; onClose: () => void }) => {
   const [isCopied, setIsCopied] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
@@ -51,8 +53,11 @@ export const ItemModal = ({ item, onClose }: { item: Item; onClose: () => void }
 
     if (myServerMinPrice <= 0) return;
 
-    queryClient.setQueriesData<Record<string, UniversalisItemData>>(
-      { queryKey: getBulkQueryKey(server), exact: false },
+    const itemIds = masterItems.map(m => m.id);
+    const exactQueryKey = [...getBulkQueryKey(server), itemIds];
+
+    queryClient.setQueryData<Record<string, UniversalisItemData>>(
+      exactQueryKey,
       (oldData) => {
         if (!oldData) return oldData;
         const prev = oldData[item.id];
