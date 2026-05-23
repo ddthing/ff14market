@@ -203,12 +203,17 @@ const ItemModal = ({ item, onClose }: { item: Item, onClose: () => void }) => {
   // → 모달을 닫았을 때 리스트 가격이 즉시 최신화됨
   useEffect(() => {
     if (!data) return;
-    const freshMinPrice = computeTrueMinPrice(
-      data.minPrice ?? 0,
-      data.minPriceNQ ?? 0,
-      data.minPriceHQ ?? 0
-    );
-    if (freshMinPrice <= 0) return;
+    
+    // 현재 선택된 서버의 한글 이름 찾기 (예: '톤베리')
+    const myServerName = SERVERS.find(s => s.id === server)?.name ?? '';
+    
+    // 모달이 불러온 Korea DC 전체 데이터 중, '현재 선택된 서버'의 매물만 필터링
+    const myServerListings = data.listings?.filter(l => l.worldName === myServerName) || [];
+    const myServerMinPrice = myServerListings.length > 0 
+      ? Math.min(...myServerListings.map(l => l.pricePerUnit)) 
+      : 0;
+
+    if (myServerMinPrice <= 0) return;
 
     queryClient.setQueriesData<Record<string, UniversalisItemData>>(
       { queryKey: getBulkQueryKey(server), exact: false },
@@ -219,10 +224,10 @@ const ItemModal = ({ item, onClose }: { item: Item, onClose: () => void }) => {
           ...oldData,
           [item.id]: {
             ...prev,
-            minPrice: freshMinPrice,
-            minPriceNQ: data.minPriceNQ ?? prev?.minPriceNQ ?? 0,
-            minPriceHQ: data.minPriceHQ ?? prev?.minPriceHQ ?? 0,
-            lastUploadTime: data.lastUploadTime ?? prev?.lastUploadTime,
+            minPrice: myServerMinPrice,
+            minPriceNQ: 0, // NQ/HQ 구분 없이 절대 최저가로 덮어씌움
+            minPriceHQ: 0,
+            lastUploadTime: Date.now(), // 방금 직접 확인했으므로 시간 갱신
           },
         };
       }
