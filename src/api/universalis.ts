@@ -39,8 +39,8 @@ export const fetchUniversalisData = async (server: string, itemIds: number[]): P
     responses.forEach((response, idx) => {
       if (response.data && response.data.items) {
         allItems = { ...allItems, ...response.data.items };
-      } else if (chunks[idx].length === 1 && (response.data as any).minPrice !== undefined) {
-        allItems[chunks[idx][0]] = response.data as any;
+      } else if (chunks[idx].length === 1 && (response.data as unknown as UniversalisItemData).minPrice !== undefined) {
+        allItems[chunks[idx][0]] = response.data as unknown as UniversalisItemData;
       }
     });
     

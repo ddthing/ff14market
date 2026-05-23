@@ -1,5 +1,6 @@
 import { useState, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import type { NavigateFunction } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import type { EnrichedItem } from '../../hooks/useItemData';
 import { useItemData } from '../../hooks/useItemData';
@@ -10,9 +11,9 @@ import { fetchKoreaDCData } from '../../api/universalis';
 import { getIconUrl } from '../../utils/icon';
 import { useFavoriteStore } from '../../store/useFavoriteStore';
 import { formatFreshness } from '../../utils/time';
-// @ts-ignore
+// @ts-expect-error react-twemoji lacks types
 import _Twemoji from 'react-twemoji';
-const Twemoji = (_Twemoji as any).default || _Twemoji;
+const Twemoji = (_Twemoji as { default?: React.ElementType }).default || _Twemoji;
 
 export const Dashboard = () => {
   const { enrichedItems, isLoading } = useItemData();
@@ -230,7 +231,7 @@ const DashboardCard = ({ title, items, isLoading }: { title: React.ReactNode, it
   );
 };
 
-const DashboardListItem = memo(({ item, index, navigate }: { item: EnrichedItem, index: number, navigate: any }) => {
+const DashboardListItem = memo(({ item, index, navigate }: { item: EnrichedItem, index: number, navigate: NavigateFunction }) => {
   const queryClient = useQueryClient();
 
   const handleMouseEnter = () => {
