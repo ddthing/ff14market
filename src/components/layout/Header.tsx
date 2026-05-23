@@ -3,10 +3,11 @@ import Fuse from 'fuse.js';
 // @ts-ignore
 import _Twemoji from 'react-twemoji';
 const Twemoji = (_Twemoji as any).default || _Twemoji;
-import { Search, X, ChevronDown, Share2, Sun, Moon } from 'lucide-react';
+import { Search, X, ChevronDown, Share2, Sun, Moon, RefreshCw, HelpCircle } from 'lucide-react';
 import { NavLink, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchKoreaDCData } from '../../api/universalis';
+import { formatFreshness } from '../../utils/time';
 import { PriceChart } from '../common/PriceChart';
 import itemsData from '../../data/items.json';
 import { useServerStore } from '../../store/useServerStore';
@@ -112,6 +113,15 @@ export const Header = () => {
               {isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
             </button>
 
+            {/* 실시간 Live 인디케이터 (토스 스타일) */}
+            <div className="flex items-center space-x-1.5 bg-green-50 dark:bg-green-950/20 border border-green-100/50 dark:border-green-900/30 rounded-lg px-2.5 py-[8px] select-none">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              <span className="text-[11px] font-bold text-green-600 dark:text-green-400 tracking-wider">LIVE</span>
+            </div>
+
             {/* 서버 선택 드롭다운 */}
             <div className="relative hidden sm:block">
               <select 
@@ -186,11 +196,24 @@ export const Header = () => {
 
 const ItemModal = ({ item, onClose }: { item: Item, onClose: () => void }) => {
   const [isCopied, setIsCopied] = useState(false);
+  const [isSpinning, setIsSpinning] = useState(false);
+  const queryClient = useQueryClient();
+
   const { data, isLoading } = useQuery({
     queryKey: ['searchItem', 'Korea', item.id],
     queryFn: () => fetchKoreaDCData(item.id),
     staleTime: 300000, // 5 minutes
   });
+
+  const handleRefresh = async () => {
+    setIsSpinning(true);
+    await queryClient.invalidateQueries({
+      queryKey: ['searchItem', 'Korea', item.id]
+    });
+    setTimeout(() => {
+      setIsSpinning(false);
+    }, 1000);
+  };
 
   const itemData = data;
   const globalMinPrice = itemData?.minPrice || 0;
@@ -251,9 +274,34 @@ const ItemModal = ({ item, onClose }: { item: Item, onClose: () => void }) => {
           <h2 className="text-[20px] font-bold text-gray-900 dark:text-white text-center leading-tight">
             {item.name}
           </h2>
-          <p className="text-gray-500 dark:text-[#9ea4aa] mt-2 text-[13px] font-medium">
-            {isLoading ? '한국 DC 통합 시세 조회 중...' : `한국 DC 실시간 시세`}
-          </p>
+          <div className="flex items-center space-x-1 mt-2 text-gray-500 dark:text-[#9ea4aa] text-[13px] font-medium select-none">
+            <span>
+              {isLoading 
+                ? '한국 DC 통합 시세 조회 중...' 
+                : `업데이트: ${formatFreshness(itemData?.lastUploadTime)}`}
+            </span>
+            {!isLoading && (
+              <>
+                {/* 툴팁 */}
+                <div className="relative group flex items-center justify-center">
+                  <HelpCircle className="w-3.5 h-3.5 text-gray-400 dark:text-[#9ea4aa] hover:text-gray-600 dark:hover:text-gray-200 cursor-help" />
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 w-60 hidden group-hover:block bg-gray-900/95 dark:bg-gray-800/95 text-white text-[11px] rounded-lg py-2 px-3 shadow-xl text-center leading-normal z-[120] pointer-events-none transition-all">
+                    Universalis 데이터 제공 시점에 따라 인게임과 약간의 차이가 있을 수 있습니다.
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900/95 dark:border-t-gray-800/95"></div>
+                  </div>
+                </div>
+                {/* 새로고침 버튼 */}
+                <button
+                  onClick={handleRefresh}
+                  disabled={isSpinning}
+                  className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer flex items-center justify-center"
+                  title="실시간 정보 새로고침"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isSpinning ? 'animate-spin' : ''}`} />
+                </button>
+              </>
+            )}
+          </div>
         </div>
         
         <div className="bg-gray-50 dark:bg-[#101112] rounded-xl p-4 space-y-4">

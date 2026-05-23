@@ -11,6 +11,7 @@ export interface EnrichedItem {
   price: number;
   fluctuation: number;
   volume: number;
+  lastUploadTime?: number;
 }
 
 export const useItemData = () => {
@@ -42,6 +43,7 @@ export const useItemData = () => {
       price: minPrice,
       fluctuation: fluctuation,
       volume: volume,
+      lastUploadTime: data?.lastUploadTime,
     };
   })
   .filter(item => item.price > 0 && item.volume > 0) // 필터링: 거래량이나 가격이 없는 껍데기 매물 제외
