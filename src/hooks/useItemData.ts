@@ -35,6 +35,7 @@ export const useItemData = () => {
   const { data: apiData, isLoading } = useQuery({
     queryKey: [...getBulkQueryKey(server), itemIds],
     queryFn: () => fetchUniversalisData(server, itemIds),
+    staleTime: 300000, // 5 minutes (모달에서 수동으로 덮어씌운 최신 캐시가 백그라운드 리패치에 의해 과거 벌크 데이터로 즉시 롤백되는 현상 방지)
   });
 
   const enrichedItems: EnrichedItem[] = masterItems.map(item => {
