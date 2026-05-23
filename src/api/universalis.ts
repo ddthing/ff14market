@@ -8,6 +8,7 @@ export interface UniversalisItemData {
   regularSaleVelocity: number;
   currentAveragePrice: number;
   averagePrice: number;
+  lastUploadTime?: number;
 }
 
 export interface UniversalisResponse {
@@ -59,6 +60,7 @@ export interface KoreaDCResponse {
   currentAveragePrice: number;
   minPrice: number;
   regularSaleVelocity?: number;
+  lastUploadTime?: number;
 }
 
 export const fetchKoreaDCData = async (itemId: number): Promise<KoreaDCResponse | null> => {

@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { fetchKoreaDCData } from '../../api/universalis';
 import { getIconUrl } from '../../utils/icon';
 import { useFavoriteStore } from '../../store/useFavoriteStore';
+import { formatFreshness } from '../../utils/time';
 // @ts-ignore
 import _Twemoji from 'react-twemoji';
 const Twemoji = (_Twemoji as any).default || _Twemoji;
@@ -279,10 +280,15 @@ const DashboardListItem = memo(({ item, index, navigate }: { item: EnrichedItem,
       </div>
 
       <div className="flex items-center space-x-4 sm:space-x-6 md:space-x-12 ml-2 flex-shrink-0">
-        <div className="text-right w-20 sm:w-28">
-          <span className="font-bold text-[15px] sm:text-[16px] text-gray-900 dark:text-white whitespace-nowrap">
+        <div className="text-right w-20 sm:w-28 flex flex-col items-end justify-center">
+          <span className="font-bold text-[15px] sm:text-[16px] text-gray-900 dark:text-white whitespace-nowrap leading-tight">
             {item.price > 0 ? `${item.price.toLocaleString()} G` : '데이터 없음'}
           </span>
+          {item.price > 0 && item.lastUploadTime !== undefined && (
+            <span className="text-[10px] font-normal text-gray-400 dark:text-[#9ea4aa] mt-[3px] leading-none whitespace-nowrap">
+              {formatFreshness(item.lastUploadTime)}
+            </span>
+          )}
         </div>
         <div className="text-right w-16 sm:w-20">
           <span className={`font-medium text-[14px] sm:text-[15px] whitespace-nowrap ${
