@@ -5,6 +5,8 @@ const BASE_URL = 'https://universalis.app/api/v2';
 export interface UniversalisItemData {
   itemID: number;
   minPrice: number;
+  minPriceNQ: number;
+  minPriceHQ: number;
   regularSaleVelocity: number;
   currentAveragePrice: number;
   averagePrice: number;
@@ -55,10 +57,12 @@ export const fetchUniversalisData = async (server: string, itemIds: number[]): P
 
 export interface KoreaDCResponse {
   itemID: number;
-  listings?: { worldName: string; pricePerUnit: number }[];
+  listings?: { worldName: string; pricePerUnit: number; hq: boolean }[];
   recentHistory?: { worldName: string; pricePerUnit: number; timestamp: number }[];
   currentAveragePrice: number;
   minPrice: number;
+  minPriceNQ: number;
+  minPriceHQ: number;
   regularSaleVelocity?: number;
   lastUploadTime?: number;
 }
