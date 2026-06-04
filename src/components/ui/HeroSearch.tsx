@@ -4,6 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import Fuse from 'fuse.js';
 import itemsData from '../../data/items.json';
 import { getIconUrl } from '../../utils/icon';
+import { useItemData } from '../../hooks/useItemData';
+// @ts-expect-error react-twemoji lacks types
+import _Twemoji from 'react-twemoji';
+const Twemoji = (_Twemoji as { default?: React.ElementType }).default || _Twemoji;
 
 interface Item {
   id: number;
@@ -12,6 +16,7 @@ interface Item {
 }
 
 export const HeroSearch = () => {
+  const { enrichedItems } = useItemData();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -80,21 +85,29 @@ export const HeroSearch = () => {
 
         {/* Recommended Search Chips */}
         <div className="flex items-center space-x-2 mt-3 overflow-x-auto scrollbar-hide px-1 pb-1 w-full max-w-full justify-start md:justify-center">
-          {['환혹약', 'G17 지도', '비전서', '명인의 약차'].map(term => (
+          {enrichedItems.slice(0, 3).map(item => (
             <button
-              key={term}
+              key={item.id}
               onClick={() => {
-                setSearchQuery(term);
+                setSearchQuery(item.name);
                 setIsDropdownOpen(true);
-                // Optionally focus the input:
                 const input = document.querySelector('input[type="text"]') as HTMLInputElement;
                 if (input) input.focus();
               }}
-              className="flex-shrink-0 px-3 py-1.5 bg-gray-100 dark:bg-[#26282b] text-gray-600 dark:text-gray-300 rounded-full text-[13px] font-medium hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+              className="flex-shrink-0 px-3 py-1.5 bg-gray-100 dark:bg-[#26282b] text-gray-600 dark:text-gray-300 rounded-full text-[13px] font-medium hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors flex items-center space-x-1"
             >
-              {term}
+              <Twemoji options={{ folder: 'svg', ext: '.svg' }} className="inline-flex w-[14px] h-[14px]">🔥</Twemoji>
+              <span>{item.name}</span>
             </button>
           ))}
+          
+          <button
+            onClick={() => navigate('/hot-issues')}
+            className="flex-shrink-0 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full text-[13px] font-bold hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors flex items-center space-x-1 border border-blue-200 dark:border-blue-800/30 ml-1"
+          >
+            <Twemoji options={{ folder: 'svg', ext: '.svg' }} className="inline-flex w-[14px] h-[14px]">📊</Twemoji>
+            <span>랭킹 더보기</span>
+          </button>
         </div>
 
         {isDropdownOpen && (
