@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Share2, ArrowLeft } from 'lucide-react';
@@ -6,14 +6,23 @@ import itemsData from '../data/items.json';
 import { fetchKoreaDCData } from '../api/universalis';
 import { PriceChart } from '../components/common/PriceChart';
 import { getIconUrl } from '../utils/icon';
+import { useRecentStore } from '../store/useRecentStore';
+import { FavoriteButton } from '../components/ui/FavoriteButton';
 
 export const ItemDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isCopied, setIsCopied] = useState(false);
+  const addRecentId = useRecentStore((state) => state.addRecentId);
 
   const itemId = id ? parseInt(id) : 0;
   const item = itemsData.find(i => i.id === itemId);
+
+  useEffect(() => {
+    if (itemId) {
+      addRecentId(itemId);
+    }
+  }, [itemId, addRecentId]);
 
   const { data, isLoading } = useQuery({
     queryKey: ['searchItem', 'Korea', itemId],
@@ -67,7 +76,8 @@ export const ItemDetail = () => {
       </button>
 
       <div className="relative w-full bg-white dark:bg-[#26282b] rounded-xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-800">
-        <div className="absolute top-6 right-6 flex items-center space-x-2">
+        <div className="absolute top-6 right-6 flex items-center space-x-3">
+          <FavoriteButton itemId={itemId} />
           <button 
             onClick={handleShare} 
             className="flex items-center space-x-1 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-gray-500 dark:text-[#9ea4aa] hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
@@ -129,7 +139,11 @@ export const ItemDetail = () => {
             )}
             
             {isLoading ? (
-              <div className="h-[100px] w-full bg-gray-200 dark:bg-gray-800 rounded-lg animate-pulse mt-3" />
+              <div className="h-[200px] w-full mt-3 flex items-end space-x-2">
+                {[40, 70, 45, 90, 60, 30, 80, 50, 100, 60, 85, 40].map((h, i) => (
+                  <div key={i} className="flex-1 bg-gray-200 dark:bg-gray-800 rounded-t-sm animate-pulse" style={{ height: `${h}%` }} />
+                ))}
+              </div>
             ) : (
               <PriceChart history={itemData?.recentHistory || []} />
             )}

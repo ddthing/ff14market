@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Heart } from 'lucide-react';
 import { useFavoriteStore } from '../../store/useFavoriteStore';
+import { useToastStore } from '../../store/useToastStore';
 
 interface FavoriteButtonProps {
   itemId: number;
@@ -9,7 +10,24 @@ interface FavoriteButtonProps {
 
 export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ itemId }) => {
   const { favoriteIds, toggleFavorite } = useFavoriteStore();
+  const { addToast } = useToastStore();
   const isFavorite = favoriteIds.includes(itemId);
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleFavorite(itemId);
+    
+    // Provide tactile feedback for mobile
+    if (navigator.vibrate) {
+      navigator.vibrate(50);
+    }
+    
+    if (!isFavorite) {
+      addToast("관심 아이템에 추가되었어요!");
+    } else {
+      addToast("관심 아이템에서 삭제되었어요.");
+    }
+  };
 
   return (
     <motion.div
@@ -21,10 +39,7 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ itemId }) => {
         damping: 15,
         duration: 0.2
       }}
-      onClick={(e) => {
-        e.stopPropagation();
-        toggleFavorite(itemId);
-      }}
+      onClick={handleToggle}
       className="p-1.5 -ml-1.5 flex-shrink-0 cursor-pointer"
     >
       <Heart 
