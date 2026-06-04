@@ -12,54 +12,61 @@ https.get(url, (res) => {
   let data = '';
   res.on('data', chunk => data += chunk);
   res.on('end', () => {
-    const lines = data.split('\n');
+    // Parse entire data instead of splitting by \n first
     const items = [];
+    const rows = [];
+    let currentRow = [];
+    let currentValue = '';
+    let inQuote = false;
+    
+    for (let i = 0; i < data.length; i++) {
+      const char = data[i];
+      const nextChar = data[i + 1];
+      
+      if (inQuote) {
+        if (char === '"') {
+          if (nextChar === '"') {
+            currentValue += '"';
+            i++; // skip next quote
+          } else {
+            inQuote = false;
+          }
+        } else {
+          currentValue += char;
+        }
+      } else {
+        if (char === '"') {
+          inQuote = true;
+        } else if (char === ',') {
+          currentRow.push(currentValue);
+          currentValue = '';
+        } else if (char === '\n' || (char === '\r' && nextChar === '\n')) {
+          currentRow.push(currentValue);
+          rows.push(currentRow);
+          currentRow = [];
+          currentValue = '';
+          if (char === '\r') i++; // skip \n
+        } else if (char !== '\r') {
+          currentValue += char;
+        }
+      }
+    }
+    if (currentValue !== '' || currentRow.length > 0) {
+      currentRow.push(currentValue);
+      rows.push(currentRow);
+    }
     
     // Row 1: column names
-    const headers = lines[1].split(',');
+    const headers = rows[1] || [];
     const nameIdx = 10; // Name
     const iconIdx = 11; // Icon
     const itemSearchCategoryIdx = 17; // ItemSearchCategory
     const categoryNameIdx = 16; // ItemUICategory
     
-    // simple csv line parser to handle quotes
-    function parseCSVLine(text) {
-      const ret = [];
-      let inQuote = false;
-      let value = '';
-      for (let i = 0; i < text.length; i++) {
-        let char = text[i];
-        if (inQuote) {
-          if (char === '"') {
-            if (i < text.length - 1 && text[i+1] === '"') {
-              value += '"';
-              i++;
-            } else {
-              inQuote = false;
-            }
-          } else {
-            value += char;
-          }
-        } else {
-          if (char === '"') {
-            inQuote = true;
-          } else if (char === ',') {
-            ret.push(value);
-            value = '';
-          } else {
-            value += char;
-          }
-        }
-      }
-      ret.push(value);
-      return ret;
-    }
-    
-    for (let i = 3; i < lines.length; i++) {
-      const line = lines[i];
-      if (!line) continue;
+    for (let i = 3; i < rows.length; i++) {
+      const parts = rows[i];
+      if (!parts || parts.length < itemSearchCategoryIdx) continue;
       
-      const parts = parseCSVLine(line);
       const id = parseInt(parts[0]);
       let name = parts[nameIdx];
       const icon = parts[iconIdx];
