@@ -6,6 +6,8 @@ import { Footer } from './components/layout/Footer'
 import { useEffect } from 'react'
 import { useThemeStore } from './store/useThemeStore'
 
+import { ToastContainer } from './components/ui/ToastContainer';
+
 // Lazy load pages
 const Dashboard = lazy(() => import('./features/dashboard/Dashboard').then(m => ({ default: m.Dashboard })));
 const HotIssues = lazy(() => import('./pages/HotIssues').then(m => ({ default: m.HotIssues })));
@@ -63,6 +65,7 @@ function App() {
         <div className="min-h-screen flex flex-col font-sans">
           <Header />
           <main className="container mx-auto px-4 py-8 md:py-10 max-w-6xl flex-grow">
+            <ToastContainer />
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
                 <Route path="/" element={<Dashboard />} />

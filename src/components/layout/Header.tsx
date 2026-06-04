@@ -1,15 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
-import Fuse from 'fuse.js';
+import React, { useState } from 'react';
 // @ts-expect-error react-twemoji lacks types
 import _Twemoji from 'react-twemoji';
 const Twemoji = (_Twemoji as { default?: React.ElementType }).default || _Twemoji;
-import { Search, ChevronDown, Sun, Moon } from 'lucide-react';
+import { ChevronDown, Sun, Moon } from 'lucide-react';
 import { NavLink, Link } from 'react-router-dom';
-import itemsData from '../../data/items.json';
 import { ItemModal } from '../common/ItemModal';
 import { useServerStore } from '../../store/useServerStore';
 import { useThemeStore } from '../../store/useThemeStore';
-import { getIconUrl } from '../../utils/icon';
 
 interface Item {
   id: number;
@@ -26,11 +23,7 @@ const SERVERS = [
 ];
 
 export const Header = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   
   const { server, setServer } = useServerStore();
   const { theme, setTheme } = useThemeStore();
@@ -42,46 +35,9 @@ export const Header = () => {
     setTheme(isDark ? 'light' : 'dark');
   };
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  const fuse = React.useMemo(() => new Fuse(itemsData, {
-    keys: ['name'],
-    threshold: 0.3,
-  }), []);
-
-  const filteredItems = React.useMemo(() => {
-    if (debouncedSearchQuery.length === 0) return [];
-    return fuse.search(debouncedSearchQuery).map(result => result.item).slice(0, 10);
-  }, [debouncedSearchQuery, fuse]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setIsDropdownOpen(e.target.value.length > 0);
-  };
-
-  const handleItemClick = (item: Item) => {
-    setSelectedItem(item);
-    setIsDropdownOpen(false);
-    setSearchQuery('');
-  };
-
   const navLinkClass = ({ isActive }: { isActive: boolean }) => 
     `text-[15px] transition-colors ${isActive ? 'font-bold text-gray-900 dark:text-white' : 'font-medium text-gray-500 dark:text-[#9ea4aa] hover:text-gray-900 dark:hover:text-gray-100'}`;
+
 
   return (
     <>
@@ -126,46 +82,6 @@ export const Header = () => {
               </div>
             </div>
 
-            {/* 검색창 */}
-            <div className="flex items-center relative" ref={dropdownRef}>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-4 w-4 text-gray-400 dark:text-[#9ea4aa]" />
-                </div>
-                <input 
-                  type="text" 
-                  placeholder="아이템 검색" 
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  onFocus={() => { if(searchQuery) setIsDropdownOpen(true) }}
-                  className="bg-gray-100 dark:bg-[#26282b] text-[14px] font-medium rounded-lg pl-9 pr-4 py-[8px] w-[140px] md:w-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-500/30 transition-all placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white"
-                />
-              </div>
-
-              {/* Auto-complete Dropdown */}
-              {isDropdownOpen && (
-                <div className="absolute top-full right-0 mt-2 w-[280px] bg-white dark:bg-[#26282b] border border-gray-100 dark:border-gray-800 rounded-xl shadow-xl z-50 overflow-hidden animate-pop-in">
-                  <div className="max-h-[320px] overflow-y-auto p-2">
-                    {filteredItems.length > 0 ? (
-                      filteredItems.map(item => (
-                        <div 
-                          key={item.id} 
-                          onClick={() => handleItemClick(item)}
-                          className="flex items-center space-x-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg cursor-pointer transition-colors"
-                        >
-                          <img src={getIconUrl(item.icon)} alt={item.name} className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 p-0.5 object-cover" />
-                          <span className="text-[14px] font-medium text-gray-900 dark:text-white">{item.name}</span>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="p-4 text-center text-sm text-gray-500 dark:text-[#9ea4aa]">
-                        검색 결과가 없습니다.
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </header>
