@@ -34,7 +34,7 @@ export const HotIssues = () => {
   }, [enrichedItems, activeTab]);
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-2xl mx-auto">
+    <div className="space-y-6 animate-fade-in w-full">
       <div className="flex flex-col space-y-4">
         <h1 className="text-[22px] font-bold text-gray-900 dark:text-white px-2">
           실시간 랭킹
@@ -45,20 +45,20 @@ export const HotIssues = () => {
           <TabButton 
             active={activeTab === 'volume'} 
             onClick={() => setActiveTab('volume')}
-            icon="🔥"
-            label="거래량 떡상"
+            icon="📈"
+            label="거래량 급증"
           />
           <TabButton 
             active={activeTab === 'drop'} 
             onClick={() => setActiveTab('drop')}
             icon="📉"
-            label="떡락 대기 중"
+            label="가격 급락"
           />
           <TabButton 
             active={activeTab === 'price'} 
             onClick={() => setActiveTab('price')}
-            icon="💰"
-            label="고가 랭킹"
+            icon="💎"
+            label="최고가 품목"
           />
         </div>
       </div>
