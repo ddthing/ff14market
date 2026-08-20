@@ -15,7 +15,6 @@ type TabType = HotIssueTab;
 const TAB_CONFIG: Record<TabType, {
   label: string;
   icon: LucideIcon;
-  eyebrow: string;
   description: string;
   formula: string;
   empty: string;
@@ -23,7 +22,6 @@ const TAB_CONFIG: Record<TabType, {
   volume: {
     label: '거래량 급증',
     icon: Activity,
-    eyebrow: '최근 7일 vs 직전 7일',
     description: '최근 7일 판매 수량이 직전 7일보다 늘어난 순서입니다. 증가율이 높아도 절대 거래량을 함께 확인하세요.',
     formula: '(최근 7일 판매 수량 - 직전 7일 판매 수량) ÷ 직전 7일 판매 수량',
     empty: '두 기간에 모두 판매 이력이 있는 품목이 아직 없습니다.',
@@ -31,7 +29,6 @@ const TAB_CONFIG: Record<TabType, {
   drop: {
     label: '가격 하락 신호',
     icon: TrendingDown,
-    eyebrow: '직전 7일 대비 최근 7일',
     description: '최근 7일 가중 평균 판매가가 직전 7일보다 낮은 순서입니다. 음수일수록 실제 하락폭이 큽니다.',
     formula: '(최근 7일 평균 - 직전 7일 평균) ÷ 직전 7일 평균',
     empty: '두 기간에 모두 판매 이력이 있는 품목이 아직 없습니다.',
@@ -39,7 +36,6 @@ const TAB_CONFIG: Record<TabType, {
   price: {
     label: '최저 매물가 TOP',
     icon: BadgeDollarSign,
-    eyebrow: '현재 등록 매물 기준',
     description: '현재 등록된 매물 중 최저가가 높은 순서입니다. 구매 진입가가 높은 품목을 빠르게 찾습니다.',
     formula: 'minPrice · 최저 매물가',
     empty: '현재 등록된 매물이 있는 품목이 아직 없습니다.',
@@ -156,10 +152,7 @@ export const HotIssues = () => {
               <ActiveIcon className="h-5 w-5" aria-hidden="true" />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--app-accent)]">
-                {activeConfig.eyebrow}
-              </p>
-              <h2 className="mt-1 text-[18px] font-bold tracking-[-0.02em] text-[var(--app-ink)]">
+              <h2 className="text-[18px] font-bold tracking-[-0.02em] text-[var(--app-ink)]">
                 {activeConfig.label}
               </h2>
             <p className="mt-2 max-w-3xl text-[13px] leading-5 text-[var(--app-ink-muted)]">
@@ -181,7 +174,7 @@ export const HotIssues = () => {
             {isHistoryPreview
               ? '현재 지표는 7일 이력 기준과 다를 수 있습니다. 다음 서버 수집 완료 후 이력 순위로 갱신됩니다.'
               : activeTab === 'price'
-              ? '최근 업로드가 7일을 넘은 데이터는 실시간 순위에서 제외합니다.'
+              ? '최근 업로드가 7일을 넘은 데이터는 표시 순위에서 제외합니다.'
               : '최근 7일과 직전 7일에 판매 이력이 모두 있는 품목만 계산합니다.'}
           </p>
         </div>
@@ -247,13 +240,13 @@ export const HotIssues = () => {
                     ? {
                         label: '7일 거래량',
                         value: item.volumeChangePercent ?? null,
-                        title: '직전 7일 대비 최근 7일 판매 수량 변화율입니다.',
+                        title: '두 기간의 판매 수량 변화율입니다.',
                       }
                     : activeTab === 'drop'
                       ? {
                           label: '7일 가격',
                           value: item.fluctuation,
-                          title: '직전 7일 대비 최근 7일 가중 평균 판매가 변화율입니다.',
+                          title: '두 기간의 가중 평균 판매가 변화율입니다.',
                         }
                       : undefined}
                 />

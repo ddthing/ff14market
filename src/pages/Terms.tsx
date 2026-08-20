@@ -24,7 +24,7 @@ export const Terms = () => {
         <section className="space-y-4">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">제2조 (데이터 출처 및 정확성)</h2>
           <p>
-            본 서비스가 제공하는 모든 시세 정보와 거래량 데이터는 외부 서비스인 <strong>Universalis API</strong>를 실시간으로 연동하여 제공받습니다. 따라서 실제 게임 내 데이터가 갱신되는 주기와 API 응답 속도에 따라 불가피한 시간 차이(Time gap)가 발생할 수 있습니다. 제공되는 정보는 참고용으로만 활용해 주시길 권장합니다.
+            본 서비스가 제공하는 모든 시세 정보와 거래량 데이터는 외부 서비스인 <strong>Universalis API</strong>에서 최근 수집된 데이터를 조회하여 제공합니다. 데이터 수집 주기와 API 응답 속도에 따라 실제 게임 내 데이터와 불가피한 시간 차이(Time gap)가 발생할 수 있습니다. 제공되는 정보는 참고용으로만 활용해 주시길 권장합니다.
           </p>
         </section>
 
