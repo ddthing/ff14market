@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import type { NavigateFunction } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import type { EnrichedItem } from '../../hooks/useItemData';
@@ -25,27 +25,73 @@ export const ItemListItem = memo(({ item, navigate, signal }: {
   signal?: SignalMetric;
 }) => {
   const queryClient = useQueryClient();
+  const prefetchTimerRef = useRef<number | null>(null);
   const metricValue = signal ? signal.value : item.fluctuation;
   const metricTone = signal?.tone ?? (metricValue === null ? 'neutral' : metricValue > 0 ? 'positive' : metricValue < 0 ? 'negative' : 'neutral');
 
+  const cancelPrefetch = () => {
+    if (prefetchTimerRef.current === null) return;
+    window.clearTimeout(prefetchTimerRef.current);
+    prefetchTimerRef.current = null;
+  };
+
+  const schedulePrefetch = () => {
+    if (prefetchTimerRef.current !== null) return;
+
+    // Moving across a dense list should not start one full detail request per row.
+    prefetchTimerRef.current = window.setTimeout(() => {
+      prefetchTimerRef.current = null;
+      queryClient.prefetchQuery({
+        queryKey: ['searchItem', 'Korea', item.id],
+        queryFn: ({ signal: requestSignal }) => fetchKoreaDCData(item.id, requestSignal),
+        staleTime: 300000, // 5 minutes
+      });
+    }, 120);
+  };
+
+  useEffect(() => () => {
+    if (prefetchTimerRef.current !== null) {
+      window.clearTimeout(prefetchTimerRef.current);
+    }
+  }, []);
+
   const handleMouseEnter = () => {
-    queryClient.prefetchQuery({
-      queryKey: ['searchItem', 'Korea', item.id],
-      queryFn: () => fetchKoreaDCData(item.id),
-      staleTime: 300000, // 5 minutes
-    });
+    schedulePrefetch();
+  };
+
+  const handleMouseLeave = () => {
+    cancelPrefetch();
+  };
+
+  const handleFocus = () => {
+    schedulePrefetch();
+  };
+
+  const handleBlur = () => {
+    cancelPrefetch();
+  };
+
+  const handleClick = () => {
+    cancelPrefetch();
+    navigate(`/item/${item.id}`);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      cancelPrefetch();
+      navigate(`/item/${item.id}`);
+    }
   };
 
   return (
     <div
       onMouseEnter={handleMouseEnter}
-      onClick={() => navigate(`/item/${item.id}`)}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          navigate(`/item/${item.id}`);
-        }
-      }}
+      onMouseLeave={handleMouseLeave}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
       role="link"
       tabIndex={0}
       aria-label={`${item.name} 시세 상세 보기`}

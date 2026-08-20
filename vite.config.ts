@@ -22,7 +22,7 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
         // The catalog is loaded only after search/detail activation. Keep it
         // out of the install-time precache and cache it after first use.
-        globIgnores: ['**/searchItems-*.js'],
+        globIgnores: ['**/searchItems-*.js', '**/PriceChart-*.js'],
         runtimeCaching: [
           {
             urlPattern: /\/assets\/searchItems-[^/]+\.js$/,
@@ -31,6 +31,20 @@ export default defineConfig({
               cacheName: 'item-catalog',
               expiration: {
                 maxEntries: 1,
+                maxAgeSeconds: 30 * 24 * 60 * 60,
+              },
+              cacheableResponse: {
+                statuses: [200],
+              },
+            },
+          },
+          {
+            urlPattern: /\/assets\/PriceChart-[^/]+\.js$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'route-chunks',
+              expiration: {
+                maxEntries: 5,
                 maxAgeSeconds: 30 * 24 * 60 * 60,
               },
               cacheableResponse: {
