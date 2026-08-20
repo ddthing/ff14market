@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 export const Footer = () => {
   return (
-    <footer className="mt-auto border-t border-[var(--app-hairline)] bg-transparent py-4">
+    <footer className="mobile-footer mt-auto border-t border-[var(--app-hairline)] bg-transparent py-4">
       <div className="container mx-auto flex max-w-6xl flex-col gap-2 px-4 text-[11px] text-[var(--app-ink-muted)] sm:flex-row sm:items-center sm:justify-between">
         <nav className="flex flex-wrap items-center gap-x-4 gap-y-1.5" aria-label="서비스 안내">
           <Link to="/terms" className="font-medium transition-colors hover:text-[var(--app-ink)]">이용약관</Link>

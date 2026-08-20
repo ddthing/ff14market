@@ -89,11 +89,11 @@ export const Header = () => {
         </div>
       </header>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--app-hairline)] bg-[var(--app-surface)]/95 px-2 pb-[env(safe-area-inset-bottom)] pt-0.5 backdrop-blur-lg md:hidden" aria-label="주요 메뉴">
-        <div className="mx-auto grid max-w-md grid-cols-3">
-          <MobileNavLink to="/" label="홈" icon={<Home className="h-4 w-4" aria-hidden="true" />} />
-          <MobileNavLink to="/hot-issues" label="실시간 Hot" icon={<Flame className="h-4 w-4" aria-hidden="true" />} />
-          <MobileNavLink to="/favorites" label="관심템" icon={<Heart className="h-4 w-4" aria-hidden="true" />} />
+      <nav className="mobile-bottom-nav fixed inset-x-3 z-40 border border-[var(--app-hairline)] bg-[var(--app-surface)]/95 backdrop-blur-lg md:hidden" aria-label="주요 메뉴">
+        <div className="mobile-bottom-nav__inner mx-auto grid max-w-md grid-cols-3 gap-1">
+          <MobileNavLink to="/" label="홈" icon={<Home className="h-[22px] w-[22px]" aria-hidden="true" />} />
+          <MobileNavLink to="/hot-issues" label="실시간 Hot" icon={<Flame className="h-[22px] w-[22px]" aria-hidden="true" />} />
+          <MobileNavLink to="/favorites" label="관심템" icon={<Heart className="h-[22px] w-[22px]" aria-hidden="true" />} />
         </div>
       </nav>
     </>
@@ -103,7 +103,8 @@ export const Header = () => {
 const MobileNavLink = ({ to, label, icon }: { to: string; label: string; icon: React.ReactNode }) => (
   <NavLink
     to={to}
-    className={({ isActive }) => `flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-md text-[10px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/60 ${isActive ? 'font-bold text-[var(--app-accent)]' : 'font-medium text-[var(--app-ink-muted)]'}`}
+    aria-label={label}
+    className={({ isActive }) => `mobile-bottom-nav__link flex min-h-12 flex-col items-center justify-center gap-1 rounded-md text-[11px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/60 ${isActive ? 'font-bold text-[var(--app-ink)]' : 'font-medium text-[var(--app-ink-muted)]'}`}
   >
     {icon}
     <span>{label}</span>
