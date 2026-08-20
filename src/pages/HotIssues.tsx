@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { Activity, BadgeDollarSign, Info, TrendingDown, type LucideIcon } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { useItemData } from '../hooks/useItemData';
 import { ItemListItem } from '../components/ui/ItemListItem';
 import { SkeletonRow } from '../components/ui/SkeletonRow';
@@ -61,7 +60,6 @@ export const HotIssues = () => {
     refetch,
   } = useItemData();
   const { server } = useServerStore();
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>('volume');
   const activeConfig = TAB_CONFIG[activeTab];
   const ActiveIcon = activeConfig.icon;
@@ -221,7 +219,6 @@ export const HotIssues = () => {
               >
                 <ItemListItem
                   item={item}
-                  navigate={navigate}
                   signal={activeTab === 'volume' && isHistoryPreview
                     ? {
                         label: '판매속도',
