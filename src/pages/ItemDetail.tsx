@@ -1,17 +1,18 @@
-import { useState, useEffect } from 'react';
+import { lazy, Suspense, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Share2, ArrowLeft } from 'lucide-react';
 import { loadItemCatalog, type ItemCatalogEntry } from '../data/loadItemCatalog';
 import { fetchKoreaDCData } from '../api/universalis';
 import { computeTrueMinPrice } from '../hooks/useItemData';
-import { PriceChart } from '../components/common/PriceChart';
 import { getIconUrl } from '../utils/icon';
 import { useRecentStore } from '../store/useRecentStore';
 import { FavoriteButton } from '../components/ui/FavoriteButton';
 import { DataErrorState } from '../components/ui/DataErrorState';
 import { Seo } from '../components/seo/Seo';
 import { formatSaleVelocity } from '../utils/marketMetrics';
+
+const PriceChart = lazy(() => import('../components/common/PriceChart').then(({ PriceChart: Component }) => ({ default: Component })));
 
 export const ItemDetail = () => {
   const { id } = useParams();
@@ -49,7 +50,9 @@ export const ItemDetail = () => {
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['searchItem', 'Korea', itemId],
     queryFn: ({ signal }) => fetchKoreaDCData(itemId, signal),
-    enabled: !!itemId && !!item,
+    // The item catalog and market detail request are independent. Start both
+    // immediately so the 16k-entry search catalog cannot block price data.
+    enabled: itemId > 0,
     staleTime: 60000,
     retry: 1,
   });
@@ -206,7 +209,9 @@ export const ItemDetail = () => {
                 ))}
               </div>
             ) : (
-              <PriceChart history={itemData?.recentHistory || []} />
+              <Suspense fallback={<div className="flex h-[100px] items-center justify-center rounded-xl bg-[var(--app-surface-subtle)] text-[12px] text-[var(--app-ink-muted)]">가격 흐름 준비 중...</div>}>
+                <PriceChart history={itemData?.recentHistory || []} />
+              </Suspense>
             )}
           </div>
 
