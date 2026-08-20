@@ -5,9 +5,12 @@ import { useToastStore } from '../../store/useToastStore';
 
 interface FavoriteButtonProps {
   itemId: number;
+  className?: string;
 }
 
-export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ itemId }) => {
+const defaultButtonClassName = '-ml-1.5 inline-flex min-h-11 min-w-11 flex-shrink-0 items-center justify-center rounded-lg p-1.5 transition-[background-color,transform] hover:bg-[var(--app-surface-subtle)] active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/60';
+
+export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ itemId, className = defaultButtonClassName }) => {
   const { favoriteIds, toggleFavorite } = useFavoriteStore();
   const { addToast } = useToastStore();
   const isFavorite = favoriteIds.includes(itemId);
@@ -32,7 +35,7 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ itemId }) => {
     <button
       type="button"
       onClick={handleToggle}
-      className="-ml-1.5 inline-flex min-h-11 min-w-11 flex-shrink-0 items-center justify-center rounded-lg p-1.5 transition-[background-color,transform] hover:bg-[var(--app-surface-subtle)] active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/60"
+      className={className}
       aria-label={isFavorite ? '관심 아이템에서 제거' : '관심 아이템에 추가'}
       aria-pressed={isFavorite}
     >
