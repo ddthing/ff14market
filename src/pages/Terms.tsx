@@ -7,6 +7,7 @@ export const Terms = () => {
         title="이용약관 | FF14 장터탐지기"
         description="FF14 장터탐지기의 서비스 목적, 데이터 출처, 이용 시 책임과 권리를 안내합니다."
         path="/terms"
+        noIndex
       />
       <div className="max-w-3xl mx-auto py-12 px-2 sm:px-4 animate-fade-in">
       <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">이용약관</h1>

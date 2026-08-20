@@ -30,6 +30,7 @@ export const Seo = ({ title, description, path, noIndex = false }: SeoProps) => 
     document.title = title;
     upsertMeta('name', 'description', description);
     upsertMeta('name', 'robots', noIndex ? 'noindex,follow' : 'index,follow');
+    upsertMeta('name', 'googlebot', noIndex ? 'noindex,follow' : 'index,follow');
     upsertMeta('property', 'og:title', title);
     upsertMeta('property', 'og:description', description);
     upsertMeta('property', 'og:type', 'website');
@@ -37,6 +38,7 @@ export const Seo = ({ title, description, path, noIndex = false }: SeoProps) => 
     upsertMeta('property', 'og:locale', 'ko_KR');
     upsertMeta('property', 'og:url', canonicalUrl);
     upsertMeta('property', 'og:image', `${siteUrl}/icon-512x512.png`);
+    upsertMeta('property', 'og:image:alt', `${SITE_NAME} 앱 아이콘`);
     upsertMeta('name', 'twitter:card', 'summary');
     upsertMeta('name', 'twitter:title', title);
     upsertMeta('name', 'twitter:description', description);
