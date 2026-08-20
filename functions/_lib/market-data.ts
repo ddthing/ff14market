@@ -15,6 +15,7 @@ export const HISTORY_WINDOW_SECONDS = 7 * 24 * 60 * 60;
 export const HISTORY_WINDOW_MILLISECONDS = HISTORY_WINDOW_SECONDS * 1000;
 export const HISTORY_ENTRIES_LIMIT = 1800;
 export const SNAPSHOT_TTL_MS = 5 * 60 * 1000;
+export const SNAPSHOT_REFRESH_COOLDOWN_MS = 60 * 1000;
 
 export interface SnapshotBucketObject {
   text(): Promise<string>;
@@ -313,6 +314,44 @@ export const fetchItemDetail = async (
 };
 
 export const snapshotKey = (server: string) => `market-snapshots/${server}.json`;
+
+export const snapshotRefreshKey = (server: string) => `${snapshotKey(server)}.refresh`;
+
+export const isSnapshotRefreshDue = (lastStartedAt: number | null, now = Date.now()) =>
+  lastStartedAt === null
+  || !Number.isFinite(lastStartedAt)
+  || now - lastStartedAt >= SNAPSHOT_REFRESH_COOLDOWN_MS;
+
+/**
+ * Refreshes a stale R2 snapshot without making the caller wait for upstream history.
+ * The short-lived marker prevents a burst of stale requests from starting duplicate builds.
+ */
+export const refreshSnapshotIfAllowed = async (
+  bucket: SnapshotBucket,
+  server: string,
+  buildSnapshot: () => Promise<MarketSnapshot>,
+  now = Date.now(),
+): Promise<boolean> => {
+  const refreshMarker = await bucket.get(snapshotRefreshKey(server));
+  const lastStartedAt = refreshMarker ? Number(await refreshMarker.text()) : null;
+  if (!isSnapshotRefreshDue(lastStartedAt, now)) return false;
+
+  await bucket.put(snapshotRefreshKey(server), String(now), {
+    httpMetadata: {
+      contentType: 'text/plain',
+      cacheControl: `public, max-age=${Math.floor(SNAPSHOT_REFRESH_COOLDOWN_MS / 1000)}`,
+    },
+  });
+
+  const snapshot = await buildSnapshot();
+  await bucket.put(snapshotKey(server), JSON.stringify(snapshot), {
+    httpMetadata: {
+      contentType: 'application/json',
+      cacheControl: `public, max-age=${Math.floor(SNAPSHOT_TTL_MS / 1000)}`,
+    },
+  });
+  return true;
+};
 
 export const isSupportedServer = (server: string): server is (typeof SUPPORTED_SERVERS)[number] =>
   (SUPPORTED_SERVERS as readonly string[]).includes(server);

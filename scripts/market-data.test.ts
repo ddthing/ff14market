@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { fetchCurrentStats } from '../functions/_lib/market-data.ts';
+import {
+  fetchCurrentStats,
+  isSnapshotRefreshDue,
+  refreshSnapshotIfAllowed,
+  SNAPSHOT_REFRESH_COOLDOWN_MS,
+  type SnapshotBucket,
+} from '../functions/_lib/market-data.ts';
 
 const response = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
   status,
@@ -56,4 +62,73 @@ test('current market keeps successful chunks when one upstream chunk fails', asy
   assert.equal(result.partial, true);
   assert.equal(Object.keys(result.data).length, 50);
   assert.ok(callCount >= 3, 'the retry policy should make the failed chunk observable');
+});
+
+test('stale snapshot refresh is throttled and writes the refreshed snapshot', async () => {
+  const now = 1_000_000;
+  const writes: string[] = [];
+  let buildCount = 0;
+  const snapshot = {
+    schemaVersion: 1 as const,
+    server: 'Tonberry',
+    generatedAt: now,
+    historyReady: true,
+    partial: false,
+    items: {},
+    priceChanges: {},
+  };
+  const bucket: SnapshotBucket = {
+    get: async (key) => key.endsWith('.refresh')
+      ? { text: async () => String(now - SNAPSHOT_REFRESH_COOLDOWN_MS - 1) }
+      : null,
+    put: async (key) => {
+      writes.push(key);
+    },
+  };
+
+  assert.equal(isSnapshotRefreshDue(now - 1, now), false);
+  assert.equal(isSnapshotRefreshDue(now - SNAPSHOT_REFRESH_COOLDOWN_MS, now), true);
+
+  const refreshed = await refreshSnapshotIfAllowed(
+    bucket,
+    'Tonberry',
+    async () => {
+      buildCount += 1;
+      return snapshot;
+    },
+    now,
+  );
+
+  assert.equal(refreshed, true);
+  assert.equal(buildCount, 1);
+  assert.deepEqual(writes, [
+    'market-snapshots/Tonberry.json.refresh',
+    'market-snapshots/Tonberry.json',
+  ]);
+});
+
+test('snapshot refresh skips a recently started refresh', async () => {
+  const now = 1_000_000;
+  let buildCount = 0;
+  const bucket: SnapshotBucket = {
+    get: async (key) => key.endsWith('.refresh')
+      ? { text: async () => String(now - SNAPSHOT_REFRESH_COOLDOWN_MS + 1) }
+      : null,
+    put: async () => {
+      throw new Error('a throttled refresh must not write');
+    },
+  };
+
+  const refreshed = await refreshSnapshotIfAllowed(
+    bucket,
+    'Tonberry',
+    async () => {
+      buildCount += 1;
+      throw new Error('a throttled refresh must not build');
+    },
+    now,
+  );
+
+  assert.equal(refreshed, false);
+  assert.equal(buildCount, 0);
 });

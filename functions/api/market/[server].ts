@@ -2,6 +2,7 @@ import {
   buildMarketSnapshot,
   isSupportedServer,
   MarketDataError,
+  refreshSnapshotIfAllowed,
   SNAPSHOT_TTL_MS,
   snapshotKey,
   type MarketRequestContext,
@@ -49,6 +50,25 @@ const errorResponse = (status: number, message: string) => new Response(JSON.str
   headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
 });
 
+const scheduleStaleSnapshotRefresh = (
+  context: MarketRequestContext,
+  bucket: SnapshotBucket,
+  server: string,
+) => {
+  if (!context.waitUntil) return;
+
+  // Keep the stale response fast while repairing the shared snapshot in the background.
+  context.waitUntil(
+    refreshSnapshotIfAllowed(
+      bucket,
+      server,
+      () => buildMarketSnapshot(server, MARKET_ITEM_IDS),
+    ).catch((error) => {
+      console.error('Stale market snapshot refresh failed', { server, error });
+    }),
+  );
+};
+
 export const onRequestGet = async (context: MarketRequestContext & { params: { server?: string } }) => {
   const server = context.params.server ?? '';
   if (!isSupportedServer(server)) return errorResponse(400, '지원하지 않는 서버입니다.');
@@ -58,6 +78,7 @@ export const onRequestGet = async (context: MarketRequestContext & { params: { s
     const stored = await readStoredSnapshot(bucket, snapshotKey(server));
     if (stored) {
       const stale = Date.now() - stored.generatedAt > SNAPSHOT_TTL_MS;
+      if (stale) scheduleStaleSnapshotRefresh(context, bucket, server);
       return toResponse(stored, 'r2', stale);
     }
   }
