@@ -4,7 +4,9 @@ import path from 'node:path';
 const publicDirectory = path.resolve('public');
 const DEFAULT_SITE_URL = 'https://ff14market.pages.dev';
 const configuredSiteUrl = process.env.VITE_SITE_URL?.trim() || process.env.SITE_URL?.trim() || DEFAULT_SITE_URL;
-const coreRoutes = ['/', '/hot-issues', '/terms', '/privacy'];
+// Legal pages stay publicly linked for trust and AdSense disclosures, but are
+// not search landing pages and are marked noindex in the app and headers.
+const coreRoutes = ['/', '/hot-issues'];
 
 const normalizeSiteUrl = (value) => {
   if (!value) return null;
@@ -30,7 +32,6 @@ const sitemapPath = path.join(publicDirectory, 'sitemap.xml');
 const robotsLines = [
   'User-agent: *',
   'Allow: /',
-  'Disallow: /favorites',
 ];
 
 if (siteUrl) {

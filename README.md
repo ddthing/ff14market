@@ -28,7 +28,9 @@ google.com, pub-2169729065542563, DIRECT, f08c47fec0942fa0
 
 배포 후 실제 도메인에서 `https://실제도메인/ads.txt`가 위 한 줄을 그대로 반환하는지 확인한 다음 AdSense에서 사이트 검토를 요청하세요. Ads.txt 변경이 AdSense 화면에 반영되기까지 시간이 걸릴 수 있으므로, 파일이 먼저 공개되어 있어야 합니다. 광고 스크립트와 광고 슬롯은 아직 넣지 않았으며, 승인·동의 화면·정책 문구를 확인한 뒤 별도 작업으로 추가하는 것이 안전합니다.
 
-SEO용 canonical, Open Graph URL, `robots.txt`의 Sitemap 주소와 `sitemap.xml`은 운영 주소 `https://ff14market.pages.dev`를 기본값으로 생성합니다. 커스텀 도메인을 연결하면 배포 환경에서 `VITE_SITE_URL` 또는 `SITE_URL`로 덮어쓸 수 있습니다.
+SEO용 canonical, Open Graph URL, `robots.txt`의 Sitemap 주소와 `sitemap.xml`은 운영 주소 `https://ff14market.pages.dev`를 기본값으로 생성합니다. 커스텀 도메인을 연결하면 배포 환경에서 `VITE_SITE_URL` 또는 `SITE_URL`로 덮어쓸 수 있습니다. 검색 유입을 위한 sitemap에는 홈과 장터 신호 페이지만 포함하며, 이용약관·개인정보처리방침은 사용자와 AdSense 검토자가 접근할 수 있도록 유지하되 `noindex`와 Cloudflare Pages `X-Robots-Tag`로 검색 결과에서는 제외합니다. 개인화된 관심템 화면도 동일하게 처리하고 `robots.txt`로 차단하지 않아 Google이 `noindex`를 읽을 수 있게 합니다.
+
+`public/_headers`는 Cloudflare Pages에서 `/favorites`, `/terms`, `/privacy`에 `X-Robots-Tag: noindex, follow`를 적용합니다. Google의 `noindex` 규칙은 크롤러가 URL에 접근할 수 있어야 유효하므로, 이 경로들을 `robots.txt`에서 Disallow하지 않습니다.
 
 ```bash
 VITE_SITE_URL=https://ff14market.pages.dev npm run build

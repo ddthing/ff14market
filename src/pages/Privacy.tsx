@@ -7,6 +7,7 @@ export const Privacy = () => {
         title="개인정보처리방침 | FF14 장터탐지기"
         description="FF14 장터탐지기의 로컬 저장소, 쿠키, 외부 API와 광고 서비스 관련 개인정보 처리 기준을 안내합니다."
         path="/privacy"
+        noIndex
       />
       <div className="max-w-3xl mx-auto py-12 px-2 sm:px-4 animate-fade-in">
       <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">개인정보처리방침</h1>

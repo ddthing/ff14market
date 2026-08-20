@@ -1,0 +1,10 @@
+# Keep user-specific and legal documents accessible for crawlers to read the
+# noindex directive, while keeping them out of search results and the sitemap.
+/favorites
+  X-Robots-Tag: noindex, follow
+/favorites/*
+  X-Robots-Tag: noindex, follow
+/terms
+  X-Robots-Tag: noindex, follow
+/privacy
+  X-Robots-Tag: noindex, follow
