@@ -2,7 +2,7 @@ import { lazy, Suspense, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Share2, ArrowLeft } from 'lucide-react';
-import { loadItemCatalog, type ItemCatalogEntry } from '../data/loadItemCatalog';
+import { fetchItemMetadata } from '../api/itemCatalog';
 import { fetchKoreaDCData } from '../api/universalis';
 import { computeTrueMinPrice } from '../hooks/useItemData';
 import { getIconUrl } from '../utils/icon';
@@ -18,28 +18,17 @@ export const ItemDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isCopied, setIsCopied] = useState(false);
-  const [itemCatalog, setItemCatalog] = useState<ItemCatalogEntry[] | null>(null);
-  const [hasCatalogError, setHasCatalogError] = useState(false);
   const addRecentId = useRecentStore((state) => state.addRecentId);
 
   const itemId = id ? parseInt(id) : 0;
 
-  useEffect(() => {
-    let isMounted = true;
-    void loadItemCatalog()
-      .then((catalog) => {
-        if (isMounted) setItemCatalog(catalog);
-      })
-      .catch(() => {
-        if (isMounted) setHasCatalogError(true);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const item = itemCatalog?.find((catalogItem) => catalogItem.id === itemId);
+  const { data: item, isLoading: isItemLoading, isError: isItemError } = useQuery({
+    queryKey: ['itemMetadata', itemId],
+    queryFn: ({ signal }) => fetchItemMetadata(itemId, signal),
+    enabled: itemId > 0,
+    staleTime: 60 * 60 * 1000,
+    retry: 1,
+  });
 
   useEffect(() => {
     if (itemId) {
@@ -57,7 +46,7 @@ export const ItemDetail = () => {
     retry: 1,
   });
 
-  if (!itemCatalog) {
+  if (isItemLoading) {
     return (
       <>
         <Seo
@@ -67,17 +56,13 @@ export const ItemDetail = () => {
           noIndex
         />
         <div className="mx-auto flex max-w-md items-center justify-center py-20">
-          {hasCatalogError ? (
-            <DataErrorState onRetry={() => window.location.reload()} />
-          ) : (
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--app-hairline)] border-t-[var(--app-accent)]" aria-label="아이템 정보 불러오는 중" />
-          )}
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--app-hairline)] border-t-[var(--app-accent)]" aria-label="아이템 정보 불러오는 중" />
         </div>
       </>
     );
   }
 
-  if (!item) {
+  if (isItemError || !item) {
     return (
       <>
         <Seo

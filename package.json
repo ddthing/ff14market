@@ -10,7 +10,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "node --test scripts/item-data-pipeline.test.js scripts/market-data.test.ts src/utils/marketMetrics.test.ts src/utils/marketRankings.test.ts src/utils/marketHistory.test.ts",
+    "test": "node --test scripts/item-data-pipeline.test.js scripts/market-data.test.ts src/utils/marketMetrics.test.ts src/utils/marketRankings.test.ts src/utils/marketHistory.test.ts src/utils/itemSearch.test.ts",
     "data:update": "node scripts/update-items.js",
     "data:update:dry-run": "node scripts/update-items.js --dry-run",
     "data:validate": "node scripts/validate-data.js",

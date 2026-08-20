@@ -1,8 +1,7 @@
-import React, { useState, useRef, useEffect, useMemo, useId } from 'react';
+import React, { useState, useRef, useEffect, useId } from 'react';
 import { Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import Fuse from 'fuse.js';
-import { loadItemCatalog, type ItemCatalogEntry } from '../../data/loadItemCatalog';
+import { fetchItemSearch, type ItemCatalogEntry } from '../../api/itemCatalog';
 import { getIconUrl } from '../../utils/icon';
 import { useItemData } from '../../hooks/useItemData';
 // @ts-expect-error react-twemoji lacks types
@@ -11,9 +10,9 @@ const Twemoji = (_Twemoji as { default?: React.ElementType }).default || _Twemoj
 
 export const HeroSearch = () => {
   const { enrichedItems } = useItemData();
-  const [itemCatalog, setItemCatalog] = useState<ItemCatalogEntry[] | null>(null);
-  const [isCatalogLoading, setIsCatalogLoading] = useState(false);
-  const [hasCatalogError, setHasCatalogError] = useState(false);
+  const [searchResults, setSearchResults] = useState<ItemCatalogEntry[]>([]);
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
+  const [hasSearchError, setHasSearchError] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -22,16 +21,6 @@ export const HeroSearch = () => {
   const listboxId = useId();
   const navigate = useNavigate();
 
-  const requestCatalog = () => {
-    if (itemCatalog || isCatalogLoading || hasCatalogError) return;
-
-    setIsCatalogLoading(true);
-    void loadItemCatalog()
-      .then(setItemCatalog)
-      .catch(() => setHasCatalogError(true))
-      .finally(() => setIsCatalogLoading(false));
-  };
-
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
@@ -39,17 +28,29 @@ export const HeroSearch = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const fuse = useMemo(() => itemCatalog ? new Fuse(itemCatalog, {
-    keys: ['name'],
-    threshold: 0.3,
-  }) : null, [itemCatalog]);
+  useEffect(() => {
+    const query = debouncedSearchQuery.trim();
+    if (!query) return;
 
-  const filteredItems = useMemo(() => {
-    if (debouncedSearchQuery.trim().length === 0 || !fuse) return [];
-    return fuse.search(debouncedSearchQuery).map(result => result.item).slice(0, 10);
-  }, [debouncedSearchQuery, fuse]);
+    const controller = new AbortController();
 
-  const isSearching = searchQuery !== debouncedSearchQuery || (searchQuery.trim().length > 0 && isCatalogLoading);
+    void fetchItemSearch(query, controller.signal)
+      .then(setSearchResults)
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted) {
+          setSearchResults([]);
+          setHasSearchError(true);
+          console.error('Item search failed', error);
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsSearchLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [debouncedSearchQuery]);
+
+  const isSearching = searchQuery !== debouncedSearchQuery || (searchQuery.trim().length > 0 && isSearchLoading);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -63,9 +64,12 @@ export const HeroSearch = () => {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const nextQuery = e.target.value;
+    const hasQuery = nextQuery.trim().length > 0;
     setSearchQuery(nextQuery);
     setIsDropdownOpen(nextQuery.length > 0);
-    if (nextQuery.trim().length > 0) requestCatalog();
+    setIsSearchLoading(hasQuery);
+    setHasSearchError(false);
+    if (!hasQuery) setSearchResults([]);
   };
 
   const handleItemClick = (item: ItemCatalogEntry) => {
@@ -93,14 +97,13 @@ export const HeroSearch = () => {
             aria-controls={isDropdownOpen ? listboxId : undefined}
             onChange={handleSearchChange}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && filteredItems.length > 0) {
-                handleItemClick(filteredItems[0]);
+              if (e.key === 'Enter' && searchResults.length > 0) {
+                handleItemClick(searchResults[0]);
               }
             }}
             onFocus={() => {
               if (searchQuery) {
                 setIsDropdownOpen(true);
-                requestCatalog();
               }
             }}
             className="h-full w-full bg-transparent pl-4 pr-6 text-[16px] font-medium text-[var(--app-ink)] placeholder-[var(--app-ink-muted)] focus:outline-none md:text-[18px]"
@@ -116,7 +119,8 @@ export const HeroSearch = () => {
               onClick={() => {
                 setSearchQuery(item.name);
                 setIsDropdownOpen(true);
-                requestCatalog();
+                setIsSearchLoading(true);
+                setHasSearchError(false);
                 inputRef.current?.focus();
               }}
               className="flex min-h-11 flex-shrink-0 items-center space-x-1 rounded-md bg-[var(--app-surface-subtle)] px-3 py-1.5 text-[13px] font-medium text-[var(--app-ink-muted)] transition-colors hover:bg-[var(--app-hairline)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/50"
@@ -139,7 +143,7 @@ export const HeroSearch = () => {
         {isDropdownOpen && (
           <div id={listboxId} role="listbox" className="absolute left-0 top-[calc(100%+12px)] z-50 w-full animate-fade-in overflow-hidden rounded-xl border border-[var(--app-hairline)] bg-[var(--app-surface)] shadow-[0_10px_40px_rgb(0,0,0,0.1)]">
             <div className="max-h-[360px] overflow-y-auto p-3 scrollbar-hide">
-              {hasCatalogError ? (
+              {hasSearchError ? (
                 <div className="py-10 text-center text-[14px] font-medium text-[var(--destructive)]" role="alert">
                   검색 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
                 </div>
@@ -147,8 +151,8 @@ export const HeroSearch = () => {
                 <div className="py-10 text-center text-[14px] font-medium text-[var(--app-ink-muted)]" aria-live="polite">
                   검색 중...
                 </div>
-              ) : filteredItems.length > 0 ? (
-                filteredItems.map(item => (
+              ) : searchResults.length > 0 ? (
+                searchResults.map(item => (
                   <button
                     type="button"
                     role="option"
