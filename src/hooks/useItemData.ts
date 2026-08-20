@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchMarketSnapshot } from '../api/universalis';
 import type { MarketSnapshotResponse } from '../types/market';
@@ -44,7 +45,9 @@ export const useItemData = () => {
 
   const apiData = snapshot?.items;
 
-  const enrichedItems: EnrichedItem[] = masterItems.map(item => {
+  // The snapshot changes far less often than the views that consume it.
+  // Keep normalization out of unrelated renders such as theme and favorite updates.
+  const enrichedItems = useMemo<EnrichedItem[]>(() => masterItems.map(item => {
     const data = apiData?.[item.id];
     // NQ/HQ 관계없이 절대 최저가
     const minPrice = data
@@ -63,19 +66,19 @@ export const useItemData = () => {
       averageListingPrice,
       averageSalePrice,
       fluctuation,
-      volume: volume,
+      volume,
       lastUploadTime: data?.lastUploadTime,
     };
   })
-  .filter(item => item.price > 0 || item.averageListingPrice > 0 || item.volume > 0)
-  .sort((a, b) => {
-    // 1순위: 거래량 내림차순
-    if (b.volume !== a.volume) {
-      return b.volume - a.volume;
-    }
-    // 2순위: 최저가 비싼 순 내림차순
-    return b.price - a.price;
-  });
+    .filter(item => item.price > 0 || item.averageListingPrice > 0 || item.volume > 0)
+    .sort((a, b) => {
+      // 1순위: 거래량 내림차순
+      if (b.volume !== a.volume) {
+        return b.volume - a.volume;
+      }
+      // 2순위: 최저가 비싼 순 내림차순
+      return b.price - a.price;
+    }), [apiData]);
 
   return {
     enrichedItems,

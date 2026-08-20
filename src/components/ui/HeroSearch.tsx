@@ -1,15 +1,18 @@
-import React, { useState, useRef, useEffect, useId } from 'react';
+import React, { memo, useState, useRef, useEffect, useId } from 'react';
 import { Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { fetchItemSearch, type ItemCatalogEntry } from '../../api/itemCatalog';
 import { getIconUrl } from '../../utils/icon';
-import { useItemData } from '../../hooks/useItemData';
+import type { EnrichedItem } from '../../hooks/useItemData';
 // @ts-expect-error react-twemoji lacks types
 import _Twemoji from 'react-twemoji';
 const Twemoji = (_Twemoji as { default?: React.ElementType }).default || _Twemoji;
 
-export const HeroSearch = () => {
-  const { enrichedItems } = useItemData();
+type HeroSearchProps = {
+  recommendedItems: ReadonlyArray<Pick<EnrichedItem, 'id' | 'name'>>;
+};
+
+export const HeroSearch = memo(({ recommendedItems }: HeroSearchProps) => {
   const [searchResults, setSearchResults] = useState<ItemCatalogEntry[]>([]);
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [hasSearchError, setHasSearchError] = useState(false);
@@ -112,7 +115,7 @@ export const HeroSearch = () => {
 
         {/* Recommended Search Chips */}
         <div className="flex items-center space-x-2 mt-3 overflow-x-auto scrollbar-hide px-1 pb-1 w-full max-w-full justify-start md:justify-center">
-          {enrichedItems.slice(0, 3).map(item => (
+          {recommendedItems.map(item => (
             <button
               type="button"
               key={item.id}
@@ -176,4 +179,6 @@ export const HeroSearch = () => {
       </div>
     </div>
   );
-};
+});
+
+HeroSearch.displayName = 'HeroSearch';

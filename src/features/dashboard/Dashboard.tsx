@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import type { EnrichedItem } from '../../hooks/useItemData';
 import { useItemData } from '../../hooks/useItemData';
 import { SkeletonRow } from '../../components/ui/SkeletonRow';
@@ -14,15 +15,25 @@ const Twemoji = (_Twemoji as { default?: React.ElementType }).default || _Twemoj
 export const Dashboard = () => {
   const { enrichedItems, isLoading, isError, refetch } = useItemData();
 
-  const { favoriteIds } = useFavoriteStore();
-  const { recentIds } = useRecentStore();
+  const favoriteIds = useFavoriteStore((state) => state.favoriteIds);
+  const recentIds = useRecentStore((state) => state.recentIds);
 
-  const favoriteListItems = enrichedItems.filter(item => favoriteIds.includes(item.id));
-  
-  // Create recentListItems maintaining the order of recentIds
-  const recentListItems = recentIds
-    .map(id => enrichedItems.find(item => item.id === id))
-    .filter((item): item is EnrichedItem => item !== undefined);
+  // Both sections read from the same snapshot, so build one O(1) lookup map.
+  const itemById = useMemo(
+    () => new Map(enrichedItems.map((item) => [item.id, item] as const)),
+    [enrichedItems],
+  );
+  const favoriteListItems = useMemo(() => {
+    const favoriteIdSet = new Set(favoriteIds);
+    return enrichedItems.filter((item) => favoriteIdSet.has(item.id));
+  }, [enrichedItems, favoriteIds]);
+  const recentListItems = useMemo(
+    () => recentIds
+      .map((id) => itemById.get(id))
+      .filter((item): item is EnrichedItem => item !== undefined),
+    [itemById, recentIds],
+  );
+  const recommendedItems = useMemo(() => enrichedItems.slice(0, 3), [enrichedItems]);
 
   return (
     <>
@@ -32,7 +43,7 @@ export const Dashboard = () => {
         path="/"
       />
       <div className="space-y-6 animate-fade-in">
-      <HeroSearch />
+      <HeroSearch recommendedItems={recommendedItems} />
 
       <div className="flex flex-col space-y-6">
         {isError ? (

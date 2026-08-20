@@ -11,9 +11,10 @@ interface FavoriteButtonProps {
 const defaultButtonClassName = '-ml-1.5 inline-flex min-h-11 min-w-11 flex-shrink-0 items-center justify-center rounded-lg p-1.5 transition-[background-color,transform] hover:bg-[var(--app-surface-subtle)] active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/60';
 
 export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ itemId, className = defaultButtonClassName }) => {
-  const { favoriteIds, toggleFavorite } = useFavoriteStore();
-  const { addToast } = useToastStore();
-  const isFavorite = favoriteIds.includes(itemId);
+  // Subscribe each row to one boolean, not the entire favorites array.
+  const isFavorite = useFavoriteStore((state) => state.favoriteIds.includes(itemId));
+  const toggleFavorite = useFavoriteStore((state) => state.toggleFavorite);
+  const addToast = useToastStore((state) => state.addToast);
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
