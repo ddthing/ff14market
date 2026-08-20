@@ -64,7 +64,7 @@ function App() {
       <Router>
         <div className="min-h-screen flex flex-col font-sans">
           <Header />
-          <main className="container mx-auto flex-grow px-4 pb-20 pt-8 md:max-w-6xl md:py-10">
+          <main className="mobile-page-main container mx-auto flex-grow px-4 pb-20 pt-8 md:max-w-6xl md:py-10">
             <ToastContainer />
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
