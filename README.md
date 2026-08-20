@@ -16,7 +16,7 @@ npm run data:validate
 
 `.github/workflows/update-items.yml`이 매일 03:17(KST)에 실행되며, 수동 실행은 GitHub Actions의 `workflow_dispatch`로 가능합니다. 변경된 `src/data/items.json`, `src/data/masterItems.json`, `src/data/searchItems.json`을 자동 커밋·푸시하므로 새로 추가된 마켓 아이템도 다음 갱신부터 저장소의 검색 카탈로그에 반영됩니다. 저장소의 Actions가 활성화되어 있고 workflow의 `contents: write` 권한이 허용되어 있어야 합니다. Pages는 push 기반 자동 배포를 연결해야 운영 화면에 반영됩니다. Worker는 매 5분 실행 때 Pages의 `/api/market-item-ids`를 다시 읽으므로, Worker를 새로 배포하지 않아도 다음 스냅샷부터 새 아이템을 수집합니다. 해당 경로를 읽지 못하는 경우에는 Worker에 내장된 이전 목록으로 폴백합니다.
 
-대형 아이템 카탈로그는 홈 화면 초기 번들에 포함하지 않고 검색 또는 상세 화면에서 지연 로드합니다. PWA service worker도 설치 시 전체 카탈로그를 미리 받지 않으며, 최초 사용 후 런타임 캐시에 저장합니다. `searchItems.json`은 아이템 ID·이름·숫자 아이콘 ID만 담은 compact payload이며, 아이콘 경로는 클라이언트에서 복원합니다.
+대형 아이템 카탈로그는 Pages Function에서 Fuse 검색 인덱스로 사용하며, 브라우저에는 검색 결과 최대 10개만 반환합니다. 상세 화면의 아이템 이름·아이콘도 `/api/item-meta/:itemId`에서 필요한 한 건만 가져오므로 `searchItems.json`을 브라우저에 내려받지 않습니다. `searchItems.json`은 아이템 갱신 파이프라인과 서버 검색이 공유하는 compact payload입니다.
 
 ## 실시간 장터 데이터 수집 구조
 

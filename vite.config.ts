@@ -20,24 +20,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       workbox: {
         maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
-        // The catalog is loaded only after search/detail activation. Keep it
-        // out of the install-time precache and cache it after first use.
-        globIgnores: ['**/searchItems-*.js', '**/PriceChart-*.js'],
+        // Route-only chart code is loaded on demand and cached after first use.
+        globIgnores: ['**/PriceChart-*.js'],
         runtimeCaching: [
-          {
-            urlPattern: /\/assets\/searchItems-[^/]+\.js$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'item-catalog',
-              expiration: {
-                maxEntries: 1,
-                maxAgeSeconds: 30 * 24 * 60 * 60,
-              },
-              cacheableResponse: {
-                statuses: [200],
-              },
-            },
-          },
           {
             urlPattern: /\/assets\/PriceChart-[^/]+\.js$/,
             handler: 'CacheFirst',
