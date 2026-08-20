@@ -11,7 +11,7 @@ export const Privacy = () => {
       />
       <div className="max-w-3xl mx-auto py-12 px-2 sm:px-4 animate-fade-in">
       <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">개인정보처리방침</h1>
-      <p className="text-gray-500 dark:text-[#9ea4aa] font-medium mb-12">마지막 업데이트: 2026년 5월 23일</p>
+      <p className="text-gray-500 dark:text-[#9ea4aa] font-medium mb-12">마지막 업데이트: 2026년 8월 20일</p>
       
       <div className="space-y-12 text-[16px] sm:text-[17px] text-gray-700 dark:text-gray-300 leading-[1.7] font-medium">
         <section className="space-y-4">
@@ -44,8 +44,8 @@ export const Privacy = () => {
         <section className="space-y-4">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">광고 서비스 안내</h2>
           <p>
-            Google AdSense 광고가 게재되는 경우 Google 및 광고 파트너는 광고 제공, 빈도 제한, 측정과 보안을 위해 쿠키·광고 식별자·접속 정보 등을 처리할 수 있습니다. 개인 맞춤 광고의 사용 여부는 Google의 광고 설정에서 관리할 수 있으며, 지역에 따라 광고 표시 전에 필요한 동의 절차를 제공합니다.
-            자세한 내용은 <a className="text-blue-600 underline dark:text-blue-400" href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noreferrer">Google 파트너 사이트 정책</a>과 <a className="text-blue-600 underline dark:text-blue-400" href="https://myadcenter.google.com/" target="_blank" rel="noreferrer">Google 광고 설정</a>을 확인해 주세요.
+            Google AdSense 광고가 실제로 게재되는 경우 Google 및 제3자 광고 파트너는 사용자의 이전 방문을 바탕으로 광고를 제공하고, 광고 노출 빈도·성과·보안을 측정하기 위해 쿠키, 웹 비콘, IP 주소, 광고 식별자 또는 유사 기술을 사용하거나 읽을 수 있습니다. Google의 광고 쿠키와 파트너의 사용 방식은 Google 정책에 따르며, 개인 맞춤 광고는 <a className="text-blue-600 underline dark:text-blue-400" href="https://adssettings.google.com/" target="_blank" rel="noreferrer">Google 광고 설정</a> 또는 <a className="text-blue-600 underline dark:text-blue-400" href="https://www.aboutads.info/choices/" target="_blank" rel="noreferrer">AboutAds 선택 도구</a>에서 관리할 수 있습니다. 지역에 따라 광고를 표시하기 전에 필요한 동의 절차를 제공합니다.
+            현재 이 사이트에는 AdSense 광고 스크립트와 광고 슬롯이 아직 설치되어 있지 않습니다. 광고를 활성화할 때에는 실제 사용되는 광고 파트너와 처리 목적을 이 방침에 다시 반영하고, 적용 법령에 따른 동의 절차를 함께 제공합니다. 자세한 내용은 <a className="text-blue-600 underline dark:text-blue-400" href="https://policies.google.com/technologies/partner-sites?hl=ko" target="_blank" rel="noreferrer">Google 파트너 사이트 정책</a>을 확인해 주세요.
           </p>
         </section>
 
