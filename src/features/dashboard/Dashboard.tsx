@@ -8,9 +8,7 @@ import { HeroSearch } from '../../components/ui/HeroSearch';
 import { ItemListItem } from '../../components/ui/ItemListItem';
 import { DataErrorState } from '../../components/ui/DataErrorState';
 import { Seo } from '../../components/seo/Seo';
-// @ts-expect-error react-twemoji lacks types
-import _Twemoji from 'react-twemoji';
-const Twemoji = (_Twemoji as { default?: React.ElementType }).default || _Twemoji;
+import { Clock3, Heart, Lightbulb, Package } from 'lucide-react';
 
 export const Dashboard = () => {
   const { enrichedItems, isLoading, isError, refetch } = useItemData();
@@ -52,9 +50,10 @@ export const Dashboard = () => {
           <div className="relative overflow-hidden rounded-xl border border-[var(--app-hairline)] bg-[var(--app-surface)] shadow-[0_2px_10px_rgba(0,0,0,0.02)] dark:shadow-none">
             <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-xl bg-[var(--app-surface)]/70 backdrop-blur-sm">
               <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-[var(--app-hairline)] border-t-[var(--app-accent)]"></div>
-              <Twemoji options={{ folder: 'svg', ext: '.svg' }}>
-                <p className="mb-1 text-[15px] font-bold text-[var(--app-ink)]">집사들이 장터 게시판에서 시세를 확인하고 있습니다... 📦</p>
-              </Twemoji>
+              <p className="mb-1 flex items-center text-[15px] font-bold text-[var(--app-ink)]">
+                <Package className="mr-2 h-4 w-4 text-[var(--app-accent)]" aria-hidden="true" />
+                집사들이 장터 게시판에서 시세를 확인하고 있습니다...
+              </p>
             </div>
             <div className="opacity-40">
               {Array.from({ length: 5 }).map((_, idx) => <SkeletonRow key={`skel-${idx}`} />)}
@@ -65,7 +64,7 @@ export const Dashboard = () => {
             {/* Watchlist Section */}
             <section>
               <h2 className="mb-3 flex items-center px-1 text-[16px] font-bold tracking-tight text-[var(--app-ink)] sm:text-[18px]">
-                <Twemoji options={{ folder: 'svg', ext: '.svg' }} className="mr-2 inline-flex">❤️</Twemoji> 내 관심 아이템
+                <Heart className="mr-2 h-4 w-4 fill-current text-[var(--app-accent)]" aria-hidden="true" /> 내 관심 아이템
               </h2>
               {favoriteListItems.length > 0 ? (
                 <div className="overflow-hidden rounded-xl border border-[var(--app-hairline)] bg-[var(--app-surface)] shadow-[0_2px_10px_rgba(0,0,0,0.02)] dark:shadow-none">
@@ -81,7 +80,7 @@ export const Dashboard = () => {
               ) : (
                 <div className="flex items-center rounded-xl border border-dashed border-[var(--app-hairline)] bg-[var(--app-surface-subtle)] px-4 py-3">
                   <span className="text-[14px] font-medium text-[var(--app-ink-muted)]">
-                    <Twemoji options={{ folder: 'svg', ext: '.svg' }} className="inline-flex mr-1.5">💡</Twemoji> 
+                    <Lightbulb className="mr-1.5 inline-flex h-4 w-4 text-[var(--app-accent)]" aria-hidden="true" />
                     자주 찾는 레이드 소모품을 찜해두세요.
                   </span>
                 </div>
@@ -92,7 +91,7 @@ export const Dashboard = () => {
             {recentListItems.length > 0 && (
               <section>
                 <h2 className="mb-3 flex items-center px-1 text-[16px] font-bold tracking-tight text-[var(--app-ink)] sm:text-[18px]">
-                  <Twemoji options={{ folder: 'svg', ext: '.svg' }} className="mr-2 inline-flex">🕒</Twemoji> 최근 본 아이템
+                  <Clock3 className="mr-2 h-4 w-4 text-[var(--app-ink-muted)]" aria-hidden="true" /> 최근 본 아이템
                 </h2>
                 <div className="overflow-hidden rounded-xl border border-[var(--app-hairline)] bg-[var(--app-surface)] shadow-[0_2px_10px_rgba(0,0,0,0.02)] dark:shadow-none">
                   <div>

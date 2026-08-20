@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from 'react';
-// @ts-expect-error react-twemoji lacks types
-import _Twemoji from 'react-twemoji';
-const Twemoji = (_Twemoji as { default?: React.ElementType }).default || _Twemoji;
-import { ChevronDown, Sun, Moon, Home, Flame, Heart } from 'lucide-react';
+import { ChevronDown, Sun, Moon, Home, Flame, Heart, Coins } from 'lucide-react';
 import { NavLink, Link } from 'react-router-dom';
 import { useServerStore } from '../../store/useServerStore';
 import { useThemeStore } from '../../store/useThemeStore';
@@ -44,11 +41,11 @@ export const Header = () => {
         <div className="container mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
           <div className="flex items-center space-x-4 md:space-x-6">
             <Link to="/" aria-label="FF14 장터탐지기 홈" className="flex min-h-10 items-center whitespace-nowrap text-[1rem] font-bold tracking-tight">
-              <Twemoji options={{ folder: 'svg', ext: '.svg' }} className="inline-flex items-center space-x-1">
-                <span className="mr-1 text-[1.1rem]">💰</span>
-                <span className="hidden sm:inline">FF14 장터탐지기</span>
-                <span className="sm:hidden">FF14 마켓</span>
-              </Twemoji>
+              <span className="mr-1.5 inline-flex items-center text-[var(--app-accent)]" aria-hidden="true">
+                <Coins className="h-[18px] w-[18px]" />
+              </span>
+              <span className="hidden sm:inline">FF14 장터탐지기</span>
+              <span className="sm:hidden">FF14 마켓</span>
             </Link>
             <nav className="hidden items-center space-x-4 md:flex" aria-label="주요 메뉴">
               <NavLink to="/" className={navLinkClass}>홈</NavLink>
