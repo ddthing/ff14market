@@ -1,0 +1,7 @@
+name = "ff14market"
+compatibility_date = "2026-08-20"
+pages_build_output_dir = "dist"
+
+[[r2_buckets]]
+binding = "MARKET_SNAPSHOTS"
+bucket_name = "ff14market-market-snapshots"

@@ -10,14 +10,16 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "node --test scripts/item-data-pipeline.test.js src/utils/marketMetrics.test.ts src/utils/marketRankings.test.ts src/utils/marketHistory.test.ts",
+    "test": "node --test scripts/item-data-pipeline.test.js scripts/market-data.test.ts src/utils/marketMetrics.test.ts src/utils/marketRankings.test.ts src/utils/marketHistory.test.ts",
     "data:update": "node scripts/update-items.js",
     "data:update:dry-run": "node scripts/update-items.js --dry-run",
-    "data:validate": "node scripts/validate-data.js"
+    "data:validate": "node scripts/validate-data.js",
+    "pages:dev": "npm run build && npx wrangler pages dev dist",
+    "market-sync:dev": "npx wrangler dev --config wrangler.market-sync.toml",
+    "market-sync:deploy": "npx wrangler deploy --config wrangler.market-sync.toml"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.13",
-    "axios": "^1.19.0",
     "csv-parse": "^6.2.1",
     "fuse.js": "^7.3.0",
     "lucide-react": "^1.16.0",

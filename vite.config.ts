@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { marketApiDevPlugin } from './scripts/vite-market-api.ts'
 
 export default defineConfig({
   resolve: {
@@ -12,6 +13,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    marketApiDevPlugin(),
     react(), 
     tailwindcss(),
     VitePWA({
@@ -42,8 +44,8 @@ export default defineConfig({
         name: 'FF14 장터탐지기',
         short_name: '장터탐지기',
         description: '파이널판타지14 한국 서버 최저 매물가, 판매량, 가격 흐름을 한눈에',
-        theme_color: '#101112',
-        background_color: '#101112',
+        theme_color: '#FFFFFF',
+        background_color: '#FFFFFF',
         display: 'standalone',
         icons: [
           {
