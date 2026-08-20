@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom';
 import type { EnrichedItem } from '../../hooks/useItemData';
 import { useItemData } from '../../hooks/useItemData';
 import { SkeletonRow } from '../../components/ui/SkeletonRow';
@@ -14,7 +13,6 @@ const Twemoji = (_Twemoji as { default?: React.ElementType }).default || _Twemoj
 
 export const Dashboard = () => {
   const { enrichedItems, isLoading, isError, refetch } = useItemData();
-  const navigate = useNavigate();
 
   const { favoriteIds } = useFavoriteStore();
   const { recentIds } = useRecentStore();
@@ -65,7 +63,6 @@ export const Dashboard = () => {
                       <ItemListItem 
                         key={`fav-${item.id}`} 
                         item={item} 
-                        navigate={navigate} 
                       />
                     ))}
                   </div>
@@ -92,7 +89,6 @@ export const Dashboard = () => {
                       <ItemListItem 
                         key={`recent-${item.id}`} 
                         item={item} 
-                        navigate={navigate} 
                       />
                     ))}
                   </div>

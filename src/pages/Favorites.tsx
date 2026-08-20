@@ -4,13 +4,11 @@ import { Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SkeletonRow } from '../components/ui/SkeletonRow';
 import { ItemListItem } from '../components/ui/ItemListItem';
-import { useNavigate } from 'react-router-dom';
 import { Seo } from '../components/seo/Seo';
 
 export const Favorites = () => {
   const { favoriteIds } = useFavoriteStore();
   const { enrichedItems, isLoading } = useItemData();
-  const navigate = useNavigate();
   
   const favoriteItemsList = enrichedItems.filter(item => favoriteIds.includes(item.id));
 
@@ -46,7 +44,7 @@ export const Favorites = () => {
       ) : (
         <div className="overflow-hidden rounded-xl border border-[var(--app-hairline)] bg-[var(--app-surface)] shadow-[0_2px_10px_rgba(0,0,0,0.02)] dark:shadow-none">
           {favoriteItemsList.map((item) => (
-            <ItemListItem key={`fav-${item.id}`} item={item} navigate={navigate} />
+            <ItemListItem key={`fav-${item.id}`} item={item} />
           ))}
         </div>
       )}

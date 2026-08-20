@@ -38,6 +38,7 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ itemId, classNam
       className={className}
       aria-label={isFavorite ? '관심 아이템에서 제거' : '관심 아이템에 추가'}
       aria-pressed={isFavorite}
+      title={isFavorite ? '관심 아이템에서 제거' : '관심 아이템에 추가'}
     >
       <Heart 
         className={`h-[18px] w-[18px] transition-colors duration-200 ${
