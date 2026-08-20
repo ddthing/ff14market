@@ -5,20 +5,25 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "seo:generate": "node scripts/generate-seo-assets.js",
+    "prebuild": "npm run seo:generate",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test scripts/item-data-pipeline.test.js src/utils/marketMetrics.test.ts src/utils/marketRankings.test.ts src/utils/marketHistory.test.ts",
+    "data:update": "node scripts/update-items.js",
+    "data:update:dry-run": "node scripts/update-items.js --dry-run",
+    "data:validate": "node scripts/validate-data.js"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.13",
-    "axios": "^1.16.1",
+    "axios": "^1.19.0",
     "csv-parse": "^6.2.1",
-    "framer-motion": "^12.40.0",
     "fuse.js": "^7.3.0",
     "lucide-react": "^1.16.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "react-router-dom": "^7.15.1",
+    "react-router-dom": "^7.18.2",
     "react-twemoji": "^0.7.2",
     "recharts": "^3.8.1",
     "zustand": "^5.0.13"

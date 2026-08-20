@@ -1,3 +1,11 @@
+export const getIconPathFromId = (iconId: number) => {
+  if (!Number.isSafeInteger(iconId) || iconId <= 0) return '';
+
+  const folder = String(Math.floor(iconId / 1000) * 1000).padStart(6, '0');
+  const file = String(iconId).padStart(6, '0');
+  return `/i/${folder}/${file}.png`;
+};
+
 export const getIconUrl = (iconPath: string) => {
   if (!iconPath) return '';
   

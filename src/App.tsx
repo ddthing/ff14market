@@ -29,7 +29,7 @@ const queryClient = new QueryClient({
 // Simple Loading Spinner for Suspense Fallback
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-[50vh]">
-    <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+    <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--app-hairline)] border-t-[var(--app-accent)]"></div>
   </div>
 );
 
@@ -64,7 +64,7 @@ function App() {
       <Router>
         <div className="min-h-screen flex flex-col font-sans">
           <Header />
-          <main className="container mx-auto px-4 py-8 md:py-10 max-w-6xl flex-grow">
+          <main className="container mx-auto flex-grow px-4 pb-24 pt-8 md:max-w-6xl md:py-10">
             <ToastContainer />
             <Suspense fallback={<LoadingFallback />}>
               <Routes>

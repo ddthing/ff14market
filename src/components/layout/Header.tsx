@@ -1,18 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 // @ts-expect-error react-twemoji lacks types
 import _Twemoji from 'react-twemoji';
 const Twemoji = (_Twemoji as { default?: React.ElementType }).default || _Twemoji;
-import { ChevronDown, Sun, Moon } from 'lucide-react';
+import { ChevronDown, Sun, Moon, Home, Flame, Heart } from 'lucide-react';
 import { NavLink, Link } from 'react-router-dom';
-import { ItemModal } from '../common/ItemModal';
 import { useServerStore } from '../../store/useServerStore';
 import { useThemeStore } from '../../store/useThemeStore';
-
-interface Item {
-  id: number;
-  name: string;
-  icon: string;
-}
 
 const SERVERS = [
   { id: 'Chocobo', name: '초코보' },
@@ -23,30 +16,38 @@ const SERVERS = [
 ];
 
 export const Header = () => {
-  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
-  
   const { server, setServer } = useServerStore();
   const { theme, setTheme } = useThemeStore();
-  
-  // Real-time dark mode evaluation for the icon
-  const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const [systemPrefersDark, setSystemPrefersDark] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const updateSystemTheme = () => setSystemPrefersDark(mediaQuery.matches);
+
+    updateSystemTheme();
+    mediaQuery.addEventListener('change', updateSystemTheme);
+    return () => mediaQuery.removeEventListener('change', updateSystemTheme);
+  }, []);
+
+  const isDark = theme === 'dark' || (theme === 'system' && systemPrefersDark);
   
   const toggleTheme = () => {
     setTheme(isDark ? 'light' : 'dark');
   };
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) => 
-    `text-[15px] transition-colors ${isActive ? 'font-bold text-gray-900 dark:text-white' : 'font-medium text-gray-500 dark:text-[#9ea4aa] hover:text-gray-900 dark:hover:text-gray-100'}`;
-
+    `inline-flex min-h-11 items-center text-[15px] transition-colors ${isActive ? 'font-bold text-[var(--app-ink)]' : 'font-medium text-[var(--app-ink-muted)] hover:text-[var(--app-ink)]'}`;
 
   return (
     <>
-      <header className="sticky top-0 z-40 backdrop-blur-md bg-white/80 dark:bg-[#101112]/80 border-b border-gray-100 dark:border-gray-800 transition-colors">
+      <header className="sticky top-0 z-40 border-b border-[var(--app-hairline)] bg-[var(--app-surface)] backdrop-blur-md transition-colors">
         <div className="container mx-auto px-4 max-w-6xl h-16 flex items-center justify-between">
           <div className="flex items-center space-x-6 md:space-x-8">
-            <Link to="/" className="text-[1.15rem] font-bold tracking-tight cursor-pointer whitespace-nowrap flex items-center">
+            <Link to="/" className="flex min-h-11 items-center whitespace-nowrap text-[1.15rem] font-bold tracking-tight">
               <Twemoji options={{ folder: 'svg', ext: '.svg' }} className="inline-flex items-center space-x-1">
-                <span className="text-[1.3rem] mr-1">💰</span> <span>FF14 장터탐지기</span>
+                <span className="mr-1 text-[1.3rem]">💰</span>
+                <span className="hidden sm:inline">FF14 장터탐지기</span>
+                <span className="sm:hidden">FF14 마켓</span>
               </Twemoji>
             </Link>
             <nav className="hidden md:flex items-center space-x-6">
@@ -58,27 +59,29 @@ export const Header = () => {
           
           <div className="flex items-center space-x-3">
             {/* 테마 토글 */}
-            <button 
+            <button
+              type="button"
               onClick={toggleTheme}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-[#26282b] text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
-              aria-label="Toggle Dark Mode"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-[var(--app-surface-subtle)] text-[var(--app-ink-muted)] transition-colors hover:bg-[var(--app-hairline)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-surface)]"
+              aria-label={isDark ? '라이트 모드로 전환' : '다크 모드로 전환'}
             >
-              {isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
+              {isDark ? <Sun className="h-[18px] w-[18px]" aria-hidden="true" /> : <Moon className="h-[18px] w-[18px]" aria-hidden="true" />}
             </button>
 
             {/* 서버 선택 드롭다운 */}
-            <div className="relative hidden sm:block">
+            <div className="relative">
               <select 
                 value={server}
                 onChange={(e) => setServer(e.target.value)}
-                className="appearance-none bg-gray-100 dark:bg-[#26282b] text-[13px] font-bold rounded-lg pl-3 pr-8 py-[8px] focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-500/30 text-gray-700 dark:text-gray-300 transition-colors cursor-pointer"
+                aria-label="장터 서버 선택"
+                className="h-11 w-[76px] appearance-none rounded-lg bg-[var(--app-surface-subtle)] pl-2 pr-7 text-[12px] font-bold text-[var(--app-ink)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--app-accent)]/50 sm:w-auto sm:pl-3 sm:text-[13px]"
               >
                 {SERVERS.map(s => (
                   <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                <ChevronDown className="w-4 h-4 text-gray-500" />
+                <ChevronDown className="h-4 w-4 text-[var(--app-ink-muted)]" aria-hidden="true" />
               </div>
             </div>
 
@@ -86,15 +89,23 @@ export const Header = () => {
         </div>
       </header>
 
-      {/* Item Detail Modal */}
-      {/* Item Detail Modal */}
-      {selectedItem && (
-        <ItemModal 
-          item={selectedItem} 
-          onClose={() => setSelectedItem(null)} 
-        />
-      )}
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--app-hairline)] bg-[var(--app-surface)] px-2 pb-[env(safe-area-inset-bottom)] pt-1 backdrop-blur-lg md:hidden" aria-label="주요 메뉴">
+        <div className="mx-auto grid max-w-md grid-cols-3">
+          <MobileNavLink to="/" label="홈" icon={<Home className="h-5 w-5" aria-hidden="true" />} />
+          <MobileNavLink to="/hot-issues" label="실시간 Hot" icon={<Flame className="h-5 w-5" aria-hidden="true" />} />
+          <MobileNavLink to="/favorites" label="관심템" icon={<Heart className="h-5 w-5" aria-hidden="true" />} />
+        </div>
+      </nav>
     </>
   );
 };
 
+const MobileNavLink = ({ to, label, icon }: { to: string; label: string; icon: React.ReactNode }) => (
+  <NavLink
+    to={to}
+    className={({ isActive }) => `flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-lg text-[11px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/60 ${isActive ? 'font-bold text-[var(--app-accent)]' : 'font-medium text-[var(--app-ink-muted)]'}`}
+  >
+    {icon}
+    <span>{label}</span>
+  </NavLink>
+);

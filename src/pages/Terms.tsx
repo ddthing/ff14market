@@ -1,6 +1,14 @@
+import { Seo } from '../components/seo/Seo';
+
 export const Terms = () => {
   return (
-    <div className="max-w-3xl mx-auto py-12 px-2 sm:px-4 animate-fade-in">
+    <>
+      <Seo
+        title="이용약관 | FF14 장터탐지기"
+        description="FF14 장터탐지기의 서비스 목적, 데이터 출처, 이용 시 책임과 권리를 안내합니다."
+        path="/terms"
+      />
+      <div className="max-w-3xl mx-auto py-12 px-2 sm:px-4 animate-fade-in">
       <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">이용약관</h1>
       <p className="text-gray-500 dark:text-[#9ea4aa] font-medium mb-12">마지막 업데이트: 2026년 5월 23일</p>
       
@@ -29,7 +37,7 @@ export const Terms = () => {
         <section className="space-y-4">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">제4조 (지적 재산권)</h2>
           <p>
-            본 서비스 내에서 시각적 이해를 돕기 위해 사용된 모든 아이템 아이콘, 게임 내 명칭, 관련 데이터 및 이미지의 저작권과 지적 재산권은 <strong>SQUARE ENIX CO., LTD.</strong>에 귀속됩니다. 본 서비스는 팬 아트 라이선스 정책을 준수하며, 상업적 목적으로 이를 활용하지 않습니다.
+            본 서비스 내에서 시각적 이해를 돕기 위해 사용된 모든 아이템 아이콘, 게임 내 명칭, 관련 데이터 및 이미지의 저작권과 지적 재산권은 <strong>SQUARE ENIX CO., LTD.</strong>에 귀속됩니다. 본 서비스의 광고 또는 후원 노출은 해당 권리자의 보증이나 제휴를 의미하지 않으며, 게임 자산 자체를 별도 상품으로 판매하지 않습니다.
           </p>
         </section>
 
@@ -40,6 +48,7 @@ export const Terms = () => {
           </p>
         </section>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
