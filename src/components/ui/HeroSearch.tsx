@@ -163,7 +163,7 @@ export const HeroSearch = memo(({ recommendedItems }: HeroSearchProps) => {
                     onClick={() => handleItemClick(item)}
                     className="flex min-h-14 w-full items-center space-x-4 rounded-lg p-3 text-left transition-colors hover:bg-[var(--app-surface-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/50 active:scale-[0.98]"
                   >
-                    <img src={getIconUrl(item.icon)} alt={item.name} className="h-10 w-10 flex-shrink-0 rounded-full bg-[var(--app-surface-subtle)] p-0.5 object-cover" />
+                    <img src={getIconUrl(item.icon)} alt={item.name} loading="lazy" decoding="async" className="h-10 w-10 flex-shrink-0 rounded-full bg-[var(--app-surface-subtle)] p-0.5 object-cover" />
                     <span className="truncate text-[16px] font-bold text-[var(--app-ink)]">{item.name}</span>
                   </button>
                 ))

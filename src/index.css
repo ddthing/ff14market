@@ -105,6 +105,12 @@ body {
   overflow-y: scroll;
 }
 
+/* Keep long market lists cheap to lay out while preserving scroll geometry. */
+.market-list-item {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 84px;
+}
+
 @media (max-width: 767px) {
   .mobile-page-main {
     padding-bottom: calc(5.5rem + max(0.75rem, env(safe-area-inset-bottom)));

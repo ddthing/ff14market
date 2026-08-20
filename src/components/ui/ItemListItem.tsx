@@ -74,7 +74,7 @@ export const ItemListItem = memo(({ item, signal }: {
     <div
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className="flex animate-fade-in items-center border-b border-[var(--app-hairline)] px-3 py-4 transition-colors last:border-0 hover:bg-[var(--app-surface-subtle)] sm:px-6 sm:py-[18px]"
+      className="market-list-item flex animate-fade-in items-center border-b border-[var(--app-hairline)] px-3 py-4 transition-colors last:border-0 hover:bg-[var(--app-surface-subtle)] sm:px-6 sm:py-[18px]"
     >
       <div className="hidden shrink-0 sm:block">
         <FavoriteButton itemId={item.id} />
@@ -93,6 +93,7 @@ export const ItemListItem = memo(({ item, signal }: {
             src={getIconUrl(item.icon)}
             alt={item.name}
             loading="lazy"
+            decoding="async"
             className="h-full w-full rounded-full bg-[var(--app-canvas)] object-cover"
           />
         </div>
