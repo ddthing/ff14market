@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 interface ChartProps {
   history: { pricePerUnit: number; timestamp: number }[];
@@ -13,44 +13,53 @@ const formatPrice = (price: number) => `${Math.round(price).toLocaleString()} G`
 
 const formatSaleTime = (timestamp: number) => {
   const milliseconds = timestamp > 10_000_000_000 ? timestamp : timestamp * 1000;
-  return new Intl.DateTimeFormat('ko-KR', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(milliseconds));
+  return saleDateFormatter.format(new Date(milliseconds));
 };
+
+const saleDateFormatter = new Intl.DateTimeFormat('ko-KR', {
+  month: 'short',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+});
 
 export const PriceChart = ({ history }: ChartProps) => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const sortedHistory = [...history]
-    .filter(({ pricePerUnit, timestamp }) => Number.isFinite(pricePerUnit) && pricePerUnit > 0 && Number.isFinite(timestamp))
-    .sort((a, b) => a.timestamp - b.timestamp)
-    .slice(-7);
+  const chartModel = useMemo(() => {
+    const sortedHistory = [...history]
+      .filter(({ pricePerUnit, timestamp }) => Number.isFinite(pricePerUnit) && pricePerUnit > 0 && Number.isFinite(timestamp))
+      .sort((a, b) => a.timestamp - b.timestamp)
+      .slice(-7);
 
-  if (sortedHistory.length === 0) {
+    if (sortedHistory.length === 0) return null;
+
+    const prices = sortedHistory.map(({ pricePerUnit }) => pricePerUnit);
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+    const priceRange = Math.max(maxPrice - minPrice, maxPrice * 0.05, 1);
+    const chartMin = Math.max(0, minPrice - priceRange * 0.15);
+    const chartMax = maxPrice + priceRange * 0.15;
+    const firstPrice = prices[0];
+    const lastPrice = prices[prices.length - 1];
+    const strokeColor = lastPrice >= firstPrice ? '#ef4444' : '#3b82f6';
+    const plotWidth = WIDTH - PADDING_X * 2;
+    const plotHeight = HEIGHT - PADDING_Y * 2;
+    const points = sortedHistory.map((entry, index) => ({
+      ...entry,
+      x: sortedHistory.length === 1
+        ? WIDTH / 2
+        : PADDING_X + (index / (sortedHistory.length - 1)) * plotWidth,
+      y: PADDING_Y + ((chartMax - entry.pricePerUnit) / (chartMax - chartMin)) * plotHeight,
+    }));
+
+    return { minPrice, maxPrice, strokeColor, plotHeight, points };
+  }, [history]);
+
+  if (!chartModel) {
     return <div className="rounded-xl bg-[var(--app-surface-subtle)] py-6 text-center text-[13px] font-medium text-[var(--app-ink-muted)]">최근 판매 기록이 없습니다.</div>;
   }
 
-  const prices = sortedHistory.map(({ pricePerUnit }) => pricePerUnit);
-  const minPrice = Math.min(...prices);
-  const maxPrice = Math.max(...prices);
-  const priceRange = Math.max(maxPrice - minPrice, maxPrice * 0.05, 1);
-  const chartMin = Math.max(0, minPrice - priceRange * 0.15);
-  const chartMax = maxPrice + priceRange * 0.15;
-  const firstPrice = prices[0];
-  const lastPrice = prices[prices.length - 1];
-  const isUp = lastPrice >= firstPrice;
-  const strokeColor = isUp ? '#ef4444' : '#3b82f6';
-  const plotWidth = WIDTH - PADDING_X * 2;
-  const plotHeight = HEIGHT - PADDING_Y * 2;
-  const points = sortedHistory.map((entry, index) => ({
-    ...entry,
-    x: sortedHistory.length === 1
-      ? WIDTH / 2
-      : PADDING_X + (index / (sortedHistory.length - 1)) * plotWidth,
-    y: PADDING_Y + ((chartMax - entry.pricePerUnit) / (chartMax - chartMin)) * plotHeight,
-  }));
+  const { maxPrice, minPrice, plotHeight, points, strokeColor } = chartModel;
   const activePoint = activeIndex === null ? null : points[activeIndex];
 
   return (

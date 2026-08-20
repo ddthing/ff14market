@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useFavoriteStore } from '../store/useFavoriteStore';
 import { useItemData } from '../hooks/useItemData';
 import { Heart } from 'lucide-react';
@@ -7,10 +8,13 @@ import { ItemListItem } from '../components/ui/ItemListItem';
 import { Seo } from '../components/seo/Seo';
 
 export const Favorites = () => {
-  const { favoriteIds } = useFavoriteStore();
+  const favoriteIds = useFavoriteStore((state) => state.favoriteIds);
   const { enrichedItems, isLoading } = useItemData();
-  
-  const favoriteItemsList = enrichedItems.filter(item => favoriteIds.includes(item.id));
+
+  const favoriteItemsList = useMemo(() => {
+    const favoriteIdSet = new Set(favoriteIds);
+    return enrichedItems.filter((item) => favoriteIdSet.has(item.id));
+  }, [enrichedItems, favoriteIds]);
 
   return (
     <>
