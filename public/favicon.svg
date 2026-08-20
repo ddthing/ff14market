@@ -1,11 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
-  <title>FF14 장터탐지기</title>
-  <rect width="64" height="64" fill="#fff"/>
-  <path fill="#8a9b78" stroke="#9a6a55" stroke-linejoin="round" stroke-width="3" d="M10 18a8 8 0 0 1 8-8h28a8 8 0 0 1 8 8v31H10z"/>
-  <path fill="#9a6a55" d="M18 49h5v5h-5zm23 0h5v5h-5z"/>
-  <path fill="#fff" stroke="#9a6a55" stroke-linejoin="round" stroke-width="1.5" d="m16 22 12-2 2 14-12 2zm20-1 12 2-2 14-12-2zM25 33h14v17H25z"/>
-  <circle cx="23" cy="22" r="2.25" fill="#9a6a55"/>
-  <circle cx="43" cy="23" r="2.25" fill="#9a6a55"/>
-  <circle cx="32" cy="34" r="2.25" fill="#9a6a55"/>
-  <path stroke="#9a6a55" stroke-linecap="round" stroke-width="1.5" d="m19 27 5-.8m14 1.2 5 .8M29 39h6m-6 4h4"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">FF14 장터탐지기</title>
+  <desc id="desc">모노톤 가격표와 상승 그래프가 있는 장터 아이콘</desc>
+  <rect width="512" height="512" rx="56" fill="#1d1d1d"/>
+  <rect x="94" y="82" width="324" height="348" rx="52" fill="#f3f1eb"/>
+  <circle cx="256" cy="88" r="48" fill="#969897"/>
+  <circle cx="256" cy="88" r="14" fill="#343535"/>
+  <rect x="155" y="188" width="160" height="18" rx="9" fill="#343535"/>
+  <rect x="155" y="240" width="210" height="18" rx="9" fill="#343535"/>
+  <path d="M155 346h55l26-35 36 42 38-34 47 38" fill="none" stroke="#747776" stroke-linecap="round" stroke-linejoin="round" stroke-width="18"/>
+  <circle cx="365" cy="381" r="25" fill="#969897"/>
+  <rect x="351" y="376" width="28" height="10" rx="5" fill="#343535"/>
 </svg>
