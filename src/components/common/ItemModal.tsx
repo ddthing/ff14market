@@ -180,7 +180,7 @@ export const ItemModal = ({ item, onClose }: { item: Item; onClose: () => void }
                   onClick={handleRefresh}
                   disabled={isSpinning}
                   className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer flex items-center justify-center"
-                  title="실시간 정보 새로고침"
+                  title="최신 정보 다시 조회"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${isSpinning ? 'animate-spin' : ''}`} />
                 </button>

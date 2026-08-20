@@ -165,7 +165,7 @@ export const ItemDetail = () => {
             {item.name}
           </h2>
           <p className="mt-2 text-[15px] font-medium text-[var(--app-ink-muted)]">
-            {isLoading ? '한국 DC 통합 시세 조회 중...' : `한국 DC 실시간 시세`}
+            {isLoading ? '한국 DC 최근 수집 시세 조회 중...' : '한국 DC 최근 수집 시세'}
           </p>
         </div>
         

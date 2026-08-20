@@ -12,7 +12,7 @@ export const DataErrorState = ({ onRetry, compact = false }: DataErrorStateProps
   >
     <AlertTriangle className="mb-3 h-7 w-7 text-[var(--destructive)]" aria-hidden="true" />
     <p className="text-[15px] font-bold text-[var(--app-ink)]">
-      실시간 장터 데이터를 불러오지 못했습니다.
+      장터 데이터를 불러오지 못했습니다.
     </p>
     <p className="mt-1 text-[13px] text-[var(--app-ink-muted)]">
       잠시 후 다시 시도해 주세요.
