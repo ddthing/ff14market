@@ -95,20 +95,28 @@ export const ItemListItem = memo(({ item, navigate, signal }: {
       role="link"
       tabIndex={0}
       aria-label={`${item.name} 시세 상세 보기`}
-      className="flex animate-fade-in cursor-pointer items-center justify-between border-b border-[var(--app-hairline)] px-4 py-[18px] transition-colors last:border-0 hover:bg-[var(--app-surface-subtle)] sm:px-6"
+      className="flex animate-fade-in cursor-pointer items-center justify-between border-b border-[var(--app-hairline)] px-3 py-4 transition-colors last:border-0 hover:bg-[var(--app-surface-subtle)] sm:px-6 sm:py-[18px]"
     >
-      <div className="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
-        <FavoriteButton itemId={item.id} />
-        <div className="h-[42px] w-[42px] flex-shrink-0 rounded-full bg-[var(--app-surface-subtle)] p-[2px]">
+      <div className="flex min-w-0 flex-1 items-center space-x-2 sm:space-x-4">
+        <div className="hidden sm:block">
+          <FavoriteButton itemId={item.id} />
+        </div>
+        <div className="relative h-10 w-10 flex-shrink-0 rounded-full bg-[var(--app-surface-subtle)] p-[2px] sm:h-[42px] sm:w-[42px]">
           <img 
             src={getIconUrl(item.icon)} 
             alt={item.name} 
             loading="lazy"
             className="h-full w-full rounded-full bg-[var(--app-canvas)] object-cover" 
           />
+          <div className="absolute -bottom-1 -right-2 z-10 sm:hidden">
+            <FavoriteButton
+              itemId={item.id}
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full bg-[var(--app-surface)]/95 p-1 shadow-sm transition-[background-color,transform] hover:bg-[var(--app-surface-subtle)] active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/60"
+            />
+          </div>
         </div>
-        <div className="flex flex-col truncate">
-          <span className="truncate text-[15px] font-bold leading-tight text-[var(--app-ink)] sm:text-[16px]">
+        <div className="min-w-0 flex-1 truncate">
+          <span className="block truncate text-[15px] font-bold leading-tight text-[var(--app-ink)] sm:text-[16px]">
             {item.name}
           </span>
           <span className="mt-[2px] flex items-center space-x-2 text-[12px] font-medium text-[var(--app-ink-muted)]">
@@ -121,8 +129,8 @@ export const ItemListItem = memo(({ item, navigate, signal }: {
         </div>
       </div>
 
-      <div className="flex items-center space-x-4 sm:space-x-6 md:space-x-12 ml-2 flex-shrink-0">
-        <div className="text-right w-20 sm:w-28 flex flex-col items-end justify-center">
+      <div className="ml-1 flex flex-shrink-0 items-center space-x-2 sm:ml-2 sm:space-x-6 md:space-x-12">
+        <div className="flex w-16 flex-col items-end justify-center text-right sm:w-28">
           <span className="mb-[3px] text-[10px] font-medium leading-none text-[var(--app-ink-muted)]">
             최저 매물가
           </span>
@@ -135,7 +143,7 @@ export const ItemListItem = memo(({ item, navigate, signal }: {
             </span>
           )}
         </div>
-        <div className="text-right w-16 sm:w-24">
+        <div className="w-14 text-right sm:w-24">
           <span className="mb-[3px] block text-[10px] font-medium leading-none text-[var(--app-ink-muted)]">
             {signal?.label ?? '매물-판매'}
           </span>
