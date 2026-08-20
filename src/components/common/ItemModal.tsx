@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Share2, X, RefreshCw, HelpCircle } from 'lucide-react';
 import { fetchKoreaDCData } from '../../api/universalis';
-import type { UniversalisItemData } from '../../api/universalis';
 import { getBulkQueryKey, computeTrueMinPrice } from '../../hooks/useItemData';
 import { formatFreshness } from '../../utils/time';
 import { PriceChart } from './PriceChart';
 import { useServerStore } from '../../store/useServerStore';
 import { getIconUrl } from '../../utils/icon';
 import { DataErrorState } from '../ui/DataErrorState';
+import type { MarketSnapshotResponse } from '../../types/market';
 
 interface Item {
   id: number;
@@ -24,8 +24,6 @@ const SERVERS = [
   { id: 'Fenrir', name: '펜리르' },
 ];
 
-import masterItems from '../../data/masterItems.json';
-
 export const ItemModal = ({ item, onClose }: { item: Item; onClose: () => void }) => {
   const [isCopied, setIsCopied] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
@@ -36,7 +34,7 @@ export const ItemModal = ({ item, onClose }: { item: Item; onClose: () => void }
     queryKey: ['searchItem', 'Korea', item.id],
     queryFn: ({ signal }) => fetchKoreaDCData(item.id, signal),
     staleTime: 300000, // 5 minutes
-    retry: 1,
+    retry: 0, // Pages Function already applies bounded upstream retry/backoff
   });
 
   // 모달에서 받은 최신 데이터를 리스트 벌크 캐시에 역방향 동기화
@@ -55,22 +53,25 @@ export const ItemModal = ({ item, onClose }: { item: Item; onClose: () => void }
 
     if (myServerMinPrice <= 0) return;
 
-    const itemIds = masterItems.map(m => m.id);
-    const exactQueryKey = [...getBulkQueryKey(server), itemIds];
+    const exactQueryKey = getBulkQueryKey(server);
 
-    queryClient.setQueryData<Record<string, UniversalisItemData>>(
+    queryClient.setQueryData<MarketSnapshotResponse>(
       exactQueryKey,
       (oldData) => {
         if (!oldData) return oldData;
-        const prev = oldData[item.id];
+        const prev = oldData.items[String(item.id)];
+        if (!prev) return oldData;
         return {
           ...oldData,
-          [item.id]: {
-            ...prev,
-            minPrice: myServerMinPrice,
-            minPriceNQ: 0, // NQ/HQ 구분 없이 절대 최저가로 덮어씌움
-            minPriceHQ: 0,
-            lastUploadTime: Date.now(), // 방금 직접 확인했으므로 시간 갱신
+          items: {
+            ...oldData.items,
+            [item.id]: {
+              ...prev,
+              minPrice: myServerMinPrice,
+              minPriceNQ: 0, // NQ/HQ 구분 없이 절대 최저가로 덮어씌움
+              minPriceHQ: 0,
+              lastUploadTime: Date.now(), // 방금 직접 확인했으므로 시간 갱신
+            },
           },
         };
       }

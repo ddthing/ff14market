@@ -2,14 +2,13 @@ import { useMemo, useState } from 'react';
 import { Activity, BadgeDollarSign, Info, TrendingDown, type LucideIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useItemData } from '../hooks/useItemData';
-import { usePriceHistory } from '../hooks/usePriceHistory';
 import { ItemListItem } from '../components/ui/ItemListItem';
 import { SkeletonRow } from '../components/ui/SkeletonRow';
 import { DataErrorState } from '../components/ui/DataErrorState';
 import { useServerStore } from '../store/useServerStore';
 import { selectCurrentPriceGapItems, selectHotIssueItems, selectRecentVolumeItems, type HotIssueTab } from '../utils/marketRankings';
 import { Seo } from '../components/seo/Seo';
-import { formatSaleVelocity, isRecentMarketData } from '../utils/marketMetrics';
+import { formatSaleVelocity } from '../utils/marketMetrics';
 
 type TabType = HotIssueTab;
 
@@ -56,29 +55,21 @@ const SERVER_LABELS: Record<string, string> = {
 };
 
 export const HotIssues = () => {
-  const { enrichedItems, isLoading, isError, refetch } = useItemData();
+  const {
+    enrichedItems,
+    priceChanges,
+    historyReady,
+    snapshotStale,
+    isLoading,
+    isError,
+    refetch,
+  } = useItemData();
   const { server } = useServerStore();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>('volume');
   const activeConfig = TAB_CONFIG[activeTab];
   const ActiveIcon = activeConfig.icon;
   const isHistoryTab = activeTab !== 'price';
-  const historyItemIds = useMemo(
-    () => enrichedItems
-      .filter((item) => {
-        if (!isRecentMarketData(item.lastUploadTime)) return false;
-        return item.volume > 0 || item.averageSalePrice > 0;
-      })
-      .map((item) => item.id),
-    [enrichedItems],
-  );
-  const isHistoryEnabled = historyItemIds.length > 0;
-  const {
-    priceChanges,
-    isLoading: isHistoryLoading,
-    isError: isHistoryError,
-    refetch: refetchHistory,
-  } = usePriceHistory(server, isHistoryEnabled, historyItemIds);
 
   const rankingItems = useMemo(() => {
     if (!isHistoryTab) return enrichedItems;
@@ -92,10 +83,7 @@ export const HotIssues = () => {
     }));
   }, [activeTab, enrichedItems, isHistoryTab, priceChanges]);
 
-  const isHistoryPreview = isHistoryTab
-    && isHistoryLoading
-    && !isHistoryError
-    && Object.keys(priceChanges).length === 0;
+  const isHistoryPreview = isHistoryTab && !historyReady;
 
   const visibleItems = useMemo(
     () => isHistoryPreview
@@ -106,13 +94,9 @@ export const HotIssues = () => {
     [activeTab, enrichedItems, isHistoryPreview, rankingItems],
   );
 
-  const isHistoryBlocking = isHistoryTab && isHistoryEnabled && isHistoryLoading && !isHistoryPreview;
-  const isAnyLoading = isLoading || isHistoryBlocking;
-  const hasError = isError || (isHistoryTab && isHistoryError && !isHistoryPreview);
-  const handleRetry = () => {
-    void refetch();
-    if (isHistoryEnabled) void refetchHistory();
-  };
+  const isAnyLoading = isLoading;
+  const hasError = isError;
+  const handleRetry = () => void refetch();
 
   return (
     <>
@@ -125,7 +109,7 @@ export const HotIssues = () => {
       <header className="flex flex-col gap-4 px-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="mb-2 text-[12px] font-bold uppercase tracking-[0.16em] text-[var(--app-accent)]">
-            {SERVER_LABELS[server] ?? server} · 실시간 지표
+            {SERVER_LABELS[server] ?? server} · {snapshotStale ? '이전 수집 데이터' : '수집 스냅샷'}
           </p>
           <h1 className="text-[24px] font-bold tracking-[-0.03em] text-[var(--app-ink)] sm:text-[28px]">
             오늘의 장터 신호
@@ -179,10 +163,10 @@ export const HotIssues = () => {
                 {activeConfig.label}
               </h2>
             <p className="mt-2 max-w-3xl text-[13px] leading-5 text-[var(--app-ink-muted)]">
-                {isHistoryPreview && activeTab === 'volume'
-                  ? '현재 판매속도 순위를 먼저 보여드립니다. 이력 비교가 끝나면 최근 7일 증가율 순위로 자동 전환됩니다.'
+              {isHistoryPreview && activeTab === 'volume'
+                  ? '7일 이력 스냅샷이 준비되지 않아 현재 판매속도 순위를 먼저 보여드립니다.'
                   : isHistoryPreview
-                    ? '현재 매물-판매가 차이를 먼저 보여드립니다. 이력 비교가 끝나면 최근 7일 가격 하락 순위로 자동 전환됩니다.'
+                    ? '7일 이력 스냅샷이 준비되지 않아 현재 매물-판매가 차이를 먼저 보여드립니다.'
                   : activeConfig.description}
               </p>
             </div>
@@ -190,12 +174,12 @@ export const HotIssues = () => {
           <div className="mt-4 flex items-start gap-2 rounded-xl border border-[var(--app-hairline)] bg-[var(--app-surface)] px-3 py-2.5 text-[12px] text-[var(--app-ink-muted)]">
             <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--app-accent)]" aria-hidden="true" />
             <span><strong className="font-bold text-[var(--app-ink)]">계산 기준</strong> · {isHistoryPreview
-              ? activeTab === 'volume' ? '현재 판매속도 · 건/일 (이력 비교 중)' : '현재 매물-판매가 차이 (이력 비교 중)'
+              ? activeTab === 'volume' ? '현재 판매속도 · 건/일 (이력 스냅샷 대기 중)' : '현재 매물-판매가 차이 (이력 스냅샷 대기 중)'
               : activeConfig.formula}</span>
           </div>
           <p className="mt-3 text-[11px] text-[var(--app-ink-muted)]">
             {isHistoryPreview
-              ? '빠른 현재 지표를 먼저 표시하고 있습니다. 비교 완료 후 7일 이력 기준으로 자동 갱신합니다.'
+              ? '현재 지표는 7일 이력 기준과 다를 수 있습니다. 다음 서버 수집 완료 후 이력 순위로 갱신됩니다.'
               : activeTab === 'price'
               ? '최근 업로드가 7일을 넘은 데이터는 실시간 순위에서 제외합니다.'
               : '최근 7일과 직전 7일에 판매 이력이 모두 있는 품목만 계산합니다.'}
@@ -211,7 +195,7 @@ export const HotIssues = () => {
             <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[var(--app-surface)]/75 backdrop-blur-sm">
               <Activity className="mb-3 h-7 w-7 animate-spin text-[var(--app-accent)]" aria-hidden="true" />
               <p className="text-[14px] font-bold text-[var(--app-ink)]">
-                {isHistoryEnabled ? '최근 14일 판매 이력을 비교 중입니다...' : '실시간 데이터를 집계 중입니다...'}
+                '마켓 스냅샷을 불러오는 중입니다...'
               </p>
             </div>
             <div className="opacity-40">

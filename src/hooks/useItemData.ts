@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchUniversalisData } from '../api/universalis';
+import { fetchMarketSnapshot } from '../api/universalis';
+import type { MarketSnapshotResponse } from '../types/market';
 import masterItems from '../data/masterItems.json';
 import { useServerStore } from '../store/useServerStore';
 import {
@@ -24,20 +25,24 @@ export interface EnrichedItem {
   lastUploadTime?: number;
 }
 
-// 서버별 통합 쿼리 키 생성 함수 — 모달의 캐시 역방향 동기화에서 공유 사용
-export const getBulkQueryKey = (server: string) => ['universalis', server] as const;
+// 서버별 스냅샷 쿼리 키 생성 함수 — 목록과 상세 모달이 공유 사용
+export const getMarketSnapshotQueryKey = (server: string) => ['market-snapshot', server] as const;
+export const getBulkQueryKey = getMarketSnapshotQueryKey;
 
 export const useItemData = () => {
   const { server } = useServerStore();
-  const itemIds = masterItems.map(item => item.id);
 
-  // 현재 선택된 서버 기준으로 통합 조회
-  const { data: apiData, isLoading, isError, error, refetch } = useQuery({
-    queryKey: [...getBulkQueryKey(server), itemIds],
-    queryFn: ({ signal }) => fetchUniversalisData(server, itemIds, signal),
+  // 현재 선택된 서버의 요약 지표와 사전 계산된 순위를 한 번에 조회
+  const { data: snapshot, isLoading, isError, error, refetch } = useQuery<MarketSnapshotResponse>({
+    queryKey: getMarketSnapshotQueryKey(server),
+    queryFn: ({ signal }) => fetchMarketSnapshot(server, signal),
     staleTime: 300000, // 5 minutes (모달에서 수동으로 덮어씌운 최신 캐시가 백그라운드 리패치에 의해 과거 벌크 데이터로 즉시 롤백되는 현상 방지)
-    retry: 1,
+    gcTime: 900000,
+    refetchOnWindowFocus: false,
+    retry: 0,
   });
+
+  const apiData = snapshot?.items;
 
   const enrichedItems: EnrichedItem[] = masterItems.map(item => {
     const data = apiData?.[item.id];
@@ -72,5 +77,16 @@ export const useItemData = () => {
     return b.price - a.price;
   });
 
-  return { enrichedItems, isLoading, isError, error, refetch };
+  return {
+    enrichedItems,
+    priceChanges: snapshot?.priceChanges ?? {},
+    historyReady: snapshot?.historyReady ?? false,
+    snapshotGeneratedAt: snapshot?.generatedAt,
+    snapshotSource: snapshot?.source,
+    snapshotStale: snapshot?.stale ?? false,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  };
 };
