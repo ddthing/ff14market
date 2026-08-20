@@ -2,1201 +2,1201 @@
   {
     "id": 49238,
     "name": "4등급 정신력의 보석약",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020708_hr1.tex&format=png",
+    "icon": "/i/020000/020708.png",
     "category": "소모품"
   },
   {
     "id": 49237,
     "name": "4등급 지능의 보석약",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020706_hr1.tex&format=png",
+    "icon": "/i/020000/020706.png",
     "category": "소모품"
   },
   {
     "id": 49236,
     "name": "4등급 활력의 보석약",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020707_hr1.tex&format=png",
+    "icon": "/i/020000/020707.png",
     "category": "소모품"
   },
   {
     "id": 49235,
     "name": "4등급 민첩성의 보석약",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020709_hr1.tex&format=png",
+    "icon": "/i/020000/020709.png",
     "category": "소모품"
   },
   {
     "id": 49234,
     "name": "4등급 힘의 보석약",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020710_hr1.tex&format=png",
+    "icon": "/i/020000/020710.png",
     "category": "소모품"
-  },
-  {
-    "id": 49205,
-    "name": "파이널리스트의 증서: CCRC2026",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026190_hr1.tex&format=png",
-    "category": "기타"
   },
   {
     "id": 46254,
     "name": "황금장어파이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/024000/024305_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/024000/024305.png",
+    "category": "요리"
   },
   {
     "id": 44095,
     "name": "메기 파이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/024000/024052_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/024000/024052.png",
+    "category": "요리"
   },
   {
     "id": 41782,
     "name": "시전의 하이알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020294_hr1.tex&format=png",
+    "icon": "/i/020000/020294.png",
     "category": "마테리아"
   },
   {
     "id": 41781,
     "name": "신속의 하이알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020294_hr1.tex&format=png",
+    "icon": "/i/020000/020294.png",
     "category": "마테리아"
   },
   {
     "id": 41780,
     "name": "거장의 하이알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020300_hr1.tex&format=png",
+    "icon": "/i/020000/020300.png",
     "category": "마테리아"
   },
   {
     "id": 41779,
     "name": "명인의 하이알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020300_hr1.tex&format=png",
+    "icon": "/i/020000/020300.png",
     "category": "마테리아"
   },
   {
     "id": 41778,
     "name": "장인의 하이알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020300_hr1.tex&format=png",
+    "icon": "/i/020000/020300.png",
     "category": "마테리아"
   },
   {
     "id": 41777,
     "name": "기량의 하이알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020296_hr1.tex&format=png",
+    "icon": "/i/020000/020296.png",
     "category": "마테리아"
   },
   {
     "id": 41776,
     "name": "박식의 하이알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020296_hr1.tex&format=png",
+    "icon": "/i/020000/020296.png",
     "category": "마테리아"
   },
   {
     "id": 41775,
     "name": "달견의 하이알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020296_hr1.tex&format=png",
+    "icon": "/i/020000/020296.png",
     "category": "마테리아"
   },
   {
     "id": 41774,
     "name": "강유의 하이알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020292_hr1.tex&format=png",
+    "icon": "/i/020000/020292.png",
     "category": "마테리아"
   },
   {
     "id": 41773,
     "name": "야망의 하이알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020298_hr1.tex&format=png",
+    "icon": "/i/020000/020298.png",
     "category": "마테리아"
   },
   {
     "id": 41772,
     "name": "무략의 하이알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020298_hr1.tex&format=png",
+    "icon": "/i/020000/020298.png",
     "category": "마테리아"
   },
   {
     "id": 41771,
     "name": "심안의 하이알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020298_hr1.tex&format=png",
+    "icon": "/i/020000/020298.png",
     "category": "마테리아"
   },
   {
     "id": 41770,
     "name": "신앙의 하이알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020292_hr1.tex&format=png",
+    "icon": "/i/020000/020292.png",
     "category": "마테리아"
   },
   {
     "id": 41769,
     "name": "시전의 하이오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020293_hr1.tex&format=png",
+    "icon": "/i/020000/020293.png",
     "category": "마테리아"
   },
   {
     "id": 41768,
     "name": "신속의 하이오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020293_hr1.tex&format=png",
+    "icon": "/i/020000/020293.png",
     "category": "마테리아"
   },
   {
     "id": 41767,
     "name": "거장의 하이오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020299_hr1.tex&format=png",
+    "icon": "/i/020000/020299.png",
     "category": "마테리아"
   },
   {
     "id": 41766,
     "name": "명인의 하이오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020299_hr1.tex&format=png",
+    "icon": "/i/020000/020299.png",
     "category": "마테리아"
   },
   {
     "id": 41765,
     "name": "장인의 하이오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020299_hr1.tex&format=png",
+    "icon": "/i/020000/020299.png",
     "category": "마테리아"
   },
   {
     "id": 41764,
     "name": "기량의 하이오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020295_hr1.tex&format=png",
+    "icon": "/i/020000/020295.png",
     "category": "마테리아"
   },
   {
     "id": 41763,
     "name": "박식의 하이오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020295_hr1.tex&format=png",
+    "icon": "/i/020000/020295.png",
     "category": "마테리아"
   },
   {
     "id": 41762,
     "name": "달견의 하이오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020295_hr1.tex&format=png",
+    "icon": "/i/020000/020295.png",
     "category": "마테리아"
   },
   {
     "id": 41761,
     "name": "강유의 하이오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020291_hr1.tex&format=png",
+    "icon": "/i/020000/020291.png",
     "category": "마테리아"
   },
   {
     "id": 41760,
     "name": "야망의 하이오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020297_hr1.tex&format=png",
+    "icon": "/i/020000/020297.png",
     "category": "마테리아"
   },
   {
     "id": 41759,
     "name": "무략의 하이오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020297_hr1.tex&format=png",
+    "icon": "/i/020000/020297.png",
     "category": "마테리아"
   },
   {
     "id": 41758,
     "name": "심안의 하이오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020297_hr1.tex&format=png",
+    "icon": "/i/020000/020297.png",
     "category": "마테리아"
   },
   {
     "id": 41757,
     "name": "신앙의 하이오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020291_hr1.tex&format=png",
+    "icon": "/i/020000/020291.png",
     "category": "마테리아"
   },
   {
     "id": 40631,
     "name": "금속 파이프 선반",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/051000/051513_hr1.tex&format=png",
-    "category": "하우징"
-  },
-  {
-    "id": 40519,
-    "name": "파이널리스트의 증서: 2024 리미트 브레이커스",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026190_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/051000/051513.png",
+    "category": "요리"
   },
   {
     "id": 39731,
     "name": "8등급 정신력의 환혹약",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020708_hr1.tex&format=png",
+    "icon": "/i/020000/020708.png",
     "category": "소모품"
   },
   {
     "id": 39730,
     "name": "8등급 지능의 환혹약",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020706_hr1.tex&format=png",
+    "icon": "/i/020000/020706.png",
     "category": "소모품"
   },
   {
     "id": 39729,
     "name": "8등급 활력의 환혹약",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020707_hr1.tex&format=png",
+    "icon": "/i/020000/020707.png",
     "category": "소모품"
   },
   {
     "id": 39728,
     "name": "8등급 민첩성의 환혹약",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020709_hr1.tex&format=png",
+    "icon": "/i/020000/020709.png",
     "category": "소모품"
   },
   {
     "id": 39727,
     "name": "8등급 힘의 환혹약",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020710_hr1.tex&format=png",
+    "icon": "/i/020000/020710.png",
     "category": "소모품"
   },
   {
     "id": 38685,
     "name": "낡은 경량 파이프",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/023000/023106_hr1.tex&format=png",
-    "category": "재료"
-  },
-  {
-    "id": 38439,
-    "name": "카드: 헤파이스토스",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/027000/027666_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/023000/023106.png",
+    "category": "요리"
   },
   {
     "id": 38261,
     "name": "멜론 파이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/024000/024083_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/024000/024083.png",
+    "category": "요리"
   },
   {
     "id": 37844,
     "name": "7등급 정신력의 환혹약",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020708_hr1.tex&format=png",
+    "icon": "/i/020000/020708.png",
     "category": "소모품"
   },
   {
     "id": 37843,
     "name": "7등급 지능의 환혹약",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020706_hr1.tex&format=png",
+    "icon": "/i/020000/020706.png",
     "category": "소모품"
   },
   {
     "id": 37842,
     "name": "7등급 활력의 환혹약",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020707_hr1.tex&format=png",
+    "icon": "/i/020000/020707.png",
     "category": "소모품"
   },
   {
     "id": 37841,
     "name": "7등급 민첩성의 환혹약",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020709_hr1.tex&format=png",
+    "icon": "/i/020000/020709.png",
     "category": "소모품"
   },
   {
     "id": 37840,
     "name": "7등급 힘의 환혹약",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020710_hr1.tex&format=png",
+    "icon": "/i/020000/020710.png",
     "category": "소모품"
-  },
-  {
-    "id": 37655,
-    "name": "개척공방 생선파이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/024000/024052_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 36009,
-    "name": "아빠 파이싸 호루라기",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026039_hr1.tex&format=png",
-    "category": "기타"
   },
   {
     "id": 33942,
     "name": "시전의 알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020287_hr1.tex&format=png",
+    "icon": "/i/020000/020287.png",
     "category": "마테리아"
   },
   {
     "id": 33941,
     "name": "신속의 알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020287_hr1.tex&format=png",
+    "icon": "/i/020000/020287.png",
     "category": "마테리아"
   },
   {
     "id": 33940,
     "name": "거장의 알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020290_hr1.tex&format=png",
+    "icon": "/i/020000/020290.png",
     "category": "마테리아"
   },
   {
     "id": 33939,
     "name": "명인의 알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020290_hr1.tex&format=png",
+    "icon": "/i/020000/020290.png",
     "category": "마테리아"
   },
   {
     "id": 33938,
     "name": "장인의 알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020290_hr1.tex&format=png",
+    "icon": "/i/020000/020290.png",
     "category": "마테리아"
   },
   {
     "id": 33937,
     "name": "기량의 알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020288_hr1.tex&format=png",
+    "icon": "/i/020000/020288.png",
     "category": "마테리아"
   },
   {
     "id": 33936,
     "name": "박식의 알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020288_hr1.tex&format=png",
+    "icon": "/i/020000/020288.png",
     "category": "마테리아"
   },
   {
     "id": 33935,
     "name": "달견의 알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020288_hr1.tex&format=png",
+    "icon": "/i/020000/020288.png",
     "category": "마테리아"
   },
   {
     "id": 33934,
     "name": "강유의 알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020286_hr1.tex&format=png",
+    "icon": "/i/020000/020286.png",
     "category": "마테리아"
   },
   {
     "id": 33933,
     "name": "야망의 알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020289_hr1.tex&format=png",
+    "icon": "/i/020000/020289.png",
     "category": "마테리아"
   },
   {
     "id": 33932,
     "name": "무략의 알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020289_hr1.tex&format=png",
+    "icon": "/i/020000/020289.png",
     "category": "마테리아"
   },
   {
     "id": 33931,
     "name": "심안의 알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020289_hr1.tex&format=png",
+    "icon": "/i/020000/020289.png",
     "category": "마테리아"
   },
   {
     "id": 33930,
     "name": "신앙의 알테마마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020286_hr1.tex&format=png",
+    "icon": "/i/020000/020286.png",
     "category": "마테리아"
   },
   {
     "id": 33929,
     "name": "시전의 오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020282_hr1.tex&format=png",
+    "icon": "/i/020000/020282.png",
     "category": "마테리아"
   },
   {
     "id": 33928,
     "name": "신속의 오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020282_hr1.tex&format=png",
+    "icon": "/i/020000/020282.png",
     "category": "마테리아"
   },
   {
     "id": 33927,
     "name": "거장의 오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020285_hr1.tex&format=png",
+    "icon": "/i/020000/020285.png",
     "category": "마테리아"
   },
   {
     "id": 33926,
     "name": "명인의 오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020285_hr1.tex&format=png",
+    "icon": "/i/020000/020285.png",
     "category": "마테리아"
   },
   {
     "id": 33925,
     "name": "장인의 오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020285_hr1.tex&format=png",
+    "icon": "/i/020000/020285.png",
     "category": "마테리아"
   },
   {
     "id": 33924,
     "name": "기량의 오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020283_hr1.tex&format=png",
+    "icon": "/i/020000/020283.png",
     "category": "마테리아"
   },
   {
     "id": 33923,
     "name": "박식의 오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020283_hr1.tex&format=png",
+    "icon": "/i/020000/020283.png",
     "category": "마테리아"
   },
   {
     "id": 33922,
     "name": "달견의 오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020283_hr1.tex&format=png",
+    "icon": "/i/020000/020283.png",
     "category": "마테리아"
   },
   {
     "id": 33921,
     "name": "강유의 오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020281_hr1.tex&format=png",
+    "icon": "/i/020000/020281.png",
     "category": "마테리아"
   },
   {
     "id": 33920,
     "name": "야망의 오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020284_hr1.tex&format=png",
+    "icon": "/i/020000/020284.png",
     "category": "마테리아"
   },
   {
     "id": 33919,
     "name": "무략의 오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020284_hr1.tex&format=png",
+    "icon": "/i/020000/020284.png",
     "category": "마테리아"
   },
   {
     "id": 33918,
     "name": "심안의 오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020284_hr1.tex&format=png",
+    "icon": "/i/020000/020284.png",
     "category": "마테리아"
   },
   {
     "id": 33917,
     "name": "신앙의 오메가마테리쟈",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020281_hr1.tex&format=png",
+    "icon": "/i/020000/020281.png",
     "category": "마테리아"
-  },
-  {
-    "id": 33652,
-    "name": "파이싸 반지",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/054000/054685_hr1.tex&format=png",
-    "category": "장비"
   },
   {
     "id": 32229,
     "name": "파이싸 그네의자",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/052000/052707_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/052000/052707.png",
+    "category": "요리"
   },
   {
     "id": 31897,
     "name": "4등급 정신력의 환혹약",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020708_hr1.tex&format=png",
+    "icon": "/i/020000/020708.png",
     "category": "소모품"
   },
   {
     "id": 31896,
     "name": "4등급 지능의 환혹약",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020706_hr1.tex&format=png",
+    "icon": "/i/020000/020706.png",
     "category": "소모품"
   },
   {
     "id": 31895,
     "name": "4등급 활력의 환혹약",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020707_hr1.tex&format=png",
+    "icon": "/i/020000/020707.png",
     "category": "소모품"
   },
   {
     "id": 31894,
     "name": "4등급 민첩성의 환혹약",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020709_hr1.tex&format=png",
+    "icon": "/i/020000/020709.png",
     "category": "소모품"
   },
   {
     "id": 31893,
     "name": "4등급 힘의 환혹약",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/020000/020710_hr1.tex&format=png",
+    "icon": "/i/020000/020710.png",
     "category": "소모품"
   },
   {
     "id": 31401,
     "name": "연기 교본: 하이파이브",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026435_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 31348,
-    "name": "카드: 사파이어 웨폰",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/027000/027665_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 30594,
-    "name": "요리사 파이싸 봉제인형",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/053000/053364_hr1.tex&format=png",
-    "category": "하우징"
+    "icon": "/i/026000/026435.png",
+    "category": "요리"
   },
   {
     "id": 30414,
     "name": "파이싸 깔개",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/052000/052032_hr1.tex&format=png",
-    "category": "하우징"
+    "icon": "/i/052000/052032.png",
+    "category": "요리"
   },
   {
     "id": 30398,
     "name": "공업용 벽 파이프",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/051000/051432_hr1.tex&format=png",
-    "category": "하우징"
-  },
-  {
-    "id": 30382,
-    "name": "사파이어 웨폰 장식품",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/053000/053355_hr1.tex&format=png",
-    "category": "하우징"
+    "icon": "/i/051000/051432.png",
+    "category": "요리"
   },
   {
     "id": 30095,
     "name": "재봉사 파이싸",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/059000/059773_hr1.tex&format=png",
-    "category": "하우징"
+    "icon": "/i/059000/059773.png",
+    "category": "요리"
   },
   {
     "id": 30094,
     "name": "요리사 파이싸",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/059000/059772_hr1.tex&format=png",
-    "category": "하우징"
+    "icon": "/i/059000/059772.png",
+    "category": "요리"
   },
   {
     "id": 29504,
     "name": "청어 파이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/024000/024052_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 28332,
-    "name": "모조 파이케아: 에우레카",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/033000/033116_hr1.tex&format=png",
-    "category": "장비"
-  },
-  {
-    "id": 28316,
-    "name": "모조 파이케아",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/033000/033113_hr1.tex&format=png",
-    "category": "장비"
+    "icon": "/i/024000/024052.png",
+    "category": "요리"
   },
   {
     "id": 27863,
     "name": "견과파이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/024000/024083_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/024000/024083.png",
+    "category": "요리"
   },
   {
     "id": 27862,
     "name": "픽시사과파이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/024000/024079_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 24716,
-    "name": "파이케아: 맞춤형",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/033000/033116_hr1.tex&format=png",
-    "category": "장비"
-  },
-  {
-    "id": 24700,
-    "name": "파이케아: 에우레카",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/033000/033116_hr1.tex&format=png",
-    "category": "장비"
-  },
-  {
-    "id": 24684,
-    "name": "파이케아",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/033000/033113_hr1.tex&format=png",
-    "category": "장비"
+    "icon": "/i/024000/024079.png",
+    "category": "요리"
   },
   {
     "id": 24488,
     "name": "파이싸 탁상시계",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/053000/053284_hr1.tex&format=png",
-    "category": "하우징"
-  },
-  {
-    "id": 24190,
-    "name": "파이널리스트의 증서: FRC 2018",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026190_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 23072,
-    "name": "스파이라이 물고기",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/029000/029261_hr1.tex&format=png",
-    "category": "재료"
+    "icon": "/i/053000/053284.png",
+    "category": "요리"
   },
   {
     "id": 23058,
     "name": "사파이어 부채",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/029000/029524_hr1.tex&format=png",
-    "category": "재료"
-  },
-  {
-    "id": 22869,
-    "name": "스파이라이: 알테마",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/031000/031154_hr1.tex&format=png",
-    "category": "장비"
-  },
-  {
-    "id": 21308,
-    "name": "호박 파이 세트(거래 불가)",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/053000/053186_hr1.tex&format=png",
-    "category": "하우징"
-  },
-  {
-    "id": 20761,
-    "name": "호박 파이 세트",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/053000/053186_hr1.tex&format=png",
-    "category": "하우징"
+    "icon": "/i/029000/029524.png",
+    "category": "요리"
   },
   {
     "id": 19839,
     "name": "유목민 파이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/024000/024354_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/024000/024354.png",
+    "category": "요리"
   },
   {
     "id": 17579,
     "name": "파이싸킬러",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/029000/029436_hr1.tex&format=png",
-    "category": "재료"
-  },
-  {
-    "id": 17495,
-    "name": "파이싸 귀걸이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/055000/055383_hr1.tex&format=png",
-    "category": "장비"
+    "icon": "/i/029000/029436.png",
+    "category": "요리"
   },
   {
     "id": 17030,
     "name": "파이싸 정원수",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/052000/052242_hr1.tex&format=png",
-    "category": "하우징"
+    "icon": "/i/052000/052242.png",
+    "category": "요리"
   },
   {
     "id": 17023,
     "name": "파이싸 조명등",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/053000/053139_hr1.tex&format=png",
-    "category": "하우징"
+    "icon": "/i/053000/053139.png",
+    "category": "요리"
   },
   {
     "id": 17006,
     "name": "대형 파이싸 외벽",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/050000/050821_hr1.tex&format=png",
-    "category": "하우징"
+    "icon": "/i/050000/050821.png",
+    "category": "요리"
   },
   {
     "id": 17005,
     "name": "파이싸 외벽",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/050000/050820_hr1.tex&format=png",
-    "category": "하우징"
+    "icon": "/i/050000/050820.png",
+    "category": "요리"
   },
   {
     "id": 17004,
     "name": "아담한 파이싸 외벽",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/050000/050819_hr1.tex&format=png",
-    "category": "하우징"
-  },
-  {
-    "id": 16001,
-    "name": "파이싸 장식인형(거래 불가)",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/053000/053072_hr1.tex&format=png",
-    "category": "하우징"
-  },
-  {
-    "id": 13362,
-    "name": "카드: 파이싸",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/027000/027663_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/050000/050819.png",
+    "category": "요리"
   },
   {
     "id": 13275,
     "name": "꼬마 파이싸",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/059000/059558_hr1.tex&format=png",
-    "category": "하우징"
+    "icon": "/i/059000/059558.png",
+    "category": "요리"
   },
   {
     "id": 13068,
     "name": "파이싸 장식인형",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/053000/053072_hr1.tex&format=png",
-    "category": "하우징"
+    "icon": "/i/053000/053072.png",
+    "category": "요리"
   },
   {
     "id": 12555,
     "name": "스타 사파이어 원석",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/021000/021472_hr1.tex&format=png",
-    "category": "재료"
+    "icon": "/i/021000/021472.png",
+    "category": "요리"
   },
   {
     "id": 12545,
     "name": "스타 사파이어",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/021000/021289_hr1.tex&format=png",
-    "category": "재료"
-  },
-  {
-    "id": 12131,
-    "name": "모조 스파이라이: 넥서스",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/031000/031072_hr1.tex&format=png",
-    "category": "장비"
-  },
-  {
-    "id": 12130,
-    "name": "모조 스파이라이: 노우스",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/031000/031072_hr1.tex&format=png",
-    "category": "장비"
-  },
-  {
-    "id": 12129,
-    "name": "모조 스파이라이: 아니무스",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/031000/031072_hr1.tex&format=png",
-    "category": "장비"
-  },
-  {
-    "id": 12128,
-    "name": "모조 스파이라이: 아트마",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/031000/031072_hr1.tex&format=png",
-    "category": "장비"
-  },
-  {
-    "id": 12127,
-    "name": "모조 스파이라이: 제니스",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/031000/031034_hr1.tex&format=png",
-    "category": "장비"
-  },
-  {
-    "id": 12126,
-    "name": "모조 스파이라이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/031000/031034_hr1.tex&format=png",
-    "category": "장비"
-  },
-  {
-    "id": 12125,
-    "name": "미완성 모조 스파이라이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/031000/031035_hr1.tex&format=png",
-    "category": "장비"
+    "icon": "/i/021000/021289.png",
+    "category": "요리"
   },
   {
     "id": 12108,
     "name": "스타 사파이어 오르골",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/053000/053068_hr1.tex&format=png",
-    "category": "하우징"
+    "icon": "/i/053000/053068.png",
+    "category": "요리"
   },
   {
     "id": 10146,
     "name": "특제 왕관 파이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/024000/024057_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/024000/024057.png",
+    "category": "요리"
   },
   {
     "id": 9516,
     "name": "특제 장어 파이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/024000/024305_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 8650,
-    "name": "스파이라이: 넥서스",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/031000/031072_hr1.tex&format=png",
-    "category": "장비"
+    "icon": "/i/024000/024305.png",
+    "category": "요리"
   },
   {
     "id": 8303,
     "name": "사파이어 반지",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/054000/054548_hr1.tex&format=png",
-    "category": "장비"
+    "icon": "/i/054000/054548.png",
+    "category": "요리"
   },
   {
     "id": 8297,
     "name": "사파이어 팔찌",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/055000/055703_hr1.tex&format=png",
-    "category": "장비"
+    "icon": "/i/055000/055703.png",
+    "category": "요리"
   },
   {
     "id": 8291,
     "name": "사파이어 목장식",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/054000/054898_hr1.tex&format=png",
-    "category": "장비"
+    "icon": "/i/054000/054898.png",
+    "category": "요리"
   },
   {
     "id": 8285,
     "name": "사파이어 귀걸이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/055000/055299_hr1.tex&format=png",
-    "category": "장비"
-  },
-  {
-    "id": 7874,
-    "name": "천공의 두루마리: 스파이라이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/025000/025934_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 7864,
-    "name": "스파이라이: 노우스",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/031000/031072_hr1.tex&format=png",
-    "category": "장비"
-  },
-  {
-    "id": 7835,
-    "name": "스파이라이: 아니무스",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/031000/031072_hr1.tex&format=png",
-    "category": "장비"
-  },
-  {
-    "id": 7825,
-    "name": "스파이라이: 아트마",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/031000/031072_hr1.tex&format=png",
-    "category": "장비"
-  },
-  {
-    "id": 6258,
-    "name": "스파이라이: 제니스",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/031000/031034_hr1.tex&format=png",
-    "category": "장비"
+    "icon": "/i/055000/055299.png",
+    "category": "요리"
   },
   {
     "id": 5192,
     "name": "사파이어",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/021000/021289_hr1.tex&format=png",
-    "category": "재료"
+    "icon": "/i/021000/021289.png",
+    "category": "요리"
   },
   {
     "id": 5151,
     "name": "사파이어 원석",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/021000/021453_hr1.tex&format=png",
-    "category": "재료"
+    "icon": "/i/021000/021453.png",
+    "category": "요리"
   },
   {
     "id": 4861,
     "name": "파이 반죽",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/025000/025053_hr1.tex&format=png",
-    "category": "소모품"
+    "icon": "/i/025000/025053.png",
+    "category": "요리"
   },
   {
     "id": 4714,
     "name": "토마토 파이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/024000/024156_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/024000/024156.png",
+    "category": "요리"
   },
   {
     "id": 4713,
     "name": "왕관 파이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/024000/024057_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/024000/024057.png",
+    "category": "요리"
   },
   {
     "id": 4711,
     "name": "장어 파이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/024000/024305_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/024000/024305.png",
+    "category": "요리"
   },
   {
     "id": 4710,
     "name": "양치기 파이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/024000/024357_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/024000/024357.png",
+    "category": "요리"
   },
   {
     "id": 4708,
     "name": "토끼 파이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/024000/024354_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/024000/024354.png",
+    "category": "요리"
   },
   {
-    "id": 1746,
-    "name": "스파이라이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/031000/031034_hr1.tex&format=png",
-    "category": "장비"
-  },
-  {
-    "id": 1735,
-    "name": "미완성 스파이라이",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/031000/031035_hr1.tex&format=png",
-    "category": "장비"
-  },
-  {
-    "id": 52604,
-    "name": "브레이크 스트리트 궤짝",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026509_hr1.tex&format=png",
-    "category": "기타"
+    "id": 52605,
+    "name": "우주 정비공 궤짝",
+    "icon": "/i/026000/026509.png",
+    "category": "룩템"
   },
   {
     "id": 52256,
     "name": "염료: 추가 색상 2",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/022000/022804_hr1.tex&format=png",
-    "category": "재료"
+    "icon": "/i/022000/022804.png",
+    "category": "염료"
   },
   {
     "id": 52255,
     "name": "염료: 추가 색상 1",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/022000/022805_hr1.tex&format=png",
-    "category": "재료"
+    "icon": "/i/022000/022805.png",
+    "category": "염료"
   },
   {
     "id": 52254,
     "name": "염료: 기본 색상",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/022000/022811_hr1.tex&format=png",
-    "category": "재료"
+    "icon": "/i/022000/022811.png",
+    "category": "염료"
   },
   {
     "id": 51261,
     "name": "에버킵 궤짝",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/051000/051758_hr1.tex&format=png",
-    "category": "하우징"
-  },
-  {
-    "id": 50891,
-    "name": "허무왕 무기 궤짝[아이템 레벨 785]",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026557_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/051000/051758.png",
+    "category": "룩템"
   },
   {
     "id": 50828,
     "name": "강화 우주복 궤짝",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026509_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/026000/026509.png",
+    "category": "룩템"
   },
   {
     "id": 49848,
     "name": "우주 궤짝 의자",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/052000/052866_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 49747,
-    "name": "그랜드 챔피언 반지 궤짝[아이템 레벨 790]",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026567_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 49746,
-    "name": "그랜드 챔피언 팔찌 궤짝[아이템 레벨 790]",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026566_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 49745,
-    "name": "그랜드 챔피언 목걸이 궤짝[아이템 레벨 790]",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026565_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 49744,
-    "name": "그랜드 챔피언 귀걸이 궤짝[아이템 레벨 790]",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026564_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 49743,
-    "name": "그랜드 챔피언 발 방어구 궤짝[아이템 레벨 790]",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026562_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 49742,
-    "name": "그랜드 챔피언 다리 방어구 궤짝[아이템 레벨 790]",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026561_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 49741,
-    "name": "그랜드 챔피언 손 방어구 궤짝[아이템 레벨 790]",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026560_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 49740,
-    "name": "그랜드 챔피언 몸통 방어구 궤짝[아이템 레벨 790]",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026559_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 49739,
-    "name": "그랜드 챔피언 머리 방어구 궤짝[아이템 레벨 790]",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026558_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 49738,
-    "name": "그랜드 챔피언 무기 궤짝[아이템 레벨 795]",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026557_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 49737,
-    "name": "글라시아 라볼라스 무기 궤짝[아이템 레벨 775]",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026557_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/052000/052866.png",
+    "category": "룩템"
   },
   {
     "id": 49246,
     "name": "주먹포포토 샐러드",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/024000/024164_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/024000/024164.png",
+    "category": "요리"
   },
   {
     "id": 49227,
     "name": "툴라이욜라 염료",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/022000/022648_hr1.tex&format=png",
-    "category": "재료"
-  },
-  {
-    "id": 48750,
-    "name": "시험형 우주 도구 궤짝",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026509_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 48728,
-    "name": "아제마 궤짝",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026509_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 48605,
-    "name": "기지 생활용 버섯 샐러드",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/024000/024207_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 48590,
-    "name": "건축자재용 염료",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/022000/022810_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 48541,
-    "name": "통일 규격 염료",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/022000/022806_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/022000/022648.png",
+    "category": "염료"
   },
   {
     "id": 48228,
     "name": "분광성 염료",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/022000/022612_hr1.tex&format=png",
-    "category": "재료"
-  },
-  {
-    "id": 48227,
-    "name": "염료: 연지색",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/022000/022805_hr1.tex&format=png",
-    "category": "재료"
-  },
-  {
-    "id": 48172,
-    "name": "염료: 금속질 짙은 파랑",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/022000/022813_hr1.tex&format=png",
-    "category": "재료"
-  },
-  {
-    "id": 48171,
-    "name": "염료: 금속질 푸른 녹색",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/022000/022819_hr1.tex&format=png",
-    "category": "재료"
-  },
-  {
-    "id": 48170,
-    "name": "염료: 금속질 홍옥색",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/022000/022814_hr1.tex&format=png",
-    "category": "재료"
-  },
-  {
-    "id": 48169,
-    "name": "염료: 금속질 분홍색",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/022000/022814_hr1.tex&format=png",
-    "category": "재료"
-  },
-  {
-    "id": 48168,
-    "name": "염료: 짙은 하늘색",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/022000/022804_hr1.tex&format=png",
-    "category": "재료"
-  },
-  {
-    "id": 48167,
-    "name": "염료: 제비꽃색",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/022000/022812_hr1.tex&format=png",
-    "category": "재료"
-  },
-  {
-    "id": 48166,
-    "name": "염료: 형광 노란색",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/022000/022806_hr1.tex&format=png",
-    "category": "재료"
-  },
-  {
-    "id": 48165,
-    "name": "염료: 형광 녹색",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/022000/022810_hr1.tex&format=png",
-    "category": "재료"
-  },
-  {
-    "id": 48164,
-    "name": "염료: 밝은 주황색",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/022000/022809_hr1.tex&format=png",
-    "category": "재료"
-  },
-  {
-    "id": 48163,
-    "name": "염료: 형광 분홍색",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/022000/022805_hr1.tex&format=png",
-    "category": "재료"
+    "icon": "/i/022000/022612.png",
+    "category": "염료"
   },
   {
     "id": 47937,
     "name": "우주복 궤짝",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026509_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 47224,
-    "name": "에어 스트리트 궤짝",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026509_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/026000/026509.png",
+    "category": "룩템"
   },
   {
     "id": 47095,
     "name": "우주 조종사 궤짝",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026509_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 47094,
-    "name": "갈슈 무기 궤짝[아이템 레벨 745]",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026557_hr1.tex&format=png",
-    "category": "기타"
-  },
-  {
-    "id": 46981,
-    "name": "죽음의 무기 궤짝[아이템 레벨 755]",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026557_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/026000/026509.png",
+    "category": "룩템"
   },
   {
     "id": 46837,
     "name": "스타일카탈로그: 미스릴 테두리 안대(오른쪽)",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026074_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/026000/026074.png",
+    "category": "재료"
   },
   {
     "id": 46836,
     "name": "스타일카탈로그: 미스릴 테두리 안대(왼쪽)",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026074_hr1.tex&format=png",
-    "category": "기타"
+    "icon": "/i/026000/026074.png",
+    "category": "재료"
   },
   {
-    "id": 46824,
-    "name": "염료 교환 증서",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026182_hr1.tex&format=png",
-    "category": "기타"
+    "id": 45972,
+    "name": "코치닐 염료",
+    "icon": "/i/025000/025011.png",
+    "category": "염료"
   },
   {
-    "id": 46719,
-    "name": "베이비페이스 챔피언 반지 궤짝[아이템 레벨 760]",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026567_hr1.tex&format=png",
-    "category": "기타"
+    "id": 45070,
+    "name": "상상의 무기 궤짝",
+    "icon": "/i/026000/026557.png",
+    "category": "룩템"
   },
   {
-    "id": 46718,
-    "name": "베이비페이스 챔피언 팔찌 궤짝[아이템 레벨 760]",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026566_hr1.tex&format=png",
-    "category": "기타"
+    "id": 44000,
+    "name": "티타늄금 덩어리",
+    "icon": "/i/020000/020821.png",
+    "category": "재료"
   },
   {
-    "id": 46717,
-    "name": "베이비페이스 챔피언 목걸이 궤짝[아이템 레벨 760]",
-    "icon": "https://v2.xivapi.com/api/asset?path=ui/icon/026000/026565_hr1.tex&format=png",
-    "category": "기타"
+    "id": 43995,
+    "name": "티타늄금 광석",
+    "icon": "/i/021000/021212.png",
+    "category": "재료"
+  },
+  {
+    "id": 43262,
+    "name": "티타늄금 정원낫",
+    "icon": "/i/038000/038166.png",
+    "category": "재료"
+  },
+  {
+    "id": 43261,
+    "name": "티타늄금 채굴망치",
+    "icon": "/i/038000/038066.png",
+    "category": "재료"
+  },
+  {
+    "id": 43260,
+    "name": "티타늄금 요리칼",
+    "icon": "/i/035000/035767.png",
+    "category": "재료"
+  },
+  {
+    "id": 43259,
+    "name": "티타늄금 약연",
+    "icon": "/i/035000/035666.png",
+    "category": "재료"
+  },
+  {
+    "id": 43257,
+    "name": "티타늄금 목타",
+    "icon": "/i/035000/035451.png",
+    "category": "재료"
+  },
+  {
+    "id": 43255,
+    "name": "티타늄금 플라이어",
+    "icon": "/i/035000/035266.png",
+    "category": "재료"
+  },
+  {
+    "id": 43254,
+    "name": "티타늄금 줄판",
+    "icon": "/i/035000/035166.png",
+    "category": "재료"
+  },
+  {
+    "id": 43253,
+    "name": "티타늄금 장도리",
+    "icon": "/i/035000/035069.png",
+    "category": "재료"
+  },
+  {
+    "id": 43251,
+    "name": "티타늄금 손도끼",
+    "icon": "/i/038000/038406.png",
+    "category": "재료"
+  },
+  {
+    "id": 43250,
+    "name": "티타늄금 곡괭이",
+    "icon": "/i/038000/038308.png",
+    "category": "재료"
+  },
+  {
+    "id": 43249,
+    "name": "티타늄금 봄 프라이팬",
+    "icon": "/i/039000/039708.png",
+    "category": "재료"
+  },
+  {
+    "id": 43248,
+    "name": "티타늄금 증류기",
+    "icon": "/i/039000/039606.png",
+    "category": "재료"
+  },
+  {
+    "id": 43246,
+    "name": "티타늄금 가죽공예 칼",
+    "icon": "/i/039000/039407.png",
+    "category": "재료"
+  },
+  {
+    "id": 43245,
+    "name": "티타늄금 세공망치",
+    "icon": "/i/039000/039306.png",
+    "category": "재료"
+  },
+  {
+    "id": 43244,
+    "name": "티타늄금 돋을무늬 망치",
+    "icon": "/i/039000/039207.png",
+    "category": "재료"
+  },
+  {
+    "id": 43243,
+    "name": "티타늄금 단조망치",
+    "icon": "/i/039000/039106.png",
+    "category": "재료"
+  },
+  {
+    "id": 43242,
+    "name": "티타늄금 톱",
+    "icon": "/i/039000/039007.png",
+    "category": "재료"
+  },
+  {
+    "id": 42350,
+    "name": "티타늄금 마술사 투구",
+    "icon": "/i/056000/056732.png",
+    "category": "재료"
+  },
+  {
+    "id": 42344,
+    "name": "티타늄금 정찰대 다리보호대",
+    "icon": "/i/049000/049744.png",
+    "category": "재료"
+  },
+  {
+    "id": 42342,
+    "name": "티타늄금 정찰대 가시장갑",
+    "icon": "/i/056000/056246.png",
+    "category": "재료"
+  },
+  {
+    "id": 42341,
+    "name": "티타늄금 정찰대 가시흉갑",
+    "icon": "/i/057000/057123.png",
+    "category": "재료"
+  },
+  {
+    "id": 42332,
+    "name": "티타늄금 타격대 가시장갑",
+    "icon": "/i/056000/056245.png",
+    "category": "재료"
+  },
+  {
+    "id": 42330,
+    "name": "티타늄금 타격대 투구",
+    "icon": "/i/056000/056733.png",
+    "category": "재료"
+  },
+  {
+    "id": 42329,
+    "name": "티타늄금 학살자 다리보호대",
+    "icon": "/i/049000/049743.png",
+    "category": "재료"
+  },
+  {
+    "id": 42327,
+    "name": "티타늄금 학살자 가시장갑",
+    "icon": "/i/056000/056244.png",
+    "category": "재료"
+  },
+  {
+    "id": 42326,
+    "name": "티타늄금 학살자 가시갑옷",
+    "icon": "/i/057000/057122.png",
+    "category": "재료"
+  },
+  {
+    "id": 42324,
+    "name": "티타늄금 수호자 다리보호대",
+    "icon": "/i/049000/049742.png",
+    "category": "재료"
+  },
+  {
+    "id": 42322,
+    "name": "티타늄금 수호자 가시장갑",
+    "icon": "/i/056000/056243.png",
+    "category": "재료"
+  },
+  {
+    "id": 42321,
+    "name": "티타늄금 수호자 가시갑옷",
+    "icon": "/i/057000/057121.png",
+    "category": "재료"
+  },
+  {
+    "id": 42320,
+    "name": "티타늄금 수호자 투구",
+    "icon": "/i/056000/056731.png",
+    "category": "재료"
+  },
+  {
+    "id": 42319,
+    "name": "티타늄금 방패",
+    "icon": "/i/030000/030263.png",
+    "category": "재료"
+  },
+  {
+    "id": 42317,
+    "name": "티타늄금 쌍검치",
+    "icon": "/i/037000/037414.png",
+    "category": "재료"
+  },
+  {
+    "id": 42315,
+    "name": "티타늄금 대낫",
+    "icon": "/i/037000/037265.png",
+    "category": "재료"
+  },
+  {
+    "id": 42314,
+    "name": "티타늄금 전투고리",
+    "icon": "/i/036000/036293.png",
+    "category": "재료"
+  },
+  {
+    "id": 42313,
+    "name": "티타늄금 건블레이드",
+    "icon": "/i/036000/036095.png",
+    "category": "재료"
+  },
+  {
+    "id": 42311,
+    "name": "티타늄금 외날검",
+    "icon": "/i/036000/036551.png",
+    "category": "재료"
+  },
+  {
+    "id": 42309,
+    "name": "티타늄금 권총",
+    "icon": "/i/034000/034497.png",
+    "category": "재료"
+  },
+  {
+    "id": 42308,
+    "name": "티타늄금 그레이트소드",
+    "icon": "/i/034000/034004.png",
+    "category": "재료"
+  },
+  {
+    "id": 42307,
+    "name": "티타늄금 단검",
+    "icon": "/i/033000/033624.png",
+    "category": "재료"
+  },
+  {
+    "id": 42300,
+    "name": "티타늄금 전투도끼",
+    "icon": "/i/031000/031248.png",
+    "category": "재료"
+  },
+  {
+    "id": 42299,
+    "name": "티타늄금 서슬발톱",
+    "icon": "/i/030000/030839.png",
+    "category": "재료"
+  },
+  {
+    "id": 42298,
+    "name": "티타늄금 언월도",
+    "icon": "/i/030000/030674.png",
+    "category": "재료"
+  },
+  {
+    "id": 38750,
+    "name": "모웬 상회 특선 티타늄판",
+    "icon": "/i/020000/020961.png",
+    "category": "재료"
+  },
+  {
+    "id": 38267,
+    "name": "피엔놀로 토마토 샐러드",
+    "icon": "/i/024000/024166.png",
+    "category": "요리"
+  },
+  {
+    "id": 36120,
+    "name": "커얼 주술구 궤짝",
+    "icon": "/i/026000/026509.png",
+    "category": "룩템"
+  },
+  {
+    "id": 36119,
+    "name": "커얼 비키니 궤짝",
+    "icon": "/i/026000/026509.png",
+    "category": "룩템"
+  },
+  {
+    "id": 36075,
+    "name": "가리비 샐러드",
+    "icon": "/i/024000/024207.png",
+    "category": "요리"
+  },
+  {
+    "id": 36064,
+    "name": "쉬콘 샐러드",
+    "icon": "/i/024000/024151.png",
+    "category": "요리"
+  },
+  {
+    "id": 36053,
+    "name": "대왕 숭어알 샐러드",
+    "icon": "/i/024000/024258.png",
+    "category": "요리"
+  },
+  {
+    "id": 36038,
+    "name": "아므라 샐러드",
+    "icon": "/i/024000/024166.png",
+    "category": "요리"
+  },
+  {
+    "id": 35785,
+    "name": "티타늄동 진자",
+    "icon": "/i/037000/037024.png",
+    "category": "재료"
+  },
+  {
+    "id": 35767,
+    "name": "티타늄동 자그날",
+    "icon": "/i/037000/037226.png",
+    "category": "재료"
+  },
+  {
+    "id": 33838,
+    "name": "평화주창자 궤짝",
+    "icon": "/i/026000/026509.png",
+    "category": "룩템"
+  },
+  {
+    "id": 33144,
+    "name": "캐주얼 재킷 궤짝",
+    "icon": "/i/026000/026509.png",
+    "category": "룩템"
+  },
+  {
+    "id": 33143,
+    "name": "캐시미어 판초 궤짝",
+    "icon": "/i/026000/026509.png",
+    "category": "룩템"
+  },
+  {
+    "id": 32066,
+    "name": "미스릴상자복",
+    "icon": "/i/028000/028020.png",
+    "category": "재료"
+  },
+  {
+    "id": 31905,
+    "name": "사과 포포토 샐러드",
+    "icon": "/i/024000/024164.png",
+    "category": "요리"
+  },
+  {
+    "id": 31903,
+    "name": "파인애플 샐러드",
+    "icon": "/i/024000/024151.png",
+    "category": "요리"
+  },
+  {
+    "id": 31630,
+    "name": "흐레스벨그 궤짝",
+    "icon": "/i/026000/026509.png",
+    "category": "룩템"
+  },
+  {
+    "id": 31239,
+    "name": "제3차 부흥용 중급 티타늄 광석[검사필]",
+    "icon": "/i/023000/023898.png",
+    "category": "재료"
+  },
+  {
+    "id": 30271,
+    "name": "쿠뽀쿠뽀 궤짝",
+    "icon": "/i/026000/026509.png",
+    "category": "룩템"
+  },
+  {
+    "id": 29858,
+    "name": "제2차 부흥용 상급 미스릴 모래[검사필]",
+    "icon": "/i/023000/023808.png",
+    "category": "재료"
+  },
+  {
+    "id": 29755,
+    "name": "미스릴 군주",
+    "icon": "/i/029000/029078.png",
+    "category": "재료"
+  },
+  {
+    "id": 28978,
+    "name": "데빌드 에그 샐러드 보울",
+    "icon": "/i/053000/053352.png",
+    "category": "요리"
+  },
+  {
+    "id": 27886,
+    "name": "요술양상추 샐러드",
+    "icon": "/i/024000/024154.png",
+    "category": "요리"
+  },
+  {
+    "id": 27885,
+    "name": "포포토 샐러드",
+    "icon": "/i/024000/024164.png",
+    "category": "요리"
+  },
+  {
+    "id": 27864,
+    "name": "피토마토 샐러드",
+    "icon": "/i/024000/024151.png",
+    "category": "요리"
+  },
+  {
+    "id": 27858,
+    "name": "누에콩 샐러드",
+    "icon": "/i/024000/024207.png",
+    "category": "요리"
   }
 ]

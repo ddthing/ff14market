@@ -1,6 +1,14 @@
+import { Seo } from '../components/seo/Seo';
+
 export const Privacy = () => {
   return (
-    <div className="max-w-3xl mx-auto py-12 px-2 sm:px-4 animate-fade-in">
+    <>
+      <Seo
+        title="개인정보처리방침 | FF14 장터탐지기"
+        description="FF14 장터탐지기의 로컬 저장소, 쿠키, 외부 API와 광고 서비스 관련 개인정보 처리 기준을 안내합니다."
+        path="/privacy"
+      />
+      <div className="max-w-3xl mx-auto py-12 px-2 sm:px-4 animate-fade-in">
       <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">개인정보처리방침</h1>
       <p className="text-gray-500 dark:text-[#9ea4aa] font-medium mb-12">마지막 업데이트: 2026년 5월 23일</p>
       
@@ -27,8 +35,16 @@ export const Privacy = () => {
         <section className="space-y-4">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">쿠키(Cookies)의 사용</h2>
           <p>
-            본 서비스는 웹사이트의 정상적인 구동과 사용자 경험(UX) 최적화, 그리고 페이지 렌더링 성능 향상을 목적으로만 브라우저 필수 쿠키를 사용할 수 있습니다.
-            수집되는 데이터는 통계 및 시스템 안정성을 위해서만 활용되며, 이를 통해 특정 개인을 식별하거나 추적하는 용도로는 절대 사용되지 않습니다.
+            본 서비스는 웹사이트의 정상적인 구동과 사용자 경험(UX) 최적화를 위해 브라우저 저장소 또는 필수 쿠키를 사용할 수 있습니다. 즐겨찾기와 선택 서버는 브라우저 로컬 스토리지에 저장됩니다.
+            광고 또는 방문 통계 기능이 실제로 도입되는 경우에는 해당 기능에 필요한 쿠키·유사 기술과 처리 목적을 이 방침에 추가로 공개합니다.
+          </p>
+        </section>
+
+        <section className="space-y-4">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">광고 서비스 안내</h2>
+          <p>
+            Google AdSense 광고가 게재되는 경우 Google 및 광고 파트너는 광고 제공, 빈도 제한, 측정과 보안을 위해 쿠키·광고 식별자·접속 정보 등을 처리할 수 있습니다. 개인 맞춤 광고의 사용 여부는 Google의 광고 설정에서 관리할 수 있으며, 지역에 따라 광고 표시 전에 필요한 동의 절차를 제공합니다.
+            자세한 내용은 <a className="text-blue-600 underline dark:text-blue-400" href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noreferrer">Google 파트너 사이트 정책</a>과 <a className="text-blue-600 underline dark:text-blue-400" href="https://myadcenter.google.com/" target="_blank" rel="noreferrer">Google 광고 설정</a>을 확인해 주세요.
           </p>
         </section>
 
@@ -40,6 +56,7 @@ export const Privacy = () => {
           </p>
         </section>
       </div>
-    </div>
+      </div>
+    </>
   );
 };

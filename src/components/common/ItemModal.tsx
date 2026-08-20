@@ -8,6 +8,7 @@ import { formatFreshness } from '../../utils/time';
 import { PriceChart } from './PriceChart';
 import { useServerStore } from '../../store/useServerStore';
 import { getIconUrl } from '../../utils/icon';
+import { DataErrorState } from '../ui/DataErrorState';
 
 interface Item {
   id: number;
@@ -31,10 +32,11 @@ export const ItemModal = ({ item, onClose }: { item: Item; onClose: () => void }
   const queryClient = useQueryClient();
   const { server } = useServerStore();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['searchItem', 'Korea', item.id],
-    queryFn: () => fetchKoreaDCData(item.id),
+    queryFn: ({ signal }) => fetchKoreaDCData(item.id, signal),
     staleTime: 300000, // 5 minutes
+    retry: 1,
   });
 
   // 모달에서 받은 최신 데이터를 리스트 벌크 캐시에 역방향 동기화
@@ -216,7 +218,9 @@ export const ItemModal = ({ item, onClose }: { item: Item; onClose: () => void }
               </div>
             )}
             
-            {isLoading ? (
+            {isError ? (
+              <DataErrorState compact onRetry={() => void refetch()} />
+            ) : isLoading ? (
               <div className="h-[90px] w-full bg-gray-200 dark:bg-gray-800 rounded-lg animate-pulse mt-2" />
             ) : (
               <PriceChart history={itemData?.recentHistory || []} />

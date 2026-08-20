@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Heart } from 'lucide-react';
 import { useFavoriteStore } from '../../store/useFavoriteStore';
 import { useToastStore } from '../../store/useToastStore';
@@ -30,25 +29,20 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ itemId }) => {
   };
 
   return (
-    <motion.div
-      whileTap={{ scale: 0.8 }}
-      animate={isFavorite ? { scale: [1, 1.25, 1] } : { scale: 1 }}
-      transition={{ 
-        type: "spring", 
-        stiffness: 500, 
-        damping: 15,
-        duration: 0.2
-      }}
+    <button
+      type="button"
       onClick={handleToggle}
-      className="p-1.5 -ml-1.5 flex-shrink-0 cursor-pointer"
+      className="-ml-1.5 inline-flex min-h-11 min-w-11 flex-shrink-0 items-center justify-center rounded-lg p-1.5 transition-[background-color,transform] hover:bg-[var(--app-surface-subtle)] active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/60"
+      aria-label={isFavorite ? '관심 아이템에서 제거' : '관심 아이템에 추가'}
+      aria-pressed={isFavorite}
     >
       <Heart 
-        className={`w-[18px] h-[18px] transition-colors duration-200 ${
+        className={`h-[18px] w-[18px] transition-colors duration-200 ${
           isFavorite 
             ? 'text-red-500 fill-red-500' 
-            : 'text-gray-300 dark:text-gray-600 hover:text-red-400'
+            : 'text-[var(--app-hairline)] hover:text-red-400'
         }`} 
       />
-    </motion.div>
+    </button>
   );
 };

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /favorites
+Sitemap: https://ff14market.pages.dev/sitemap.xml

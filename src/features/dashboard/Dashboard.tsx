@@ -2,17 +2,18 @@ import { useNavigate } from 'react-router-dom';
 import type { EnrichedItem } from '../../hooks/useItemData';
 import { useItemData } from '../../hooks/useItemData';
 import { SkeletonRow } from '../../components/ui/SkeletonRow';
-import { AnimatePresence } from 'framer-motion';
 import { useFavoriteStore } from '../../store/useFavoriteStore';
 import { useRecentStore } from '../../store/useRecentStore';
 import { HeroSearch } from '../../components/ui/HeroSearch';
 import { ItemListItem } from '../../components/ui/ItemListItem';
+import { DataErrorState } from '../../components/ui/DataErrorState';
+import { Seo } from '../../components/seo/Seo';
 // @ts-expect-error react-twemoji lacks types
 import _Twemoji from 'react-twemoji';
 const Twemoji = (_Twemoji as { default?: React.ElementType }).default || _Twemoji;
 
 export const Dashboard = () => {
-  const { enrichedItems, isLoading } = useItemData();
+  const { enrichedItems, isLoading, isError, refetch } = useItemData();
   const navigate = useNavigate();
 
   const { favoriteIds } = useFavoriteStore();
@@ -26,16 +27,24 @@ export const Dashboard = () => {
     .filter((item): item is EnrichedItem => item !== undefined);
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <>
+      <Seo
+        title="FF14 장터탐지기 | 한국 서버 시세 대시보드"
+        description="파이널판타지14 한국 데이터센터 장터의 최저 매물가, 판매량, 가격 흐름을 한눈에 확인하세요."
+        path="/"
+      />
+      <div className="space-y-6 animate-fade-in">
       <HeroSearch />
 
       <div className="flex flex-col space-y-6">
-        {isLoading ? (
-          <div className="bg-white dark:bg-[#26282b] rounded-xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] dark:shadow-none border border-transparent dark:border-gray-800 overflow-hidden relative">
-            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/70 dark:bg-[#26282b]/70 backdrop-blur-sm rounded-xl">
-              <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+        {isError ? (
+          <DataErrorState onRetry={() => void refetch()} />
+        ) : isLoading ? (
+          <div className="relative overflow-hidden rounded-xl border border-[var(--app-hairline)] bg-[var(--app-surface)] shadow-[0_2px_10px_rgba(0,0,0,0.02)] dark:shadow-none">
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-xl bg-[var(--app-surface)]/70 backdrop-blur-sm">
+              <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-[var(--app-hairline)] border-t-[var(--app-accent)]"></div>
               <Twemoji options={{ folder: 'svg', ext: '.svg' }}>
-                <p className="text-[15px] font-bold text-gray-800 dark:text-gray-200 mb-1">집사들이 장터 게시판에서 시세를 확인하고 있습니다... 📦</p>
+                <p className="mb-1 text-[15px] font-bold text-[var(--app-ink)]">집사들이 장터 게시판에서 시세를 확인하고 있습니다... 📦</p>
               </Twemoji>
             </div>
             <div className="opacity-40">
@@ -46,12 +55,12 @@ export const Dashboard = () => {
           <>
             {/* Watchlist Section */}
             <section>
-              <h2 className="text-[16px] sm:text-[18px] font-bold tracking-tight mb-3 flex items-center text-gray-900 dark:text-white px-1">
+              <h2 className="mb-3 flex items-center px-1 text-[16px] font-bold tracking-tight text-[var(--app-ink)] sm:text-[18px]">
                 <Twemoji options={{ folder: 'svg', ext: '.svg' }} className="mr-2 inline-flex">❤️</Twemoji> 내 관심 아이템
               </h2>
               {favoriteListItems.length > 0 ? (
-                <div className="bg-white dark:bg-[#26282b] rounded-xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] dark:shadow-none border border-transparent dark:border-gray-800 overflow-hidden">
-                  <AnimatePresence mode="popLayout">
+                <div className="overflow-hidden rounded-xl border border-[var(--app-hairline)] bg-[var(--app-surface)] shadow-[0_2px_10px_rgba(0,0,0,0.02)] dark:shadow-none">
+                  <div>
                     {favoriteListItems.map((item) => (
                       <ItemListItem 
                         key={`fav-${item.id}`} 
@@ -59,11 +68,11 @@ export const Dashboard = () => {
                         navigate={navigate} 
                       />
                     ))}
-                  </AnimatePresence>
+                  </div>
                 </div>
               ) : (
-                <div className="py-3 px-4 bg-gray-50 dark:bg-[#1a1b1e] rounded-xl border border-dashed border-gray-200 dark:border-gray-800 flex items-center">
-                  <span className="text-[14px] text-gray-500 dark:text-[#9ea4aa] font-medium">
+                <div className="flex items-center rounded-xl border border-dashed border-[var(--app-hairline)] bg-[var(--app-surface-subtle)] px-4 py-3">
+                  <span className="text-[14px] font-medium text-[var(--app-ink-muted)]">
                     <Twemoji options={{ folder: 'svg', ext: '.svg' }} className="inline-flex mr-1.5">💡</Twemoji> 
                     자주 찾는 레이드 소모품을 찜해두세요.
                   </span>
@@ -74,11 +83,11 @@ export const Dashboard = () => {
             {/* Recently Viewed Section (Rendered only if data exists) */}
             {recentListItems.length > 0 && (
               <section>
-                <h2 className="text-[16px] sm:text-[18px] font-bold tracking-tight mb-3 flex items-center text-gray-900 dark:text-white px-1">
+                <h2 className="mb-3 flex items-center px-1 text-[16px] font-bold tracking-tight text-[var(--app-ink)] sm:text-[18px]">
                   <Twemoji options={{ folder: 'svg', ext: '.svg' }} className="mr-2 inline-flex">🕒</Twemoji> 최근 본 아이템
                 </h2>
-                <div className="bg-white dark:bg-[#26282b] rounded-xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] dark:shadow-none border border-transparent dark:border-gray-800 overflow-hidden">
-                  <AnimatePresence mode="popLayout">
+                <div className="overflow-hidden rounded-xl border border-[var(--app-hairline)] bg-[var(--app-surface)] shadow-[0_2px_10px_rgba(0,0,0,0.02)] dark:shadow-none">
+                  <div>
                     {recentListItems.map((item) => (
                       <ItemListItem 
                         key={`recent-${item.id}`} 
@@ -86,13 +95,14 @@ export const Dashboard = () => {
                         navigate={navigate} 
                       />
                     ))}
-                  </AnimatePresence>
+                  </div>
                 </div>
               </section>
             )}
           </>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 };

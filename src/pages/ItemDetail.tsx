@@ -2,21 +2,43 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Share2, ArrowLeft } from 'lucide-react';
-import itemsData from '../data/items.json';
+import { loadItemCatalog, type ItemCatalogEntry } from '../data/loadItemCatalog';
 import { fetchKoreaDCData } from '../api/universalis';
+import { computeTrueMinPrice } from '../hooks/useItemData';
 import { PriceChart } from '../components/common/PriceChart';
 import { getIconUrl } from '../utils/icon';
 import { useRecentStore } from '../store/useRecentStore';
 import { FavoriteButton } from '../components/ui/FavoriteButton';
+import { DataErrorState } from '../components/ui/DataErrorState';
+import { Seo } from '../components/seo/Seo';
+import { formatSaleVelocity } from '../utils/marketMetrics';
 
 export const ItemDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isCopied, setIsCopied] = useState(false);
+  const [itemCatalog, setItemCatalog] = useState<ItemCatalogEntry[] | null>(null);
+  const [hasCatalogError, setHasCatalogError] = useState(false);
   const addRecentId = useRecentStore((state) => state.addRecentId);
 
   const itemId = id ? parseInt(id) : 0;
-  const item = itemsData.find(i => i.id === itemId);
+
+  useEffect(() => {
+    let isMounted = true;
+    void loadItemCatalog()
+      .then((catalog) => {
+        if (isMounted) setItemCatalog(catalog);
+      })
+      .catch(() => {
+        if (isMounted) setHasCatalogError(true);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const item = itemCatalog?.find((catalogItem) => catalogItem.id === itemId);
 
   useEffect(() => {
     if (itemId) {
@@ -24,29 +46,60 @@ export const ItemDetail = () => {
     }
   }, [itemId, addRecentId]);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['searchItem', 'Korea', itemId],
-    queryFn: () => fetchKoreaDCData(itemId),
-    enabled: !!itemId,
+    queryFn: ({ signal }) => fetchKoreaDCData(itemId, signal),
+    enabled: !!itemId && !!item,
     staleTime: 60000,
+    retry: 1,
   });
+
+  if (!itemCatalog) {
+    return (
+      <>
+        <Seo
+          title="아이템 시세 조회 중 | FF14 장터탐지기"
+          description="파이널판타지14 한국 데이터센터 아이템 시세를 불러오는 중입니다."
+          path={`/item/${itemId}`}
+          noIndex
+        />
+        <div className="mx-auto flex max-w-md items-center justify-center py-20">
+          {hasCatalogError ? (
+            <DataErrorState onRetry={() => window.location.reload()} />
+          ) : (
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--app-hairline)] border-t-[var(--app-accent)]" aria-label="아이템 정보 불러오는 중" />
+          )}
+        </div>
+      </>
+    );
+  }
 
   if (!item) {
     return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">아이템을 찾을 수 없습니다</h2>
-        <button 
-          onClick={() => navigate('/')}
-          className="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          홈으로 돌아가기
-        </button>
-      </div>
+      <>
+        <Seo
+          title="아이템을 찾을 수 없습니다 | FF14 장터탐지기"
+          description="요청한 아이템을 FF14 장터탐지기 카탈로그에서 찾을 수 없습니다."
+          path={`/item/${itemId}`}
+          noIndex
+        />
+        <div className="flex flex-col items-center justify-center py-20">
+          <h2 className="mb-4 text-2xl font-bold text-[var(--app-ink)]">아이템을 찾을 수 없습니다</h2>
+          <button 
+            onClick={() => navigate('/')}
+            className="rounded-lg bg-[var(--app-accent)] px-6 py-2 font-bold text-[var(--app-accent-foreground)] transition-colors hover:bg-[var(--app-accent-hover)]"
+          >
+            홈으로 돌아가기
+          </button>
+        </div>
+      </>
     );
   }
 
   const itemData = data;
-  const globalMinPrice = itemData?.minPrice || 0;
+  const globalMinPrice = itemData
+    ? computeTrueMinPrice(itemData.minPrice ?? 0, itemData.minPriceNQ ?? 0, itemData.minPriceHQ ?? 0)
+    : 0;
   const netPrice = Math.floor(globalMinPrice * 0.95);
   
   const serverPrices = ['초코보', '모그리', '카벙클', '톤베리', '펜리르'].map(serverName => {
@@ -66,24 +119,30 @@ export const ItemDetail = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto py-8 px-2 sm:px-4 animate-fade-in">
+    <>
+      <Seo
+        title={`${item.name} 시세 | FF14 장터탐지기`}
+        description={`${item.name}의 한국 데이터센터 최저 매물가, 최근 판매량, 가격 흐름을 확인하세요.`}
+        path={`/item/${item.id}`}
+      />
+      <div className="max-w-md mx-auto py-8 px-2 sm:px-4 animate-fade-in">
       <button 
         onClick={() => navigate(-1)}
-        className="flex items-center space-x-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 mb-6 font-medium transition-colors"
+        className="mb-6 flex items-center space-x-2 font-medium text-[var(--app-ink-muted)] transition-colors hover:text-[var(--app-ink)]"
       >
         <ArrowLeft className="w-5 h-5" />
         <span>뒤로 가기</span>
       </button>
 
-      <div className="relative w-full bg-white dark:bg-[#26282b] rounded-xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-800">
+      <div className="relative w-full rounded-xl border border-[var(--app-hairline)] bg-[var(--app-surface)] p-6 shadow-sm sm:p-8">
         <div className="absolute top-6 right-6 flex items-center space-x-3">
           <FavoriteButton itemId={itemId} />
           <button 
             onClick={handleShare} 
-            className="flex items-center space-x-1 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-gray-500 dark:text-[#9ea4aa] hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            className="flex items-center space-x-1 rounded-lg bg-[var(--app-surface-subtle)] px-3 py-2 text-[var(--app-ink-muted)] transition-colors hover:bg-[var(--app-hairline)] hover:text-[var(--app-ink)]"
           >
             {isCopied ? (
-              <span className="text-[13px] font-bold text-blue-600 dark:text-blue-400">복사됨!</span>
+              <span className="text-[13px] font-bold text-[var(--app-accent)]">복사됨!</span>
             ) : (
               <>
                 <Share2 className="w-4 h-4" />
@@ -98,30 +157,30 @@ export const ItemDetail = () => {
             src={getIconUrl(item.icon)} 
             alt={item.name} 
             loading="lazy"
-            className="w-[100px] h-[100px] rounded-full mb-5 bg-gray-50 dark:bg-[#101112] p-[3px] shadow-sm" 
+            className="mb-5 h-[100px] w-[100px] rounded-full bg-[var(--app-surface-subtle)] p-[3px] shadow-sm" 
           />
-          <h2 className="text-[24px] font-bold text-gray-900 dark:text-white text-center leading-tight">
+          <h2 className="text-center text-[24px] font-bold leading-tight text-[var(--app-ink)]">
             {item.name}
           </h2>
-          <p className="text-gray-500 dark:text-[#9ea4aa] mt-2 text-[15px] font-medium">
+          <p className="mt-2 text-[15px] font-medium text-[var(--app-ink-muted)]">
             {isLoading ? '한국 DC 통합 시세 조회 중...' : `한국 DC 실시간 시세`}
           </p>
         </div>
         
-        <div className="bg-gray-50 dark:bg-[#101112] rounded-xl p-5 space-y-5">
+        <div className="space-y-5 rounded-xl bg-[var(--app-surface-subtle)] p-5">
           {/* Chart Section */}
           <div className="w-full">
             <div className="flex justify-between items-end mb-2">
-              <span className="text-[14px] font-bold text-gray-700 dark:text-gray-300">한국 전체 최저가</span>
+              <span className="text-[14px] font-bold text-[var(--app-ink)]">한국 전체 최저가</span>
               {isLoading ? (
-                <div className="w-24 h-6 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+                <div className="h-6 w-24 animate-pulse rounded bg-[var(--app-hairline)]" />
               ) : (
                 <div className="text-right">
-                  <div className="text-[20px] font-bold text-gray-900 dark:text-white leading-none">
+                  <div className="text-[20px] font-bold leading-none text-[var(--app-ink)]">
                     {globalMinPrice > 0 ? `${globalMinPrice.toLocaleString()} G` : '매물 없음'}
                   </div>
                   {globalMinPrice > 0 && (
-                    <div className="text-[12px] font-medium text-blue-500 dark:text-blue-400 mt-1">
+                    <div className="mt-1 text-[12px] font-medium text-blue-600 dark:text-blue-400">
                       (수수료 5% 제외: {netPrice.toLocaleString()} G)
                     </div>
                   )}
@@ -131,17 +190,19 @@ export const ItemDetail = () => {
             
             {/* Daily Sales Announcement */}
             {!isLoading && itemData?.regularSaleVelocity !== undefined && (
-              <div className="w-full bg-blue-50/50 dark:bg-blue-900/10 rounded-lg py-2 px-3 mb-3 border border-blue-100 dark:border-blue-800/30 flex items-center justify-between">
-                <span className="text-[13px] font-medium text-blue-600 dark:text-blue-400 flex items-center">
-                  {Math.round(itemData.regularSaleVelocity) >= 50 ? '🔥 ' : ''}오늘 하루 동안 총 {Math.round(itemData.regularSaleVelocity).toLocaleString()}개의 매물이 거래되었습니다.
+              <div className="mb-3 flex w-full items-center justify-between rounded-lg border border-[var(--app-accent)]/20 bg-[var(--app-surface)] px-3 py-2">
+                <span className="flex items-center text-[13px] font-medium text-[var(--app-accent)]">
+                  {itemData.regularSaleVelocity >= 50 ? '🔥 ' : ''}최근 판매속도 기준 하루 평균 {formatSaleVelocity(itemData.regularSaleVelocity)}건이 판매되었습니다.
                 </span>
               </div>
             )}
             
-            {isLoading ? (
-              <div className="h-[200px] w-full mt-3 flex items-end space-x-2">
+            {isError ? (
+              <DataErrorState compact onRetry={() => void refetch()} />
+            ) : isLoading ? (
+              <div className="mt-3 flex h-[200px] w-full items-end space-x-2">
                 {[40, 70, 45, 90, 60, 30, 80, 50, 100, 60, 85, 40].map((h, i) => (
-                  <div key={i} className="flex-1 bg-gray-200 dark:bg-gray-800 rounded-t-sm animate-pulse" style={{ height: `${h}%` }} />
+                  <div key={i} className="flex-1 animate-pulse rounded-t-sm bg-[var(--app-hairline)]" style={{ height: `${h}%` }} />
                 ))}
               </div>
             ) : (
@@ -150,29 +211,29 @@ export const ItemDetail = () => {
           </div>
 
           {/* DC Comparison Section */}
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-800/60">
-            <span className="text-[13px] font-bold text-gray-500 dark:text-[#9ea4aa] mb-3 block">서버별 최저가 비교</span>
+          <div className="border-t border-[var(--app-hairline)] pt-4">
+            <span className="mb-3 block text-[13px] font-bold text-[var(--app-ink-muted)]">서버별 최저가 비교</span>
             <div className="space-y-2">
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="w-full h-8 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+                  <div key={i} className="h-8 w-full animate-pulse rounded bg-[var(--app-hairline)]" />
                 ))
               ) : (
                 serverPrices.map(s => {
                   const isLowest = s.minPrice > 0 && s.minPrice === absoluteMin;
                   return (
-                    <div key={s.serverName} className={`flex justify-between items-center p-2 rounded-lg transition-colors ${isLowest ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-gray-100 dark:hover:bg-gray-800/50'}`}>
+                    <div key={s.serverName} className={`flex items-center justify-between rounded-lg p-2 transition-colors ${isLowest ? 'bg-[var(--app-surface)]' : 'hover:bg-[var(--app-surface)]'}`}>
                       <div className="flex items-center space-x-2">
-                        <span className={`text-[14px] font-bold ${isLowest ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}>
+                        <span className={`text-[14px] font-bold ${isLowest ? 'text-[var(--app-accent)]' : 'text-[var(--app-ink)]'}`}>
                           {s.serverName}
                         </span>
                         {isLowest && (
-                          <span className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-800 text-blue-600 dark:text-blue-300 text-[10px] font-bold rounded-md">
+                          <span className="rounded-md bg-[var(--app-surface-subtle)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--app-accent)]">
                             최저가
                           </span>
                         )}
                       </div>
-                      <span className={`text-[14px] font-medium ${isLowest ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-gray-900 dark:text-white'}`}>
+                      <span className={`text-[14px] font-medium ${isLowest ? 'font-bold text-[var(--app-accent)]' : 'text-[var(--app-ink)]'}`}>
                         {s.minPrice > 0 ? `${s.minPrice.toLocaleString()} G` : '-'}
                       </span>
                     </div>
@@ -185,11 +246,12 @@ export const ItemDetail = () => {
         
         <button 
           onClick={() => navigate('/')}
-          className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-[16px] rounded-xl transition-colors text-[17px]"
+          className="mt-6 w-full rounded-xl bg-[var(--app-accent)] py-[16px] text-[17px] font-bold text-[var(--app-accent-foreground)] transition-colors hover:bg-[var(--app-accent-hover)]"
         >
           장터 둘러보기
         </button>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
