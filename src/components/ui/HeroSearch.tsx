@@ -1,12 +1,9 @@
 import React, { memo, useState, useRef, useEffect, useId } from 'react';
-import { Search } from 'lucide-react';
+import { BarChart3, Flame, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { fetchItemSearch, type ItemCatalogEntry } from '../../api/itemCatalog';
 import { getIconUrl } from '../../utils/icon';
 import type { EnrichedItem } from '../../hooks/useItemData';
-// @ts-expect-error react-twemoji lacks types
-import _Twemoji from 'react-twemoji';
-const Twemoji = (_Twemoji as { default?: React.ElementType }).default || _Twemoji;
 
 type HeroSearchProps = {
   recommendedItems: ReadonlyArray<Pick<EnrichedItem, 'id' | 'name'>>;
@@ -128,7 +125,7 @@ export const HeroSearch = memo(({ recommendedItems }: HeroSearchProps) => {
               }}
               className="flex min-h-11 flex-shrink-0 items-center space-x-1 rounded-md bg-[var(--app-surface-subtle)] px-3 py-1.5 text-[13px] font-medium text-[var(--app-ink-muted)] transition-colors hover:bg-[var(--app-hairline)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/50"
             >
-              <Twemoji options={{ folder: 'svg', ext: '.svg' }} className="inline-flex w-[14px] h-[14px]">🔥</Twemoji>
+              <Flame className="h-3.5 w-3.5 text-[var(--app-accent)]" aria-hidden="true" />
               <span>{item.name}</span>
             </button>
           ))}
@@ -138,7 +135,7 @@ export const HeroSearch = memo(({ recommendedItems }: HeroSearchProps) => {
             onClick={() => navigate('/hot-issues')}
             className="ml-1 flex min-h-11 flex-shrink-0 items-center space-x-1 rounded-md border border-[var(--app-accent)]/30 bg-[var(--app-surface-subtle)] px-3 py-1.5 text-[13px] font-bold text-[var(--app-accent)] transition-colors hover:bg-[var(--app-hairline)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/50"
           >
-            <Twemoji options={{ folder: 'svg', ext: '.svg' }} className="inline-flex w-[14px] h-[14px]">📊</Twemoji>
+            <BarChart3 className="h-3.5 w-3.5" aria-hidden="true" />
             <span>랭킹 더보기</span>
           </button>
         </div>

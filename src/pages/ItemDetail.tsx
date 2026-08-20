@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Share2, ArrowLeft } from 'lucide-react';
+import { Flame, Share2, ArrowLeft } from 'lucide-react';
 import { fetchItemMetadata } from '../api/itemCatalog';
 import { fetchKoreaDCData } from '../api/universalis';
 import { computeTrueMinPrice } from '../hooks/useItemData';
@@ -194,7 +194,8 @@ export const ItemDetail = () => {
             {!isLoading && itemData?.regularSaleVelocity !== undefined && (
               <div className="mb-3 flex w-full items-center justify-between rounded-lg border border-[var(--app-accent)]/20 bg-[var(--app-surface)] px-3 py-2">
                 <span className="flex items-center text-[13px] font-medium text-[var(--app-accent)]">
-                  {itemData.regularSaleVelocity >= 50 ? '🔥 ' : ''}최근 판매속도 기준 하루 평균 {formatSaleVelocity(itemData.regularSaleVelocity)}건이 판매되었습니다.
+                  {itemData.regularSaleVelocity >= 50 && <Flame className="mr-1.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
+                  최근 판매속도 기준 하루 평균 {formatSaleVelocity(itemData.regularSaleVelocity)}건이 판매되었습니다.
                 </span>
               </div>
             )}

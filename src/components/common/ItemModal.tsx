@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Share2, X, RefreshCw, HelpCircle } from 'lucide-react';
+import { Flame, Share2, X, RefreshCw, HelpCircle } from 'lucide-react';
 import { fetchKoreaDCData } from '../../api/universalis';
 import { getBulkQueryKey, computeTrueMinPrice } from '../../hooks/useItemData';
 import { formatFreshness } from '../../utils/time';
@@ -214,7 +214,8 @@ export const ItemModal = ({ item, onClose }: { item: Item; onClose: () => void }
             {!isLoading && itemData?.regularSaleVelocity !== undefined && (
               <div className="w-full bg-blue-50/50 dark:bg-blue-900/10 rounded-lg py-2 px-3 mb-3 border border-blue-100 dark:border-blue-800/30 flex items-center justify-between">
                 <span className="text-[12px] font-medium text-blue-600 dark:text-blue-400 flex items-center">
-                  {Math.round(itemData.regularSaleVelocity) >= 50 ? '🔥 ' : ''}오늘 하루 동안 총 {Math.round(itemData.regularSaleVelocity).toLocaleString()}개의 매물이 거래되었습니다.
+                  {Math.round(itemData.regularSaleVelocity) >= 50 && <Flame className="mr-1.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
+                  오늘 하루 동안 총 {Math.round(itemData.regularSaleVelocity).toLocaleString()}개의 매물이 거래되었습니다.
                 </span>
               </div>
             )}

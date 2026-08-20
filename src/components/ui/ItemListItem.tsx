@@ -1,15 +1,13 @@
 import { memo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
+import { Flame } from 'lucide-react';
 import type { EnrichedItem } from '../../hooks/useItemData';
 import { fetchKoreaDCData } from '../../api/universalis';
 import { FavoriteButton } from './FavoriteButton';
 import { getIconUrl } from '../../utils/icon';
 import { formatMarketPriceGap, formatSaleVelocity } from '../../utils/marketMetrics';
 import { formatFreshness } from '../../utils/time';
-// @ts-expect-error react-twemoji lacks types
-import _Twemoji from 'react-twemoji';
-const Twemoji = (_Twemoji as { default?: React.ElementType }).default || _Twemoji;
 
 type SignalMetric = {
   label: string;
@@ -107,7 +105,7 @@ export const ItemListItem = memo(({ item, signal }: {
                 <span className="shrink-0">{item.category}</span>
                 <span className="h-[3px] w-[3px] shrink-0 rounded-full bg-[var(--app-hairline)]"></span>
                 <span className="inline-flex min-w-0 items-center truncate text-xs text-[var(--app-ink-muted)]">
-                  최근 판매속도 {formatSaleVelocity(item.volume)}건/일 {item.volume >= 50 && <Twemoji options={{ folder: 'svg', ext: '.svg' }} className="ml-1 inline-flex">🔥</Twemoji>}
+                  최근 판매속도 {formatSaleVelocity(item.volume)}건/일 {item.volume >= 50 && <Flame className="ml-1 h-3.5 w-3.5 shrink-0 text-[var(--app-accent)]" aria-hidden="true" />}
                 </span>
               </span>
             </div>

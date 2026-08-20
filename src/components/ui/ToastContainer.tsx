@@ -1,8 +1,5 @@
-import React from 'react';
+import { Heart } from 'lucide-react';
 import { useToastStore } from '../../store/useToastStore';
-// @ts-expect-error react-twemoji lacks types
-import _Twemoji from 'react-twemoji';
-const Twemoji = (_Twemoji as { default?: React.ElementType }).default || _Twemoji;
 
 export const ToastContainer = () => {
   const { toasts } = useToastStore();
@@ -16,7 +13,7 @@ export const ToastContainer = () => {
             className="pointer-events-auto animate-slide-up rounded-full bg-[var(--app-accent)] px-5 py-3 text-[var(--app-accent-foreground)] shadow-lg backdrop-blur-sm"
           >
             <span className="text-[14px] font-bold tracking-tight">
-              <Twemoji options={{ folder: 'svg', ext: '.svg' }} className="inline-flex mr-1.5">❤️</Twemoji> 
+              <Heart className="mr-1.5 inline-flex h-3.5 w-3.5 fill-current" aria-hidden="true" />
               {toast.message}
             </span>
           </div>
