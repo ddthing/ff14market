@@ -22,7 +22,7 @@ export const ItemDetail = () => {
 
   const itemId = id ? parseInt(id) : 0;
 
-  const { data: item, isLoading: isItemLoading, isError: isItemError } = useQuery({
+  const { data: item, isLoading: isItemLoading, isError: isItemError, refetch: refetchItemMetadata } = useQuery({
     queryKey: ['itemMetadata', itemId],
     queryFn: ({ signal }) => fetchItemMetadata(itemId, signal),
     enabled: itemId > 0,
@@ -62,7 +62,21 @@ export const ItemDetail = () => {
     );
   }
 
-  if (isItemError || !item) {
+  if (isItemError) {
+    return (
+      <>
+        <Seo
+          title="아이템 정보 오류 | FF14 장터탐지기"
+          description="아이템 정보를 불러오지 못했습니다."
+          path={`/item/${itemId}`}
+          noIndex
+        />
+        <DataErrorState onRetry={() => void refetchItemMetadata()} />
+      </>
+    );
+  }
+
+  if (!item) {
     return (
       <>
         <Seo
