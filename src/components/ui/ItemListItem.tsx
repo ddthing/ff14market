@@ -8,6 +8,7 @@ import { FavoriteButton } from './FavoriteButton';
 import { getIconUrl } from '../../utils/icon';
 import { formatMarketPriceGap, formatSaleVelocity } from '../../utils/marketMetrics';
 import { formatFreshness } from '../../utils/time';
+import { loadItemDetail } from '../../routes/itemDetail';
 
 type SignalMetric = {
   label: string;
@@ -69,6 +70,9 @@ export const ItemListItem = memo(({ item, signal }: {
   }, []);
 
   const handleMouseEnter = () => {
+    // Warm the route chunk while the pointer is already expressing intent.
+    // The module loader deduplicates this import across all rows.
+    void loadItemDetail();
     schedulePrefetch();
   };
 
@@ -77,6 +81,7 @@ export const ItemListItem = memo(({ item, signal }: {
   };
 
   const handleFocus = () => {
+    void loadItemDetail();
     schedulePrefetch();
   };
 
