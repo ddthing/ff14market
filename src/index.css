@@ -105,6 +105,13 @@ body {
   overflow-y: scroll;
 }
 
+/* Keep the desktop content track stable while modal surfaces lock body scroll. */
+@media (min-width: 768px) {
+  html {
+    scrollbar-gutter: stable;
+  }
+}
+
 /* Public guides and policies share a compact reading rhythm. */
 .info-page {
   width: 100%;
