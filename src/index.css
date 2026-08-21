@@ -99,10 +99,274 @@
 }
 
 body {
-  @apply font-sans font-medium antialiased transition-colors duration-200;
+  @apply font-sans antialiased transition-colors duration-200;
   background-color: var(--app-canvas);
   color: var(--app-ink);
   overflow-y: scroll;
+}
+
+/* Public guides and policies share a compact reading rhythm. */
+.info-page {
+  width: 100%;
+  max-width: 44rem;
+  margin-inline: auto;
+  padding-block: 1.5rem 2rem;
+}
+
+.info-page__header {
+  border-bottom: 1px solid var(--app-hairline);
+  padding-bottom: 1.5rem;
+}
+
+.info-page__back-link {
+  display: inline-flex;
+  min-height: 2.25rem;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--app-ink-muted);
+  font-size: 0.75rem;
+  font-weight: 650;
+  transition: color 150ms ease;
+}
+
+.info-page__back-link:hover {
+  color: var(--app-ink);
+}
+
+.info-page__back-link:focus-visible,
+.info-page__content a:focus-visible,
+.info-page__faq summary:focus-visible,
+.info-page__primary-link:focus-visible {
+  outline: 2px solid color-mix(in oklch, var(--app-accent) 60%, transparent);
+  outline-offset: 3px;
+}
+
+.info-page__eyebrow {
+  margin-top: 1.25rem;
+  color: var(--app-accent);
+  font-size: 0.6875rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.info-page__title {
+  margin-top: 0.4rem;
+  color: var(--app-ink);
+  font-size: clamp(1.5rem, 6vw, 2rem);
+  font-weight: 750;
+  letter-spacing: -0.045em;
+  line-height: 1.2;
+}
+
+.info-page__lead {
+  max-width: 40rem;
+  margin-top: 0.65rem;
+  color: var(--app-ink-muted);
+  font-size: 0.875rem;
+  line-height: 1.65;
+}
+
+.info-page__updated {
+  margin-top: 0.75rem;
+  color: var(--app-ink-muted);
+  font-size: 0.6875rem;
+  line-height: 1.5;
+}
+
+.info-page__content {
+  color: var(--app-ink);
+}
+
+.info-page__section {
+  border-bottom: 1px solid var(--app-hairline);
+  padding-block: 1.25rem;
+}
+
+.info-page__section:first-child {
+  padding-top: 1.5rem;
+}
+
+.info-page__section:last-child {
+  border-bottom: 0;
+}
+
+.info-page__section-title {
+  color: var(--app-ink);
+  font-size: 1rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  line-height: 1.45;
+}
+
+.info-page__section p,
+.info-page__section li {
+  color: var(--app-ink-muted);
+  font-size: 0.875rem;
+  line-height: 1.75;
+}
+
+.info-page__section p {
+  margin-top: 0.65rem;
+}
+
+.info-page__section p + p {
+  margin-top: 0.8rem;
+}
+
+.info-page__section strong {
+  color: var(--app-ink);
+  font-weight: 700;
+}
+
+.info-page__section ul,
+.info-page__section ol {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-left: 1.25rem;
+}
+
+.info-page__section ul {
+  list-style: disc;
+}
+
+.info-page__section ol {
+  list-style: decimal;
+}
+
+.info-page__callout {
+  margin-top: 0.85rem;
+  border-left: 2px solid var(--app-accent);
+  background: var(--app-surface-subtle);
+  padding: 0.75rem 0.875rem;
+}
+
+.info-page__callout p {
+  margin-top: 0;
+  font-size: 0.8125rem;
+}
+
+.info-page__callout--warning {
+  border-left-color: var(--destructive);
+}
+
+.info-page__content a:not(.info-page__primary-link) {
+  color: var(--app-ink);
+  font-weight: 650;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklch, var(--app-accent) 55%, transparent);
+  text-underline-offset: 0.18em;
+}
+
+.info-page__faq {
+  border-top: 1px solid var(--app-hairline);
+}
+
+.info-page__faq details {
+  border-bottom: 1px solid var(--app-hairline);
+  padding-block: 0.9rem;
+}
+
+.info-page__faq summary {
+  cursor: pointer;
+  list-style: none;
+  padding-right: 1.5rem;
+  color: var(--app-ink);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.5;
+  position: relative;
+}
+
+.info-page__faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.info-page__faq summary::after {
+  content: '+';
+  position: absolute;
+  right: 0;
+  top: -0.05rem;
+  color: var(--app-ink-muted);
+  font-size: 1.125rem;
+  font-weight: 400;
+}
+
+.info-page__faq details[open] summary::after {
+  content: '−';
+}
+
+.info-page__faq details > p {
+  max-width: 40rem;
+  margin-top: 0.6rem;
+  color: var(--app-ink-muted);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+}
+
+.info-page__link-list {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.info-page__link-row {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--app-hairline);
+  background: var(--app-surface);
+  padding: 0.65rem 0.8rem;
+  color: var(--app-ink);
+  font-size: 0.8125rem;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.info-page__link-row:hover {
+  border-color: color-mix(in oklch, var(--app-accent) 55%, var(--app-hairline));
+  background: var(--app-surface-subtle);
+}
+
+.info-page__link-row span:last-child {
+  color: var(--app-ink-muted);
+  font-size: 0.75rem;
+}
+
+.info-page__primary-link {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.85rem;
+  background: var(--app-accent);
+  padding: 0.65rem 1rem;
+  color: var(--app-accent-foreground);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  transition: background-color 150ms ease;
+}
+
+.info-page__primary-link:hover {
+  background: var(--app-accent-hover);
+}
+
+@media (min-width: 640px) {
+  .info-page {
+    padding-block: 2rem 3rem;
+  }
+
+  .info-page__section p,
+  .info-page__section li {
+    font-size: 0.9375rem;
+  }
+
+  .info-page__faq details > p {
+    font-size: 0.875rem;
+  }
 }
 
 /* Keep long market lists cheap to lay out while preserving scroll geometry. */
