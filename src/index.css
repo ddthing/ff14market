@@ -30,7 +30,8 @@
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  /* Keep secondary text readable on both white and subtle neutral surfaces. */
+  --muted-foreground: oklch(0.52 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
@@ -103,6 +104,29 @@ body {
   background-color: var(--app-canvas);
   color: var(--app-ink);
   overflow-y: scroll;
+}
+
+/* Keyboard users can bypass the sticky header and repeated navigation. */
+.skip-link {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.75rem;
+  z-index: 100;
+  transform: translateY(-150%);
+  border: 1px solid var(--app-accent);
+  background: var(--app-accent);
+  padding: 0.625rem 0.875rem;
+  color: var(--app-accent-foreground);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.25;
+  transition: transform 150ms ease;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid var(--app-accent);
+  outline-offset: 3px;
 }
 
 /* Keep the desktop content track stable while modal surfaces lock body scroll. */
@@ -383,6 +407,15 @@ body {
 }
 
 @media (max-width: 767px) {
+  html {
+    scroll-padding-bottom: calc(6.5rem + max(0.75rem, env(safe-area-inset-bottom)));
+  }
+
+  /* Keep focused rows clear of the floating navigation when browsers scroll them into view. */
+  .market-list-item:focus-within {
+    scroll-margin-bottom: calc(6.5rem + max(0.75rem, env(safe-area-inset-bottom)));
+  }
+
   .mobile-page-main {
     padding-bottom: calc(5.5rem + max(0.75rem, env(safe-area-inset-bottom)));
   }
@@ -470,6 +503,21 @@ body {
 
 .animate-slide-up {
   animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .emoji { height: 1.1em; width: 1.1em; margin: 0 0.1em; vertical-align: -0.15em; display: inline-block; }

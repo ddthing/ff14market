@@ -21,7 +21,7 @@ export const Footer = () => {
           ))}
         </nav>
         <p className="leading-4 sm:text-right">
-          데이터: Universalis API · Created by <a href="https://x.com/reconeur" target="_blank" rel="noopener noreferrer" className="font-medium transition-colors hover:text-[var(--app-accent)]">@reconeur</a>
+          데이터: Universalis API · Created by <a href="https://x.com/reconeur" target="_blank" rel="noopener noreferrer" className="font-medium transition-colors hover:text-[var(--app-accent)]">@reconeur<span className="sr-only"> (새 창에서 열림)</span></a>
           <span className="hidden sm:inline"> · </span>
           <span className="block sm:inline">FINAL FANTASY XIV © SQUARE ENIX CO., LTD.</span>
         </p>

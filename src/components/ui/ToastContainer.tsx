@@ -6,7 +6,7 @@ export const ToastContainer = () => {
 
   return (
     <div className="pointer-events-none fixed bottom-20 left-1/2 z-[100] flex -translate-x-1/2 flex-col items-center space-y-2 md:bottom-6">
-      <div>
+      <div role="status" aria-live="polite" aria-atomic="true">
         {toasts.map((toast) => (
           <div
             key={toast.id}

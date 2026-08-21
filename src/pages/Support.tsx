@@ -26,6 +26,7 @@ export const Support = () => (
           rel="noopener noreferrer"
         >
           <span>Ko-fi에서 후원하기</span>
+          <span className="sr-only"> (새 창에서 열림)</span>
           <ExternalLink className="ml-2 h-4 w-4" aria-hidden="true" />
         </a>
       </section>
@@ -42,7 +43,7 @@ export const Support = () => (
       <section className="info-page__section">
         <h2 className="info-page__section-title">문의와 피드백</h2>
         <p>
-          오류나 개선 의견은 <a href="https://github.com/ddthing/ff14market/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a>에 남겨주세요. 시세 오류를 제보할 때는 서버, 아이템명, 확인한 시각을 함께 적어주시면 확인하기 쉽습니다.
+          오류나 개선 의견은 <a href="https://github.com/ddthing/ff14market/issues" target="_blank" rel="noopener noreferrer">GitHub Issues<span className="sr-only"> (새 창에서 열림)</span></a>에 남겨주세요. 시세 오류를 제보할 때는 서버, 아이템명, 확인한 시각을 함께 적어주시면 확인하기 쉽습니다.
         </p>
       </section>
     </InfoPageLayout>
