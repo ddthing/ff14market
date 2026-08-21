@@ -20,6 +20,16 @@ const errorEvent = (event: string, payload: Record<string, unknown>) => {
   console.error(JSON.stringify({ event, ...payload }));
 };
 
+const withCacheStatus = (response: Response, status: 'HIT' | 'MISS') => {
+  const headers = new Headers(response.headers);
+  headers.set('X-Market-Cache', status);
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+};
+
 interface ItemDetailContext extends MarketRequestContext {
   params: { itemId?: string };
   request?: Request;
@@ -45,7 +55,7 @@ export const onRequestGet = async (context: ItemDetailContext) => {
       const cached = await cache.match(cacheKey);
       if (cached) {
         logEvent('item_detail_cache_hit', { itemId });
-        return cached;
+        return withCacheStatus(cached, 'HIT');
       }
       logEvent('item_detail_cache_miss', { itemId });
     } catch (error) {
@@ -74,6 +84,7 @@ export const onRequestGet = async (context: ItemDetailContext) => {
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
         'Cache-Control': 'public, max-age=30, s-maxage=60, stale-while-revalidate=120',
+        'X-Market-Cache': 'MISS',
       },
     });
 
