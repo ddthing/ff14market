@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { Activity, BadgeDollarSign, Info, Search, TrendingDown, type LucideIcon } from 'lucide-react';
 import { useItemData } from '../hooks/useItemData';
 import { ItemListItem } from '../components/ui/ItemListItem';
@@ -12,6 +12,7 @@ import { useSearchStore } from '../store/useSearchStore';
 import { getMarketServerLabel } from '../constants/market';
 
 type TabType = HotIssueTab;
+const TAB_ORDER: TabType[] = ['volume', 'drop', 'price'];
 
 const TAB_CONFIG: Record<TabType, {
   label: string;
@@ -86,6 +87,29 @@ export const HotIssues = () => {
   const isAnyLoading = isLoading;
   const hasError = isError;
   const handleRetry = () => void refetch();
+  const handleTabKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>, currentTab: TabType) => {
+    const currentIndex = TAB_ORDER.indexOf(currentTab);
+    let nextIndex: number | null = null;
+
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+      nextIndex = (currentIndex + 1) % TAB_ORDER.length;
+    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+      nextIndex = (currentIndex - 1 + TAB_ORDER.length) % TAB_ORDER.length;
+    } else if (event.key === 'Home') {
+      nextIndex = 0;
+    } else if (event.key === 'End') {
+      nextIndex = TAB_ORDER.length - 1;
+    }
+
+    if (nextIndex === null) return;
+
+    event.preventDefault();
+    const nextTab = TAB_ORDER[nextIndex];
+    setActiveTab(nextTab);
+    requestAnimationFrame(() => {
+      document.getElementById(`hot-issues-tab-${nextTab}`)?.focus();
+    });
+  };
 
   return (
     <>
@@ -130,15 +154,18 @@ export const HotIssues = () => {
         className="grid grid-cols-1 gap-2 sm:grid-cols-3"
         role="tablist"
         aria-label="장터 순위 기준"
+        aria-orientation="horizontal"
       >
         {(Object.keys(TAB_CONFIG) as TabType[]).map((tab) => (
           <TabButton
             key={tab}
             active={activeTab === tab}
             onClick={() => setActiveTab(tab)}
+            onKeyDown={(event) => handleTabKeyDown(event, tab)}
             icon={TAB_CONFIG[tab].icon}
             label={TAB_CONFIG[tab].label}
             tabId={tab}
+            tabIndex={activeTab === tab ? 0 : -1}
           />
         ))}
       </div>
@@ -188,7 +215,7 @@ export const HotIssues = () => {
           </div>
         ) : isAnyLoading ? (
           <div className="relative overflow-hidden">
-            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[var(--app-surface)]/75 backdrop-blur-sm">
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[var(--app-surface)]/75 backdrop-blur-sm" role="status" aria-live="polite" aria-label="마켓 스냅샷을 불러오는 중">
               <Activity className="mb-3 h-7 w-7 animate-spin text-[var(--app-accent)]" aria-hidden="true" />
               <p className="text-[14px] font-bold text-[var(--app-ink)]">
                 '마켓 스냅샷을 불러오는 중입니다...'
@@ -265,15 +292,19 @@ export const HotIssues = () => {
 const TabButton = ({
   active,
   onClick,
+  onKeyDown,
   icon: Icon,
   label,
   tabId,
+  tabIndex,
 }: {
   active: boolean;
   onClick: () => void;
+  onKeyDown: (event: ReactKeyboardEvent<HTMLButtonElement>) => void;
   icon: LucideIcon;
   label: string;
   tabId: TabType;
+  tabIndex: number;
 }) => (
   <button
     id={`hot-issues-tab-${tabId}`}
@@ -281,7 +312,9 @@ const TabButton = ({
     role="tab"
     aria-selected={active}
     aria-controls="hot-issues-panel"
+    tabIndex={tabIndex}
     onClick={onClick}
+    onKeyDown={onKeyDown}
     className={`flex min-h-12 items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/50 ${
       active
         ? 'border-[var(--app-accent)] bg-[var(--app-accent)] text-[var(--app-accent-foreground)] shadow-sm'

@@ -34,8 +34,9 @@ const queryClient = new QueryClient({
 
 // Simple Loading Spinner for Suspense Fallback
 const LoadingFallback = () => (
-  <div className="flex items-center justify-center min-h-[50vh]">
-    <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--app-hairline)] border-t-[var(--app-accent)]"></div>
+  <div className="flex min-h-[50vh] items-center justify-center" role="status" aria-live="polite" aria-label="페이지를 불러오는 중">
+    <span className="sr-only">페이지를 불러오는 중입니다.</span>
+    <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--app-hairline)] border-t-[var(--app-accent)]" aria-hidden="true"></div>
   </div>
 );
 
@@ -69,26 +70,35 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <div className="min-h-screen flex flex-col font-sans">
-          <Header />
+          <div id="app-content" className="flex min-h-screen flex-col">
+            <a className="skip-link" href="#main-content">
+              본문으로 바로가기
+            </a>
+            <Header />
+            <main
+              id="main-content"
+              tabIndex={-1}
+              className="mobile-page-main container mx-auto flex-grow px-4 pb-20 pt-6 outline-none md:max-w-6xl md:py-8"
+            >
+              <ToastContainer />
+              <Suspense fallback={<LoadingFallback />}>
+                <Routes>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/hot-issues" element={<HotIssues />} />
+                  <Route path="/favorites" element={<Favorites />} />
+                  <Route path="/item/:id" element={<ItemDetail />} />
+                  <Route path="/guide" element={<Guide />} />
+                  <Route path="/faq" element={<FAQ />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/terms" element={<Terms />} />
+                  <Route path="/privacy" element={<Privacy />} />
+                  <Route path="/support" element={<Support />} />
+                </Routes>
+              </Suspense>
+            </main>
+            <Footer />
+          </div>
           <GlobalSearch />
-          <main className="mobile-page-main container mx-auto flex-grow px-4 pb-20 pt-6 md:max-w-6xl md:py-8">
-            <ToastContainer />
-            <Suspense fallback={<LoadingFallback />}>
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/hot-issues" element={<HotIssues />} />
-                <Route path="/favorites" element={<Favorites />} />
-                <Route path="/item/:id" element={<ItemDetail />} />
-                <Route path="/guide" element={<Guide />} />
-                <Route path="/faq" element={<FAQ />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="/support" element={<Support />} />
-              </Routes>
-            </Suspense>
-          </main>
-          <Footer />
         </div>
       </Router>
     </QueryClientProvider>

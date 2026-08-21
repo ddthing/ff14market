@@ -41,10 +41,10 @@ export const Privacy = () => (
       <section className="info-page__section">
         <h2 className="info-page__section-title">광고 서비스 안내</h2>
         <p>
-          Google AdSense가 실제로 게재되는 경우 Google 및 제3자 광고 파트너가 광고 제공, 노출 측정, 보안을 위해 쿠키·웹 비콘·IP 주소·광고 식별자 또는 유사 기술을 사용할 수 있습니다. 개인 맞춤 광고는 <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer">Google 광고 설정</a> 또는 <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer">AboutAds 선택 도구</a>에서 관리할 수 있습니다.
+          Google AdSense가 실제로 게재되는 경우 Google 및 제3자 광고 파트너가 광고 제공, 노출 측정, 보안을 위해 쿠키·웹 비콘·IP 주소·광고 식별자 또는 유사 기술을 사용할 수 있습니다. 개인 맞춤 광고는 <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer">Google 광고 설정<span className="sr-only"> (새 창에서 열림)</span></a> 또는 <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer">AboutAds 선택 도구<span className="sr-only"> (새 창에서 열림)</span></a>에서 관리할 수 있습니다.
         </p>
         <p>
-          현재 이 사이트에는 AdSense 광고 스크립트와 광고 슬롯이 설치되어 있지 않습니다. 광고를 활성화할 때 실제 파트너와 처리 목적을 다시 반영하고, 지역별로 필요한 동의 절차를 제공합니다. 자세한 내용은 <a href="https://policies.google.com/technologies/partner-sites?hl=ko" target="_blank" rel="noopener noreferrer">Google 파트너 사이트 정책</a>을 확인해 주세요.
+          현재 이 사이트에는 AdSense 광고 스크립트와 광고 슬롯이 설치되어 있지 않습니다. 광고를 활성화할 때 실제 파트너와 처리 목적을 다시 반영하고, 지역별로 필요한 동의 절차를 제공합니다. 자세한 내용은 <a href="https://policies.google.com/technologies/partner-sites?hl=ko" target="_blank" rel="noopener noreferrer">Google 파트너 사이트 정책<span className="sr-only"> (새 창에서 열림)</span></a>을 확인해 주세요.
         </p>
       </section>
 

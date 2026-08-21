@@ -119,7 +119,7 @@ export const ItemModal = ({ item, onClose }: { item: Item; onClose: () => void }
           <div className="flex flex-col items-center sm:pt-4 pb-5">
           <img 
             src={getIconUrl(item.icon)} 
-            alt={item.name} 
+            alt=""
             loading="lazy"
             className="w-[88px] h-[88px] rounded-full mb-4 bg-gray-50 dark:bg-[#101112] p-[3px] shadow-sm" 
           />

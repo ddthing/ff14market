@@ -26,7 +26,7 @@ export const Favorites = () => {
       />
       <div className="space-y-6">
       <div className="flex items-center justify-between px-2 mb-2">
-        <h2 className="text-[1.3rem] font-bold tracking-tight">내 관심템</h2>
+        <h1 className="text-[1.3rem] font-bold tracking-tight">내 관심템</h1>
         <span className="text-sm font-medium text-[var(--app-ink-muted)]">
           {isLoading ? '-' : favoriteItemsList.length}개
         </span>

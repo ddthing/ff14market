@@ -57,7 +57,7 @@ export const Header = () => {
               className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-md text-[var(--app-ink-muted)] transition-colors hover:bg-[var(--app-surface-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-surface)]"
               aria-label="아이템 검색 열기"
               aria-expanded={isSearchOpen}
-              aria-controls="global-item-search"
+              aria-controls={isSearchOpen ? 'global-item-search' : undefined}
               data-search-trigger="true"
             >
               <Search className="h-[18px] w-[18px]" aria-hidden="true" />

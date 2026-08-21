@@ -23,7 +23,7 @@ export const About = () => (
       <section className="info-page__section">
         <h2 className="info-page__section-title">어떤 데이터를 사용하나요?</h2>
         <p>
-          시세와 판매 기록은 <a href="https://universalis.app/" target="_blank" rel="noopener noreferrer">Universalis API</a>를 기반으로 합니다. 아이템 이름과 분류는 한국어 <a href="https://github.com/Ra-Workspace/ffxiv-datamining-ko" target="_blank" rel="noopener noreferrer">ffxiv-datamining 데이터</a>에서 생성합니다.
+          시세와 판매 기록은 <a href="https://universalis.app/" target="_blank" rel="noopener noreferrer">Universalis API<span className="sr-only"> (새 창에서 열림)</span></a>를 기반으로 합니다. 아이템 이름과 분류는 한국어 <a href="https://github.com/Ra-Workspace/ffxiv-datamining-ko" target="_blank" rel="noopener noreferrer">ffxiv-datamining 데이터<span className="sr-only"> (새 창에서 열림)</span></a>에서 생성합니다.
         </p>
         <div className="info-page__callout">
           <p>외부 데이터의 수집 시점, API 응답 상태, 게임 내 변동에 따라 표시 결과가 늦거나 달라질 수 있습니다.</p>
@@ -43,7 +43,7 @@ export const About = () => (
       <section className="info-page__section">
         <h2 className="info-page__section-title">독립 팬 프로젝트</h2>
         <p>
-          FF14 장터탐지기는 SQUARE ENIX CO., LTD.의 공식 서비스가 아니며, 게임 내 자산의 권리는 각 권리자에게 있습니다. 프로젝트와 데이터 출처에 관한 자세한 기준은 <a href="https://github.com/ddthing/ff14market" target="_blank" rel="noopener noreferrer">GitHub 저장소</a>에서 확인할 수 있습니다.
+          FF14 장터탐지기는 SQUARE ENIX CO., LTD.의 공식 서비스가 아니며, 게임 내 자산의 권리는 각 권리자에게 있습니다. 프로젝트와 데이터 출처에 관한 자세한 기준은 <a href="https://github.com/ddthing/ff14market" target="_blank" rel="noopener noreferrer">GitHub 저장소<span className="sr-only"> (새 창에서 열림)</span></a>에서 확인할 수 있습니다.
         </p>
       </section>
     </InfoPageLayout>

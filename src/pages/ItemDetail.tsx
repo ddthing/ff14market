@@ -77,8 +77,9 @@ export const ItemDetail = () => {
           path={`/item/${itemId}`}
           noIndex
         />
-        <div className="mx-auto flex max-w-md items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--app-hairline)] border-t-[var(--app-accent)]" aria-label="아이템 정보 불러오는 중" />
+        <div className="mx-auto flex max-w-md flex-col items-center justify-center py-20" role="status" aria-live="polite" aria-label="아이템 정보를 불러오는 중">
+          <h1 className="sr-only">아이템 시세 조회 중</h1>
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--app-hairline)] border-t-[var(--app-accent)]" aria-hidden="true" />
         </div>
       </>
     );
@@ -108,7 +109,7 @@ export const ItemDetail = () => {
           noIndex
         />
         <div className="flex flex-col items-center justify-center py-20">
-          <h2 className="mb-4 text-2xl font-bold text-[var(--app-ink)]">아이템을 찾을 수 없습니다</h2>
+          <h1 className="mb-4 text-2xl font-bold text-[var(--app-ink)]">아이템을 찾을 수 없습니다</h1>
           <button 
             onClick={() => navigate('/')}
             className="rounded-lg bg-[var(--app-accent)] px-6 py-2 font-bold text-[var(--app-accent-foreground)] transition-colors hover:bg-[var(--app-accent-hover)]"
@@ -150,13 +151,13 @@ export const ItemDetail = () => {
         <div className="flex flex-col items-center pt-8 pb-8">
           <img 
             src={getIconUrl(item.icon)} 
-            alt={item.name} 
+            alt=""
             loading="lazy"
             className="mb-5 h-[100px] w-[100px] rounded-full bg-[var(--app-surface-subtle)] p-[3px] shadow-sm" 
           />
-          <h2 className="text-center text-[24px] font-bold leading-tight text-[var(--app-ink)]">
+          <h1 className="text-center text-[24px] font-bold leading-tight text-[var(--app-ink)]">
             {item.name}
-          </h2>
+          </h1>
           <p className="mt-2 text-[15px] font-medium text-[var(--app-ink-muted)]">
             {isLoading
               ? '한국 DC 최근 수집 시세 조회 중...'

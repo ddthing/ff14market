@@ -1,9 +1,17 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { Command, Search, X } from 'lucide-react';
 import { ItemSearch } from './ItemSearch';
 import { useSearchStore } from '../../store/useSearchStore';
 
 const SEARCH_DIALOG_ID = 'global-item-search';
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(',');
 
 /**
  * One responsive search surface for the whole product:
@@ -16,6 +24,10 @@ export const GlobalSearch = () => {
   const wasOpen = useRef(false);
   const previouslyFocusedElement = useRef<HTMLElement | null>(null);
   const previousBodyOverflow = useRef('');
+  const dialogRef = useRef<HTMLElement | null>(null);
+  const appContentRef = useRef<HTMLElement | null>(null);
+  const previousAppContentInert = useRef(false);
+  const previousAppContentAriaHidden = useRef<string | null>(null);
 
   useEffect(() => {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
@@ -36,16 +48,46 @@ export const GlobalSearch = () => {
   }, [close, isOpen, open]);
 
   useEffect(() => {
+    const restorePageInteraction = () => {
+      document.body.style.overflow = previousBodyOverflow.current;
+
+      const appContent = appContentRef.current;
+      if (!appContent) return;
+
+      appContent.inert = previousAppContentInert.current;
+      if (previousAppContentAriaHidden.current === null) {
+        appContent.removeAttribute('aria-hidden');
+      } else {
+        appContent.setAttribute('aria-hidden', previousAppContentAriaHidden.current);
+      }
+    };
+
     if (isOpen && !wasOpen.current) {
       previouslyFocusedElement.current = document.activeElement instanceof HTMLElement
         ? document.activeElement
         : null;
       previousBodyOverflow.current = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
+
+      const appContent = document.getElementById('app-content');
+      appContentRef.current = appContent;
+      if (appContent) {
+        previousAppContentInert.current = appContent.inert;
+        previousAppContentAriaHidden.current = appContent.getAttribute('aria-hidden');
+        appContent.inert = true;
+        appContent.setAttribute('aria-hidden', 'true');
+      }
+
+      requestAnimationFrame(() => {
+        const dialog = dialogRef.current;
+        const searchInput = dialog?.querySelector<HTMLInputElement>('input');
+        const firstFocusable = dialog?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+        (searchInput ?? firstFocusable)?.focus();
+      });
     }
 
     if (!isOpen && wasOpen.current) {
-      document.body.style.overflow = previousBodyOverflow.current;
+      restorePageInteraction();
       requestAnimationFrame(() => {
         const focusTarget = previouslyFocusedElement.current?.isConnected
           ? previouslyFocusedElement.current
@@ -57,24 +99,53 @@ export const GlobalSearch = () => {
     wasOpen.current = isOpen;
 
     return () => {
-      if (isOpen) document.body.style.overflow = previousBodyOverflow.current;
+      if (isOpen) restorePageInteraction();
     };
   }, [isOpen]);
+
+  const handleDialogKeyDown = (event: ReactKeyboardEvent<HTMLElement>) => {
+    if (event.key !== 'Tab') return;
+
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    const focusableElements = Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
+      .filter((element) => element.getClientRects().length > 0);
+
+    if (focusableElements.length === 0) {
+      event.preventDefault();
+      return;
+    }
+
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+
+    if (event.shiftKey && document.activeElement === firstFocusable) {
+      event.preventDefault();
+      lastFocusable.focus();
+    } else if (!event.shiftKey && document.activeElement === lastFocusable) {
+      event.preventDefault();
+      firstFocusable.focus();
+    }
+  };
 
   if (!isOpen) return null;
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-end justify-center bg-[color-mix(in_srgb,var(--app-ink)_18%,transparent)] p-0 backdrop-blur-[2px] md:items-start md:p-4 md:pt-[12vh]"
-      onPointerDown={close}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) close();
+      }}
       role="presentation"
     >
       <section
+        ref={dialogRef}
         id={SEARCH_DIALOG_ID}
         aria-labelledby={`${SEARCH_DIALOG_ID}-title`}
         aria-modal="true"
         className="w-full max-h-[min(80vh,540px)] overflow-visible rounded-t-2xl border border-b-0 border-[var(--app-hairline)] bg-[var(--app-surface)] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_-12px_36px_rgba(23,25,28,0.14)] animate-slide-up md:max-w-2xl md:rounded-2xl md:border-b md:p-5 md:pb-5 md:shadow-[0_20px_60px_rgba(23,25,28,0.16)] md:animate-pop-in"
-        onPointerDown={(event) => event.stopPropagation()}
+        onKeyDown={handleDialogKeyDown}
         role="dialog"
       >
         <div className="mb-3 flex items-center justify-between gap-3">

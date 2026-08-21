@@ -41,6 +41,7 @@ export const Dashboard = () => {
         path="/"
       />
       <div className="space-y-6 animate-fade-in">
+      <h1 className="sr-only">한국 데이터센터 장터 시세</h1>
       <HeroSearch recommendedItems={recommendedItems} />
 
       <div className="flex flex-col space-y-6">

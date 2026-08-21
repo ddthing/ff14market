@@ -100,6 +100,11 @@ export const PriceChart = ({ history }: ChartProps) => {
                 onFocus={() => setActiveIndex(index)}
                 onBlur={() => setActiveIndex(null)}
                 onClick={() => setActiveIndex(isActive ? null : index)}
+                onKeyDown={(event) => {
+                  if (event.key !== 'Enter' && event.key !== ' ') return;
+                  event.preventDefault();
+                  setActiveIndex(isActive ? null : index);
+                }}
               >
                 <title>{`${formatSaleTime(point.timestamp)} · ${formatPrice(point.pricePerUnit)}`}</title>
               </circle>

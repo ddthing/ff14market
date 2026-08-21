@@ -32,6 +32,7 @@ export const ItemSearch = memo(({
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [activeResultIndex, setActiveResultIndex] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listboxId = useId();
   const navigate = useNavigate();
@@ -67,13 +68,21 @@ export const ItemSearch = memo(({
     return () => controller.abort();
   }, [debouncedSearchQuery]);
 
+  useEffect(() => {
+    setActiveResultIndex((currentIndex) => (
+      currentIndex !== null && currentIndex < searchResults.length ? currentIndex : null
+    ));
+  }, [searchResults.length]);
+
   const isSearching = searchQuery !== debouncedSearchQuery || (searchQuery.trim().length > 0 && isSearchLoading);
+  const activeResult = activeResultIndex === null ? null : searchResults[activeResultIndex];
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextQuery = event.target.value;
     const hasQuery = nextQuery.trim().length > 0;
     setSearchQuery(nextQuery);
     setIsDropdownOpen(nextQuery.length > 0);
+    setActiveResultIndex(null);
     setIsSearchLoading(hasQuery);
     setHasSearchError(false);
     if (!hasQuery) {
@@ -90,6 +99,7 @@ export const ItemSearch = memo(({
 
   const handleItemClick = (item: ItemCatalogEntry) => {
     setIsDropdownOpen(false);
+    setActiveResultIndex(null);
     setSearchQuery('');
     onSelect?.();
     navigate(`/item/${item.id}`);
@@ -98,18 +108,39 @@ export const ItemSearch = memo(({
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Escape') {
       setIsDropdownOpen(false);
+      setActiveResultIndex(null);
       onEscape?.();
       return;
     }
 
+    if (event.key === 'ArrowDown' && searchResults.length > 0) {
+      event.preventDefault();
+      setIsDropdownOpen(true);
+      setActiveResultIndex((currentIndex) => (
+        currentIndex === null ? 0 : Math.min(currentIndex + 1, searchResults.length - 1)
+      ));
+      return;
+    }
+
+    if (event.key === 'ArrowUp' && searchResults.length > 0) {
+      event.preventDefault();
+      setIsDropdownOpen(true);
+      setActiveResultIndex((currentIndex) => (
+        currentIndex === null ? searchResults.length - 1 : Math.max(currentIndex - 1, 0)
+      ));
+      return;
+    }
+
     if (event.key === 'Enter' && searchResults.length > 0) {
-      handleItemClick(searchResults[0]);
+      event.preventDefault();
+      handleItemClick(searchResults[activeResultIndex ?? 0]);
     }
   };
 
   const handleRecommendedItemClick = (item: Pick<EnrichedItem, 'id' | 'name'>) => {
     setSearchQuery(item.name);
     setIsDropdownOpen(true);
+    setActiveResultIndex(null);
     setIsSearchLoading(true);
     setHasSearchError(false);
     inputRef.current?.focus();
@@ -142,6 +173,7 @@ export const ItemSearch = memo(({
             aria-haspopup="listbox"
             aria-expanded={isDropdownOpen}
             aria-controls={isDropdownOpen ? listboxId : undefined}
+            aria-activedescendant={isDropdownOpen && activeResult ? `${listboxId}-option-${activeResult.id}` : undefined}
             onChange={handleSearchChange}
             onKeyDown={handleKeyDown}
             onFocus={() => {
@@ -194,11 +226,14 @@ export const ItemSearch = memo(({
                   검색 중...
                 </div>
               ) : searchResults.length > 0 ? (
-                searchResults.map((item) => (
+                searchResults.map((item, index) => (
                   <button
                     type="button"
                     role="option"
+                    id={`${listboxId}-option-${item.id}`}
+                    aria-selected={activeResultIndex === index}
                     key={item.id}
+                    onMouseEnter={() => setActiveResultIndex(index)}
                     onClick={() => handleItemClick(item)}
                     className={`flex w-full items-center text-left transition-colors hover:bg-[var(--app-surface-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/50 active:scale-[0.98] ${
                       isHero ? 'min-h-14 space-x-4 rounded-lg p-3' : 'min-h-11 space-x-3 rounded-md p-2'
@@ -206,7 +241,7 @@ export const ItemSearch = memo(({
                   >
                     <img
                       src={getIconUrl(item.icon)}
-                      alt={item.name}
+                      alt=""
                       loading="lazy"
                       decoding="async"
                       className={isHero ? 'h-10 w-10 flex-shrink-0 rounded-full bg-[var(--app-surface-subtle)] p-0.5 object-cover' : 'h-8 w-8 flex-shrink-0 rounded-full bg-[var(--app-surface-subtle)] p-0.5 object-cover'}

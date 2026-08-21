@@ -110,7 +110,7 @@ export const ItemListItem = memo(({ item, signal }: {
         <div className="mt-0.5 h-10 w-10 shrink-0 rounded-full bg-[var(--app-surface-subtle)] p-[2px] sm:mt-0 sm:h-[42px] sm:w-[42px]">
           <img
             src={getIconUrl(item.icon)}
-            alt={item.name}
+            alt=""
             loading="lazy"
             decoding="async"
             className="h-full w-full rounded-full bg-[var(--app-canvas)] object-cover"
@@ -155,7 +155,7 @@ export const ItemListItem = memo(({ item, signal }: {
                 </span>
               ) : (
                 <span className={`whitespace-nowrap text-[12px] font-medium ${
-                  metricTone === 'positive' ? 'text-red-500' :
+                  metricTone === 'positive' ? 'text-[var(--destructive)]' :
                   metricTone === 'negative' ? 'text-blue-600 dark:text-blue-400' : 'text-[var(--app-ink-muted)]'
                 }`}>
                   {signal?.format ? signal.format(metricValue) : formatMarketPriceGap(metricValue)}
@@ -187,7 +187,7 @@ export const ItemListItem = memo(({ item, signal }: {
                   </span>
                 ) : (
                   <span className={`whitespace-nowrap text-[12px] font-medium sm:text-[15px] ${
-                    metricTone === 'positive' ? 'text-red-500' :
+                    metricTone === 'positive' ? 'text-[var(--destructive)]' :
                     metricTone === 'negative' ? 'text-blue-600 dark:text-blue-400' : 'text-[var(--app-ink-muted)]'
                   }`}>
                     {signal?.format ? signal.format(metricValue) : formatMarketPriceGap(metricValue)}
