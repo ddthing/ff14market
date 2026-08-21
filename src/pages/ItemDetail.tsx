@@ -1,7 +1,7 @@
-import { lazy, Suspense, useState, useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Flame, Share2, ArrowLeft } from 'lucide-react';
+import { Flame, ArrowLeft } from 'lucide-react';
 import { fetchItemMetadata } from '../api/itemCatalog';
 import { fetchKoreaDCData } from '../api/universalis';
 import { computeTrueMinPrice } from '../hooks/useItemData';
@@ -17,7 +17,6 @@ const PriceChart = lazy(() => import('../components/common/PriceChart').then(({ 
 export const ItemDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [isCopied, setIsCopied] = useState(false);
   const addRecentId = useRecentStore((state) => state.addRecentId);
 
   const itemId = id ? parseInt(id) : 0;
@@ -113,13 +112,6 @@ export const ItemDetail = () => {
   const validPrices = serverPrices.filter(s => s.minPrice > 0).map(s => s.minPrice);
   const absoluteMin = validPrices.length > 0 ? Math.min(...validPrices) : 0;
 
-  const handleShare = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 500);
-  };
-
   return (
     <>
       <Seo
@@ -137,21 +129,8 @@ export const ItemDetail = () => {
       </button>
 
       <div className="relative w-full rounded-xl border border-[var(--app-hairline)] bg-[var(--app-surface)] p-6 shadow-sm sm:p-8">
-        <div className="absolute top-6 right-6 flex items-center space-x-3">
+        <div className="absolute right-6 top-6">
           <FavoriteButton itemId={itemId} />
-          <button 
-            onClick={handleShare} 
-            className="flex items-center space-x-1 rounded-lg bg-[var(--app-surface-subtle)] px-3 py-2 text-[var(--app-ink-muted)] transition-colors hover:bg-[var(--app-hairline)] hover:text-[var(--app-ink)]"
-          >
-            {isCopied ? (
-              <span className="text-[13px] font-bold text-[var(--app-accent)]">복사됨!</span>
-            ) : (
-              <>
-                <Share2 className="w-4 h-4" />
-                <span className="text-[13px] font-bold">공유</span>
-              </>
-            )}
-          </button>
         </div>
         
         <div className="flex flex-col items-center pt-8 pb-8">

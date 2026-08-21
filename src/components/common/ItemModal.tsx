@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Flame, Share2, X, RefreshCw, HelpCircle } from 'lucide-react';
+import { Flame, X, RefreshCw, HelpCircle } from 'lucide-react';
 import { fetchKoreaDCData } from '../../api/universalis';
 import { getBulkQueryKey, computeTrueMinPrice } from '../../hooks/useItemData';
 import { formatFreshness } from '../../utils/time';
@@ -25,7 +25,6 @@ const SERVERS = [
 ];
 
 export const ItemModal = ({ item, onClose }: { item: Item; onClose: () => void }) => {
-  const [isCopied, setIsCopied] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
   const queryClient = useQueryClient();
   const { server } = useServerStore();
@@ -104,13 +103,6 @@ export const ItemModal = ({ item, onClose }: { item: Item; onClose: () => void }
   const validPrices = serverPrices.filter(s => s.minPrice > 0).map(s => s.minPrice);
   const absoluteMin = validPrices.length > 0 ? Math.min(...validPrices) : 0;
 
-  const handleShare = () => {
-    const url = `${window.location.origin}/item/${item.id}`;
-    navigator.clipboard.writeText(url);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 500);
-  };
-
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-6">
       <div 
@@ -124,21 +116,8 @@ export const ItemModal = ({ item, onClose }: { item: Item; onClose: () => void }
           <div className="w-10 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
         </div>
 
-        {/* 상단 액션 버튼 */}
-        <div className="absolute top-3 sm:top-4 right-3 sm:right-4 flex items-center space-x-2 z-10">
-          <button 
-            onClick={handleShare} 
-            className="flex items-center space-x-1 px-3 py-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg text-gray-500 dark:text-[#9ea4aa] hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shadow-sm"
-          >
-            {isCopied ? (
-              <span className="text-[13px] font-bold text-blue-600 dark:text-blue-400">복사됨!</span>
-            ) : (
-              <>
-                <Share2 className="w-4 h-4" />
-                <span className="text-[13px] font-bold hidden sm:inline">공유</span>
-              </>
-            )}
-          </button>
+        {/* 데스크톱 닫기 버튼 */}
+        <div className="absolute right-3 top-3 z-10 sm:right-4 sm:top-4">
           <button 
             onClick={onClose} 
             className="p-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg text-gray-500 dark:text-[#9ea4aa] hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shadow-sm hidden sm:flex"
