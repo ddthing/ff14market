@@ -18,12 +18,14 @@ FF14 장터탐지기는 단순히 최저가 하나를 나열하지 않습니다.
 | 기능 | 사용자가 얻는 것 |
 | --- | --- |
 | 오늘의 장터 신호 | 거래량 급증, 가격 하락 신호, 최저 매물가 TOP을 같은 화면에서 비교 |
-| 아이템 검색 | 한국어 아이템 이름으로 필요한 품목을 빠르게 탐색 |
+| 어디서나 아이템 검색 | 헤더 검색 버튼, `Ctrl/Cmd + K`, 인기 아이템 화면의 검색 진입점으로 필요한 품목을 빠르게 탐색 |
 | 아이템 상세 | 한국 데이터센터 최저 매물가, 서버별 최저가, 최근 판매 속도, 가격 흐름 확인 |
 | 관심 아이템 | 로그인 없이 브라우저에 아이템을 저장하고 홈에서 바로 확인 |
 | 최근 본 아이템 | 직전에 살펴본 품목으로 빠르게 돌아가기 |
 | 서버 선택 | 초코보, 모그리, 카벙클, 톤베리, 펜리르 지원 |
 | 모바일·다크 모드 | 모바일 장터 확인과 라이트/다크 테마 지원 |
+| 접근성 중심 UI | 본문 바로가기, 키보드 탐색, 검색 모달 포커스 관리, 축소 모션, 의미 있는 제목·레이블 제공 |
+| 서비스 안내 | 가이드, FAQ, 소개, 이용약관, 개인정보처리방침, 후원 페이지 제공 |
 
 ## 장터 신호를 읽는 방법
 
@@ -67,9 +69,10 @@ FF14 장터탐지기는 단순히 최저가 하나를 나열하지 않습니다.
 1. GitHub Actions가 매일 03:17(KST)에 아이템 데이터를 갱신합니다.
 2. 마켓 검색 가능 여부와 추천 목록의 참조 무결성을 검증합니다.
 3. 변경된 `items.json`, `masterItems.json`, `searchItems.json`을 자동 커밋·푸시합니다.
-4. Worker는 매 5분 실행 때 최신 아이템 ID 목록을 다시 읽고 다음 시세 스냅샷에 반영합니다.
+4. `main`에 변경이 push되면 Git 연결형 Cloudflare Pages가 Production을 자동 배포합니다.
+5. Worker는 매 5분 실행 때 최신 아이템 ID 목록을 다시 읽고 다음 시세 스냅샷에 반영합니다.
 
-즉, 새 아이템은 **카탈로그 갱신 → Pages 배포 → 다음 Worker 스냅샷** 순서로 노출됩니다. GitHub Actions와 Pages의 자동 배포 연결이 활성화되어 있어야 운영 화면까지 자동으로 반영됩니다. 아이템 ID 목록을 읽지 못하는 경우에는 Worker가 내장한 이전 목록으로 안전하게 폴백합니다.
+즉, 새 아이템은 **카탈로그 갱신 → `main` push → Pages Production 배포 → 다음 Worker 스냅샷** 순서로 노출됩니다. 아이템 ID 목록을 읽지 못하는 경우에는 Worker가 내장한 이전 목록으로 안전하게 폴백합니다.
 
 로컬에서 데이터 파이프라인을 확인할 수 있습니다.
 
@@ -78,6 +81,19 @@ npm run data:update:dry-run
 npm run data:update
 npm run data:validate
 ```
+
+## 오픈소스·데이터·권리
+
+이 프로젝트는 여러 오픈소스 라이브러리와 외부 데이터·이미지 서비스를 조합합니다. 직접 사용하는 의존성의 출처와 라이선스는 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)에 정리했습니다. 전이 의존성의 버전과 라이선스 메타데이터는 `package-lock.json`을 기준으로 확인합니다.
+
+- 시세 데이터: [Universalis API](https://universalis.app/) 및 [Universalis 저장소](https://github.com/Universalis-FFXIV/Universalis)
+- 한국어 아이템 카탈로그: [ffxiv-datamining-ko](https://github.com/Ra-Workspace/ffxiv-datamining-ko)의 `Item.csv`
+- 아이템 아이콘: [XIVAPI](https://v2.xivapi.com/)의 아이콘 자산 엔드포인트
+- UI 방향 참고: [shadcn/ui](https://ui.shadcn.com/)와 저장소의 [DESIGN.md](DESIGN.md)
+
+현재 제품 UI 아이콘은 `lucide-react`를 사용합니다. `components.json`의 Remix Icon 설정은 디자인 목표를 나타내며, Remix Icon 패키지가 현재 번들에 포함되어 있다는 뜻은 아닙니다. 게임 데이터·아이콘·상표의 권리는 각 원저작권자에게 있으며, 이 저장소의 라이선스가 그 권리를 대신 부여하지 않습니다.
+
+이 저장소 자체에는 아직 별도의 `LICENSE` 파일이 없습니다. 프로젝트 코드의 재사용 조건을 명확히 하려면 별도 프로젝트 라이선스를 선택해 추가해야 합니다.
 
 ## 개인정보와 신뢰 기준
 
@@ -89,7 +105,7 @@ npm run data:validate
 
 ## 광고·SEO 운영
 
-Google AdSense 검토를 위한 `ads.txt` 레코드는 [public/ads.txt](public/ads.txt)에 포함되어 있습니다.
+Google AdSense 검토를 위한 `ads.txt` 레코드는 [public/ads.txt](public/ads.txt)와 [운영 ads.txt](https://ff14market.pages.dev/ads.txt)에 포함되어 있습니다.
 
 ```text
 google.com, pub-2169729065542563, DIRECT, f08c47fec0942fa0
@@ -149,13 +165,15 @@ npx wrangler r2 bucket create ff14market-market-snapshots
 
 # Pages 정적 자산 빌드 및 배포
 npm run build
-npx wrangler pages deploy dist --project-name ff14market
+npx wrangler pages deploy dist --project-name ff14market --branch main
 
 # 5분 주기 시세 스냅샷 Worker 배포
 npm run market-sync:deploy
 ```
 
 `wrangler.toml`과 `wrangler.market-sync.toml`의 `MARKET_SNAPSHOTS` 바인딩은 같은 R2 버킷을 가리켜야 합니다. Git 연결형 Pages를 사용할 때도 Pages 프로젝트에 R2 바인딩을 추가해야 합니다.
+
+`--branch main`을 생략하면 현재 feature 브랜치가 Preview로 배포될 수 있습니다. 기능 브랜치 검증은 해당 브랜치명을 `--branch`에 지정하고, 운영 반영은 반드시 `main`으로 배포하세요.
 
 ## 구조
 
