@@ -113,11 +113,17 @@ npm run build
 - API: `X-Market-Source`, `X-Market-History-Ready`, 캐시 헤더가 유지되는지
 - PWA: 새 배포 후 service worker가 이전 JS chunk를 계속 가리키지 않는지
 
+## 운영 cold/warm 측정
+
+2026-08-21 운영 `https://ff14market.pages.dev/api/item/33939`를 동일 URL 기준 5쌍 측정했다. 모든 응답은 HTTP 200·`7,885 bytes`였고, cold 전체 시간은 `0.31–0.78초`(중앙값 `0.31초`), warm은 `0.31–0.67초`(중앙값 `0.39초`)였다. 고정 URL을 4회 반복해도 `Age`와 `CF-Cache-Status`가 모두 없었고 매번 새로운 `CF-Ray`가 발급됐다.
+
+따라서 기존 `s-maxage` 헤더만으로는 Pages Function이 실제 Edge cache hit를 만들고 있다고 판단할 수 없다. 상세 응답은 공개 데이터이므로 `caches.default`를 통한 명시적 캐시를 추가하고, query string을 제거한 `/api/item/:id` 정규화 키를 사용한다. Cache API는 실행된 데이터센터 단위이므로 전역 캐시 지연을 보장하는 장치가 아니라, 동일 PoP의 반복 상세 진입을 줄이는 장치로 기록한다.
+
 ## 다음 관찰 작업
 
 다음 단계는 최적화를 더 넣는 것이 아니라 측정 가능성을 높이는 것이다.
 
 1. Worker에 서버별 실행 시간, current/history chunk 실패 수, 429·5xx 횟수를 구조화 로그로 남긴다. `market_snapshot_updated`, `market_snapshot_failed`, `market_sync_completed` 이벤트에 current/recent/previous 단계별 `durationMs`, `failedChunks`, `retries`, `rateLimitResponses`, `serverErrors`가 기록되도록 구현했다.
 2. Pages Function에 상세 응답의 upstream duration과 payload byte를 내부 로그로 남긴다. `item_detail_upstream_completed`, `item_detail_upstream_failed`, `item_detail_not_found` 이벤트에 아이템 ID, upstream 처리 시간·바이트·시도 횟수와 최종 상태를 기록하도록 구현했다. 응답 본문과 민감한 정보는 로그에 남기지 않는다.
-3. 운영에서 cold start와 warm cache를 분리해 상세 페이지의 목표 시간을 다시 측정한다.
+3. 명시적 Cache API 배포 후 동일 PoP에서 cold miss·warm hit와 `item_detail_cache_hit` 로그를 재측정한다.
 4. 실제 병목이 확인될 때만 history 계산을 서버 사전계산하거나 상세 API를 더 세분화한다.
