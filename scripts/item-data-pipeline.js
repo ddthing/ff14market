@@ -12,17 +12,59 @@ const FALLBACK_COLUMNS = Object.freeze({
   itemSearchCategory: 17,
 });
 
+// ItemUICategory is the authoritative source for the broad labels shown in
+// the UI. Keep the groups explicit: the upstream table is not contiguous
+// (new weapon categories were appended after the housing categories).
+const EQUIPMENT_UI_CATEGORIES = new Set([
+  ...Array.from({ length: 32 }, (_, index) => index + 1),
+  ...Array.from({ length: 5 }, (_, index) => index + 34),
+  40,
+  41,
+  42,
+  43,
+  84,
+  87,
+  88,
+  89,
+  96,
+  97,
+  98,
+  99,
+  105,
+  106,
+  107,
+  108,
+  109,
+  110,
+  111,
+]);
+
+const MATERIAL_UI_CATEGORIES = new Set([
+  33, // Bait
+  45, // Ingredients
+  ...Array.from({ length: 8 }, (_, index) => index + 47), // Raw materials
+  56, // Parts
+  59, // Crystals
+  60, // Catalysts
+  83, // Demimateria
+]);
+
+const HOUSING_UI_CATEGORIES = new Set([
+  57, // Furniture
+  ...Array.from({ length: 17 }, (_, index) => index + 64), // Housing parts and furnishings
+]);
+
 const MASTER_KEYWORDS = Object.freeze([
-  { term: '환혹약', category: '소모품' },
-  { term: '환약', category: '소모품' },
-  { term: '마테리쟈', category: '마테리아' },
-  { term: '염료', category: '염료' },
-  { term: '궤짝', category: '룩템' },
-  { term: '파이', category: '요리' },
-  { term: '티타늄', category: '재료' },
-  { term: '미스릴', category: '재료' },
-  { term: '샐러드', category: '요리' },
-  { term: '보석약', category: '소모품' },
+  { term: '환혹약' },
+  { term: '환약' },
+  { term: '마테리쟈' },
+  { term: '염료' },
+  { term: '궤짝' },
+  { term: '파이' },
+  { term: '티타늄' },
+  { term: '미스릴' },
+  { term: '샐러드' },
+  { term: '보석약' },
 ]);
 
 const MASTER_ITEM_LIMIT = 200;
@@ -125,12 +167,24 @@ function resolveColumns(rows) {
   };
 }
 
-export function getOfficialCategoryName(itemUiCategoryId) {
-  if (itemUiCategoryId === 44 || itemUiCategoryId === 45) return '소모품';
-  if (itemUiCategoryId >= 47 && itemUiCategoryId <= 55) return '재료';
-  if (itemUiCategoryId >= 1 && itemUiCategoryId <= 43) return '장비';
-  if (itemUiCategoryId === 58) return '마테리아';
-  if (itemUiCategoryId >= 64 && itemUiCategoryId <= 83) return '하우징';
+export function getOfficialCategoryName(itemUiCategoryId, itemName = '') {
+  const categoryId = Number.parseInt(String(itemUiCategoryId ?? ''), 10);
+  const name = String(itemName ?? '');
+
+  if (categoryId === 44) return '소모품';
+  if (categoryId === 46) return '요리';
+  // Some dye items are filed under the upstream's alchemy-material group.
+  // The item name is the more precise, user-facing category in that case.
+  if (name.includes('염료')) return '염료';
+  if (categoryId === 55) return '염료';
+  if (categoryId === 58) return '마테리아';
+  if (categoryId === 81) return '꼬마 친구';
+  if (categoryId === 82) return '재배용품';
+  if (categoryId === 112) return '룩템';
+  if (categoryId === 61 && /궤짝|스타일카탈로그/.test(name)) return '룩템';
+  if (EQUIPMENT_UI_CATEGORIES.has(categoryId)) return '장비';
+  if (MATERIAL_UI_CATEGORIES.has(categoryId)) return '재료';
+  if (HOUSING_UI_CATEGORIES.has(categoryId)) return '하우징';
   return '기타';
 }
 
@@ -173,7 +227,7 @@ export function buildItemsFromCsv(csvText) {
       id,
       name,
       icon: getIconPath(row[columns.icon]),
-      category: getOfficialCategoryName(itemUiCategory),
+      category: getOfficialCategoryName(itemUiCategory, name),
     });
   }
 
@@ -182,6 +236,12 @@ export function buildItemsFromCsv(csvText) {
 
 function matchesMasterKeyword(item, keyword) {
   if (!item.name.includes(keyword.term)) return false;
+
+  // "파이" is also part of names such as 사파이어 and 파이싸. Only a
+  // source item already classified as food can satisfy the food keyword.
+  if ((keyword.term === '파이' || keyword.term === '샐러드') && item.category !== '요리') {
+    return false;
+  }
 
   if (keyword.term === '환혹약' || keyword.term === '보석약' || keyword.term === '환약') {
     if (!['4등급', '7등급', '8등급'].some((grade) => item.name.includes(grade))) {
@@ -212,7 +272,9 @@ export function buildMasterItems(items, limit = MASTER_ITEM_LIMIT) {
       id: item.id,
       name: item.name,
       icon: item.icon,
-      category: keyword.category,
+      // Keyword matching only curates the featured list. The displayed
+      // category must remain the official source category for that item.
+      category: item.category,
     });
     includedIds.add(item.id);
   }
