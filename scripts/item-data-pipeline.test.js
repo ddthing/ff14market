@@ -4,6 +4,7 @@ import {
   buildItemsFromCsv,
   buildMasterItems,
   buildSearchCatalog,
+  getOfficialCategoryName,
   parseCsv,
   validateItemCollections,
   validateSearchCatalog,
@@ -48,6 +49,39 @@ test('buildItemsFromCsv keeps marketable items and deduplicates ids', () => {
   assert.deepEqual(items.map((item) => item.id), [20]);
   assert.equal(items[0].category, '소모품');
   assert.equal(items[0].icon, '/i/056000/056892.png');
+});
+
+test('getOfficialCategoryName maps the official UI category groups', () => {
+  assert.equal(getOfficialCategoryName(33), '재료');
+  assert.equal(getOfficialCategoryName(45), '재료');
+  assert.equal(getOfficialCategoryName(46), '요리');
+  assert.equal(getOfficialCategoryName(54, '코치닐 염료'), '염료');
+  assert.equal(getOfficialCategoryName(55), '염료');
+  assert.equal(getOfficialCategoryName(57), '하우징');
+  assert.equal(getOfficialCategoryName(84), '장비');
+  assert.equal(getOfficialCategoryName(112), '룩템');
+  assert.equal(getOfficialCategoryName(61, '우주복 궤짝'), '룩템');
+});
+
+test('buildMasterItems keeps source categories and rejects substring keyword false positives', () => {
+  const items = [
+    { id: 200, name: '사파이어 목장식', icon: '', category: '장비' },
+    { id: 201, name: '견과파이', icon: '', category: '요리' },
+    { id: 202, name: '스타 사파이어 오르골', icon: '', category: '하우징' },
+    { id: 203, name: '티타늄금 수호자 투구', icon: '', category: '장비' },
+    { id: 204, name: '우주 궤짝 의자', icon: '', category: '하우징' },
+    { id: 205, name: '파이싸킬러', icon: '', category: '재료' },
+  ];
+
+  const masterItems = buildMasterItems(items, 20);
+  const categoriesByName = new Map(masterItems.map((item) => [item.name, item.category]));
+
+  assert.equal(categoriesByName.get('견과파이'), '요리');
+  assert.equal(categoriesByName.get('티타늄금 수호자 투구'), '장비');
+  assert.equal(categoriesByName.get('우주 궤짝 의자'), '하우징');
+  assert.equal(categoriesByName.has('사파이어 목장식'), false);
+  assert.equal(categoriesByName.has('스타 사파이어 오르골'), false);
+  assert.equal(categoriesByName.has('파이싸킬러'), false);
 });
 
 test('buildMasterItems retains the curated selection rules for new data', () => {
