@@ -7,6 +7,7 @@ import { useEffect } from 'react'
 import { useThemeStore } from './store/useThemeStore'
 
 import { ToastContainer } from './components/ui/ToastContainer';
+import { GlobalSearch } from './components/ui/GlobalSearch';
 
 // Lazy load pages
 const Dashboard = lazy(() => import('./features/dashboard/Dashboard').then(m => ({ default: m.Dashboard })));
@@ -68,6 +69,7 @@ function App() {
       <Router>
         <div className="min-h-screen flex flex-col font-sans">
           <Header />
+          <GlobalSearch />
           <main className="mobile-page-main container mx-auto flex-grow px-4 pb-20 pt-6 md:max-w-6xl md:py-8">
             <ToastContainer />
             <Suspense fallback={<LoadingFallback />}>

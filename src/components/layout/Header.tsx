@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { ChevronDown, Sun, Moon, Home, Flame, Heart, Coins, Search } from 'lucide-react';
 import { NavLink, Link } from 'react-router-dom';
 import { useServerStore } from '../../store/useServerStore';
+import { useSearchStore } from '../../store/useSearchStore';
 import { useThemeStore } from '../../store/useThemeStore';
-import { ItemSearch } from '../ui/ItemSearch';
 
 const SERVERS = [
   { id: 'Chocobo', name: '초코보' },
@@ -15,9 +15,10 @@ const SERVERS = [
 
 export const Header = () => {
   const { server, setServer } = useServerStore();
+  const isSearchOpen = useSearchStore((state) => state.isOpen);
+  const openSearch = useSearchStore((state) => state.open);
   const { theme, setTheme } = useThemeStore();
   const [systemPrefersDark, setSystemPrefersDark] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -56,20 +57,15 @@ export const Header = () => {
             </nav>
           </div>
 
-          <div className="hidden min-w-0 flex-1 justify-center px-3 lg:flex">
-            <div className="w-full max-w-[280px]">
-              <ItemSearch variant="compact" />
-            </div>
-          </div>
-
           <div className="ml-auto flex shrink-0 items-center space-x-2">
             <button
               type="button"
-              onClick={() => setIsSearchOpen((open) => !open)}
-              className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-md text-[var(--app-ink-muted)] transition-colors hover:bg-[var(--app-surface-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-surface)] lg:hidden"
-              aria-label={isSearchOpen ? '아이템 검색 닫기' : '아이템 검색 열기'}
+              onClick={openSearch}
+              className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-md text-[var(--app-ink-muted)] transition-colors hover:bg-[var(--app-surface-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-surface)]"
+              aria-label="아이템 검색 열기"
               aria-expanded={isSearchOpen}
-              aria-controls="mobile-item-search"
+              aria-controls="global-item-search"
+              data-search-trigger="true"
             >
               <Search className="h-[18px] w-[18px]" aria-hidden="true" />
             </button>
@@ -104,18 +100,6 @@ export const Header = () => {
           </div>
         </div>
 
-        {isSearchOpen && (
-          <div id="mobile-item-search" className="absolute inset-x-0 top-full border-b border-[var(--app-hairline)] bg-[var(--app-surface)] p-3 shadow-[0_8px_24px_rgba(23,25,28,0.08)] lg:hidden">
-            <div className="mx-auto max-w-md">
-              <ItemSearch
-                variant="compact"
-                autoFocus
-                onSelect={() => setIsSearchOpen(false)}
-                onEscape={() => setIsSearchOpen(false)}
-              />
-            </div>
-          </div>
-        )}
       </header>
 
       <nav className="mobile-bottom-nav fixed inset-x-3 z-40 border border-[var(--app-hairline)] bg-[var(--app-surface)]/95 backdrop-blur-lg md:hidden" aria-label="주요 메뉴">

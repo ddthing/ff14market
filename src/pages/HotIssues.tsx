@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Activity, BadgeDollarSign, Info, TrendingDown, type LucideIcon } from 'lucide-react';
+import { Activity, BadgeDollarSign, Info, Search, TrendingDown, type LucideIcon } from 'lucide-react';
 import { useItemData } from '../hooks/useItemData';
 import { ItemListItem } from '../components/ui/ItemListItem';
 import { SkeletonRow } from '../components/ui/SkeletonRow';
@@ -8,6 +8,7 @@ import { useServerStore } from '../store/useServerStore';
 import { selectCurrentPriceGapItems, selectHotIssueItems, selectRecentVolumeItems, type HotIssueTab } from '../utils/marketRankings';
 import { Seo } from '../components/seo/Seo';
 import { formatSaleVelocity } from '../utils/marketMetrics';
+import { useSearchStore } from '../store/useSearchStore';
 
 type TabType = HotIssueTab;
 
@@ -60,6 +61,7 @@ export const HotIssues = () => {
     refetch,
   } = useItemData();
   const { server } = useServerStore();
+  const openSearch = useSearchStore((state) => state.open);
   const [activeTab, setActiveTab] = useState<TabType>('volume');
   const activeConfig = TAB_CONFIG[activeTab];
   const ActiveIcon = activeConfig.icon;
@@ -105,9 +107,19 @@ export const HotIssues = () => {
           <p className="mb-2 text-[12px] font-bold uppercase tracking-[0.16em] text-[var(--app-accent)]">
             {SERVER_LABELS[server] ?? server} · {snapshotStale ? '이전 수집 데이터' : '수집 스냅샷'}
           </p>
-          <h1 className="text-[24px] font-bold tracking-[-0.03em] text-[var(--app-ink)] sm:text-[28px]">
-            오늘의 장터 신호
-          </h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-[24px] font-bold tracking-[-0.03em] text-[var(--app-ink)] sm:text-[28px]">
+              오늘의 장터 신호
+            </h1>
+            <button
+              type="button"
+              onClick={openSearch}
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-[var(--app-hairline)] bg-[var(--app-surface)] px-2.5 text-[12px] font-bold text-[var(--app-ink-muted)] transition-colors hover:border-[var(--app-accent)]/50 hover:bg-[var(--app-surface-subtle)] hover:text-[var(--app-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/50"
+            >
+              <Search className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>아이템 찾기</span>
+            </button>
+          </div>
           <p className="mt-2 max-w-2xl text-[14px] leading-6 text-[var(--app-ink-muted)]">
             같은 데이터를 서로 다른 기준으로 읽어보세요. 각 순위는 현재 선택한 장터 서버 기준입니다.
           </p>
