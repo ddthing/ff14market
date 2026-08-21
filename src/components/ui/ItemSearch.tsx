@@ -36,6 +36,8 @@ export const ItemSearch = memo(({
   const listboxId = useId();
   const navigate = useNavigate();
   const isHero = variant === 'hero';
+  // iOS Safari zooms focused inputs below 16px; compact sizing starts at md.
+  const inputClassName = isHero ? 'pl-4 pr-6 text-[16px] md:text-[18px]' : 'px-2.5 pr-3 text-[16px] md:text-[13px]';
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -145,9 +147,7 @@ export const ItemSearch = memo(({
             onFocus={() => {
               if (searchQuery) setIsDropdownOpen(true);
             }}
-            className={`h-full w-full bg-transparent font-medium text-[var(--app-ink)] placeholder-[var(--app-ink-muted)] focus:outline-none ${
-              isHero ? 'pl-4 pr-6 text-[16px] md:text-[18px]' : 'px-2.5 pr-3 text-[13px]'
-            }`}
+            className={`h-full w-full bg-transparent font-medium text-[var(--app-ink)] placeholder-[var(--app-ink-muted)] focus:outline-none ${inputClassName}`}
           />
         </div>
 
