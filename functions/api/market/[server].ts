@@ -1,5 +1,8 @@
 import {
   buildMarketSnapshot,
+  buildMarketSnapshotFromCurrent,
+  createCurrentSnapshot,
+  fetchCurrentStats,
   isSupportedServer,
   MarketDataError,
   refreshSnapshotIfAllowed,
@@ -54,6 +57,7 @@ const scheduleStaleSnapshotRefresh = (
   context: MarketRequestContext,
   bucket: SnapshotBucket,
   server: string,
+  buildSnapshot: () => Promise<MarketSnapshot> = () => buildMarketSnapshot(server, MARKET_ITEM_IDS),
 ) => {
   if (!context.waitUntil) return;
 
@@ -62,7 +66,7 @@ const scheduleStaleSnapshotRefresh = (
     refreshSnapshotIfAllowed(
       bucket,
       server,
-      () => buildMarketSnapshot(server, MARKET_ITEM_IDS),
+      buildSnapshot,
     ).catch((error) => {
       console.error('Stale market snapshot refresh failed', { server, error });
     }),
@@ -84,7 +88,20 @@ export const onRequestGet = async (context: MarketRequestContext & { params: { s
   }
 
   try {
-    const snapshot = await buildMarketSnapshot(server, MARKET_ITEM_IDS);
+    const current = await fetchCurrentStats(server, MARKET_ITEM_IDS);
+    if (bucket && context.waitUntil) {
+      // Show current prices immediately; history ranking is filled into R2 in the background.
+      const preview = createCurrentSnapshot(server, current);
+      scheduleStaleSnapshotRefresh(
+        context,
+        bucket,
+        server,
+        () => buildMarketSnapshotFromCurrent(server, current),
+      );
+      return toResponse(preview, 'upstream-fallback', false);
+    }
+
+    const snapshot = await buildMarketSnapshotFromCurrent(server, current);
     if (bucket) {
       context.waitUntil?.(bucket.put(snapshotKey(server), JSON.stringify(snapshot), {
         httpMetadata: {

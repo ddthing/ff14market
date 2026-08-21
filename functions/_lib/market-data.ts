@@ -267,19 +267,33 @@ export const fetchPriceChanges = async (
   };
 };
 
-export const buildMarketSnapshot = async (
+export const createCurrentSnapshot = (
   server: string,
-  itemIds: number[],
+  current: ChunkFetchResult<Record<string, UniversalisItemData>>,
+  generatedAt = Date.now(),
+): MarketSnapshot => ({
+  schemaVersion: 1,
+  server,
+  generatedAt,
+  historyReady: false,
+  partial: current.partial,
+  items: current.data,
+  priceChanges: {},
+});
+
+export const buildMarketSnapshotFromCurrent = async (
+  server: string,
+  current: ChunkFetchResult<Record<string, UniversalisItemData>>,
   fetcher: Fetcher = fetch,
   signal?: AbortSignal,
 ): Promise<MarketSnapshot> => {
-  const current = await fetchCurrentStats(server, itemIds, fetcher, signal);
+  const preview = createCurrentSnapshot(server, current);
   let priceChanges: Record<string, PriceChange> = {};
   let historyReady = false;
   let partial = current.partial;
 
   try {
-    const history = await fetchPriceChanges(server, itemIds, fetcher, signal);
+    const history = await fetchPriceChanges(server, Object.keys(current.data).map(Number), fetcher, signal);
     priceChanges = history.data;
     historyReady = !history.partial;
     partial ||= history.partial;
@@ -290,14 +304,21 @@ export const buildMarketSnapshot = async (
   }
 
   return {
-    schemaVersion: 1,
-    server,
-    generatedAt: Date.now(),
+    ...preview,
     historyReady,
     partial,
-    items: current.data,
     priceChanges,
   };
+};
+
+export const buildMarketSnapshot = async (
+  server: string,
+  itemIds: number[],
+  fetcher: Fetcher = fetch,
+  signal?: AbortSignal,
+): Promise<MarketSnapshot> => {
+  const current = await fetchCurrentStats(server, itemIds, fetcher, signal);
+  return buildMarketSnapshotFromCurrent(server, current, fetcher, signal);
 };
 
 export const fetchItemDetail = async (
