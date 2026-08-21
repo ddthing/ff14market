@@ -15,8 +15,8 @@ export interface UniversalisItemData {
 
 export interface KoreaDCResponse {
   itemID: number;
-  listings?: { worldName: string; pricePerUnit: number; hq: boolean }[];
-  recentHistory?: { worldName: string; pricePerUnit: number; timestamp: number }[];
+  listings?: { worldName: string; pricePerUnit: number; hq?: boolean }[];
+  recentHistory?: { worldName?: string; pricePerUnit: number; timestamp: number }[];
   currentAveragePrice: number;
   minPrice: number;
   minPriceNQ: number;

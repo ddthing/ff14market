@@ -9,6 +9,7 @@ import { selectCurrentPriceGapItems, selectHotIssueItems, selectRecentVolumeItem
 import { Seo } from '../components/seo/Seo';
 import { formatSaleVelocity } from '../utils/marketMetrics';
 import { useSearchStore } from '../store/useSearchStore';
+import { getMarketServerLabel } from '../constants/market';
 
 type TabType = HotIssueTab;
 
@@ -40,14 +41,6 @@ const TAB_CONFIG: Record<TabType, {
     formula: 'minPrice · 최저 매물가',
     empty: '현재 등록된 매물이 있는 품목이 아직 없습니다.',
   },
-};
-
-const SERVER_LABELS: Record<string, string> = {
-  Chocobo: '초코보',
-  Moogle: '모그리',
-  Carbuncle: '카벙클',
-  Tonberry: '톤베리',
-  Fenrir: '펜리르',
 };
 
 export const HotIssues = () => {
@@ -105,7 +98,7 @@ export const HotIssues = () => {
       <header className="flex flex-col gap-4 px-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="mb-2 text-[12px] font-bold uppercase tracking-[0.16em] text-[var(--app-accent)]">
-            {SERVER_LABELS[server] ?? server} · {snapshotStale ? '이전 수집 데이터' : '수집 스냅샷'}
+            {getMarketServerLabel(server)} · {snapshotStale ? '이전 수집 데이터' : '수집 스냅샷'}
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-[24px] font-bold tracking-[-0.03em] text-[var(--app-ink)] sm:text-[28px]">

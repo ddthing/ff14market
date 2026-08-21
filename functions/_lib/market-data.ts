@@ -5,9 +5,10 @@ import type {
   PriceChange,
   UniversalisItemData,
 } from '../../src/types/market.ts';
+import { MARKET_SERVERS } from '../../src/constants/market.ts';
 
 export const UPSTREAM_BASE_URL = 'https://universalis.app/api/v2';
-export const SUPPORTED_SERVERS = ['Chocobo', 'Moogle', 'Carbuncle', 'Tonberry', 'Fenrir'] as const;
+export const SUPPORTED_SERVERS = MARKET_SERVERS.map(({ id }) => id);
 export const CURRENT_CHUNK_SIZE = 50;
 export const HISTORY_CHUNK_SIZE = 50;
 export const MAX_UPSTREAM_CONCURRENCY = 2;
@@ -16,6 +17,24 @@ export const HISTORY_WINDOW_MILLISECONDS = HISTORY_WINDOW_SECONDS * 1000;
 export const HISTORY_ENTRIES_LIMIT = 1800;
 export const SNAPSHOT_TTL_MS = 5 * 60 * 1000;
 export const SNAPSHOT_REFRESH_COOLDOWN_MS = 60 * 1000;
+
+/** Keep the detail payload to fields rendered by ItemDetail and ItemModal. */
+export const ITEM_DETAIL_ENTRIES = 7;
+export const ITEM_DETAIL_FIELDS = [
+  'itemID',
+  'minPrice',
+  'minPriceNQ',
+  'minPriceHQ',
+  'currentAveragePrice',
+  'averagePrice',
+  'regularSaleVelocity',
+  'lastUploadTime',
+  'listings.worldName',
+  'listings.pricePerUnit',
+  'listings.hq',
+  'recentHistory.pricePerUnit',
+  'recentHistory.timestamp',
+].join(',');
 
 export interface SnapshotBucketObject {
   text(): Promise<string>;
@@ -327,7 +346,13 @@ export const fetchItemDetail = async (
   signal?: AbortSignal,
 ): Promise<KoreaDCResponse | null> => {
   try {
-    return await requestJson<KoreaDCResponse>(`${UPSTREAM_BASE_URL}/Korea/${itemId}`, fetcher, signal);
+    const params = new URLSearchParams({
+      // The chart renders at most seven points. Avoid the endpoint's default
+      // history payload and explicitly request only the fields used by the UI.
+      entries: String(ITEM_DETAIL_ENTRIES),
+      fields: ITEM_DETAIL_FIELDS,
+    });
+    return await requestJson<KoreaDCResponse>(`${UPSTREAM_BASE_URL}/Korea/${itemId}?${params.toString()}`, fetcher, signal);
   } catch (error) {
     if (error instanceof MarketDataError && error.status === 404) return null;
     throw error;

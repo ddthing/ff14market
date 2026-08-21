@@ -3,7 +3,10 @@ import test from 'node:test';
 import {
   buildMarketSnapshotFromCurrent,
   createCurrentSnapshot,
+  fetchItemDetail,
   fetchCurrentStats,
+  ITEM_DETAIL_ENTRIES,
+  ITEM_DETAIL_FIELDS,
   isSnapshotRefreshDue,
   refreshSnapshotIfAllowed,
   SNAPSHOT_REFRESH_COOLDOWN_MS,
@@ -64,6 +67,23 @@ test('current market keeps successful chunks when one upstream chunk fails', asy
   assert.equal(result.partial, true);
   assert.equal(Object.keys(result.data).length, 50);
   assert.ok(callCount >= 3, 'the retry policy should make the failed chunk observable');
+});
+
+test('item detail requests only the fields and history points rendered by the UI', async () => {
+  let requestedUrl = '';
+  const fetcher = async (url: string) => {
+    requestedUrl = url;
+    return response({ itemID: 33939, listings: [], recentHistory: [] });
+  };
+
+  const result = await fetchItemDetail(33939, fetcher);
+  const url = new URL(requestedUrl);
+
+  assert.equal(result?.itemID, 33939);
+  assert.equal(url.searchParams.get('entries'), String(ITEM_DETAIL_ENTRIES));
+  assert.equal(url.searchParams.get('fields'), ITEM_DETAIL_FIELDS);
+  assert.ok(url.searchParams.get('fields')?.includes('listings.worldName'));
+  assert.ok(url.searchParams.get('fields')?.includes('recentHistory.timestamp'));
 });
 
 test('current snapshot preview is usable before history finishes', async () => {
