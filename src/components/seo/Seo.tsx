@@ -7,6 +7,7 @@ type SeoProps = {
   description: string;
   path: string;
   noIndex?: boolean;
+  structuredData?: Record<string, unknown>;
 };
 
 const upsertMeta = (attribute: 'name' | 'property', key: string, content: string) => {
@@ -19,7 +20,7 @@ const upsertMeta = (attribute: 'name' | 'property', key: string, content: string
   if (!existing) document.head.appendChild(meta);
 };
 
-export const Seo = ({ title, description, path, noIndex = false }: SeoProps) => {
+export const Seo = ({ title, description, path, noIndex = false, structuredData }: SeoProps) => {
   useEffect(() => {
     const configuredSiteUrl = import.meta.env.VITE_SITE_URL?.trim();
     const siteUrl = (configuredSiteUrl || window.location.origin).replace(/\/$/, '');
@@ -52,14 +53,14 @@ export const Seo = ({ title, description, path, noIndex = false }: SeoProps) => 
     }
     canonical.href = canonicalUrl;
 
-    let structuredData = document.getElementById('site-structured-data') as HTMLScriptElement | null;
-    if (!structuredData) {
-      structuredData = document.createElement('script');
-      structuredData.id = 'site-structured-data';
-      structuredData.type = 'application/ld+json';
-      document.head.appendChild(structuredData);
+    let structuredDataScript = document.getElementById('site-structured-data') as HTMLScriptElement | null;
+    if (!structuredDataScript) {
+      structuredDataScript = document.createElement('script');
+      structuredDataScript.id = 'site-structured-data';
+      structuredDataScript.type = 'application/ld+json';
+      document.head.appendChild(structuredDataScript);
     }
-    structuredData.textContent = JSON.stringify({
+    structuredDataScript.textContent = JSON.stringify({
       '@context': 'https://schema.org',
       '@type': pageType,
       name: title,
@@ -71,8 +72,9 @@ export const Seo = ({ title, description, path, noIndex = false }: SeoProps) => 
         name: SITE_NAME,
         url: `${siteUrl}/`,
       },
+      ...structuredData,
     });
-  }, [description, noIndex, path, title]);
+  }, [description, noIndex, path, structuredData, title]);
 
   return null;
 };
