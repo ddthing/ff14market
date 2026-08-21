@@ -25,6 +25,7 @@ export const ItemListItem = memo(({ item, signal }: {
   const prefetchTimerRef = useRef<number | null>(null);
   const metricValue = signal ? signal.value : item.fluctuation;
   const metricTone = signal?.tone ?? (metricValue === null ? 'neutral' : metricValue > 0 ? 'positive' : metricValue < 0 ? 'negative' : 'neutral');
+  const formattedPrice = item.price > 0 ? `${item.price.toLocaleString()} G` : '데이터 없음';
 
   const cancelPrefetch = () => {
     if (prefetchTimerRef.current === null) return;
@@ -97,26 +98,58 @@ export const ItemListItem = memo(({ item, signal }: {
         </div>
         <div className="min-w-0 flex-1">
           <div className="min-w-0 sm:flex sm:items-center">
-            <div className="min-w-0 overflow-hidden sm:flex-1">
-              <span className="block truncate text-[15px] font-bold leading-tight text-[var(--app-ink)] sm:text-[16px]">
-                {item.name}
-              </span>
-              <span className="mt-[2px] flex items-center space-x-2 truncate text-[12px] font-medium text-[var(--app-ink-muted)]">
-                <span className="shrink-0">{item.category}</span>
-                <span className="h-[3px] w-[3px] shrink-0 rounded-full bg-[var(--app-hairline)]"></span>
-                <span className="inline-flex min-w-0 items-center truncate text-xs text-[var(--app-ink-muted)]">
-                  최근 판매속도 {formatSaleVelocity(item.volume)}건/일 {item.volume >= 50 && <Flame className="ml-1 h-3.5 w-3.5 shrink-0 text-[var(--app-accent)]" aria-hidden="true" />}
+            <div className="flex min-w-0 items-start gap-2 sm:contents">
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <span className="block truncate text-[15px] font-bold leading-tight text-[var(--app-ink)] sm:text-[16px]">
+                  {item.name}
                 </span>
-              </span>
+                <span className="mt-[2px] flex min-w-0 items-center space-x-2 truncate text-[12px] font-medium text-[var(--app-ink-muted)]">
+                  <span className="shrink-0">{item.category}</span>
+                  <span className="h-[3px] w-[3px] shrink-0 rounded-full bg-[var(--app-hairline)]"></span>
+                  <span className="inline-flex min-w-0 items-center truncate text-xs text-[var(--app-ink-muted)]">
+                    최근 판매속도 {formatSaleVelocity(item.volume)}건/일 {item.volume >= 50 && <Flame className="ml-1 h-3.5 w-3.5 shrink-0 text-[var(--app-accent)]" aria-hidden="true" />}
+                  </span>
+                </span>
+              </div>
+
+              <div className="flex w-[78px] shrink-0 flex-col items-end justify-center text-right sm:hidden">
+                <span className="sr-only">최저 매물가 </span>
+                <span className="whitespace-nowrap text-[15px] font-bold leading-tight text-[var(--app-ink)]" title="최저 매물가">
+                  {formattedPrice}
+                </span>
+                {item.price > 0 && item.lastUploadTime !== undefined && (
+                  <span className="mt-[3px] whitespace-nowrap text-[10px] font-normal leading-none text-[var(--app-ink-muted)]">
+                    {formatFreshness(item.lastUploadTime)}
+                  </span>
+                )}
+              </div>
             </div>
 
-            <div className="mt-1 flex shrink-0 items-center justify-end gap-2 sm:ml-2 sm:mt-0 sm:gap-6 md:gap-12">
+            <div className="mt-1 flex min-w-0 items-center justify-end gap-1.5 sm:hidden">
+              <span className="shrink-0 text-[10px] font-medium leading-none text-[var(--app-ink-muted)]">
+                {signal?.label ?? '매물-판매'}
+              </span>
+              {metricValue === null ? (
+                <span className="truncate text-[10px] font-medium text-[var(--app-ink-muted)]" title={signal?.title ?? '현재 평균 매물가와 최근 평균 판매가가 모두 있어야 비교할 수 있습니다.'}>
+                  비교 불가
+                </span>
+              ) : (
+                <span className={`whitespace-nowrap text-[12px] font-medium ${
+                  metricTone === 'positive' ? 'text-red-500' :
+                  metricTone === 'negative' ? 'text-blue-600 dark:text-blue-400' : 'text-[var(--app-ink-muted)]'
+                }`}>
+                  {signal?.format ? signal.format(metricValue) : formatMarketPriceGap(metricValue)}
+                </span>
+              )}
+            </div>
+
+            <div className="hidden shrink-0 items-center justify-end gap-2 sm:flex sm:ml-2 sm:gap-6 md:gap-12">
               <div className="flex w-16 flex-col items-end justify-center text-right sm:w-28">
                 <span className="mb-[3px] text-[10px] font-medium leading-none text-[var(--app-ink-muted)]">
                   최저 매물가
                 </span>
                 <span className="whitespace-nowrap text-[15px] font-bold leading-tight text-[var(--app-ink)] sm:text-[16px]">
-                  {item.price > 0 ? `${item.price.toLocaleString()} G` : '데이터 없음'}
+                  {formattedPrice}
                 </span>
                 {item.price > 0 && item.lastUploadTime !== undefined && (
                   <span className="mt-[3px] whitespace-nowrap text-[10px] font-normal leading-none text-[var(--app-ink-muted)]">
