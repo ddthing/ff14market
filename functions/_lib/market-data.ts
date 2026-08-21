@@ -96,6 +96,13 @@ export interface MarketSyncTelemetrySummary {
   totals: ChunkFetchMetrics;
 }
 
+export interface ItemDetailTelemetry {
+  upstreamDurationMs: number;
+  upstreamPayloadBytes: number;
+  attempts: number;
+  lastStatus: number | null;
+}
+
 type Fetcher = (input: string, init?: RequestInit) => Promise<Response>;
 
 interface HistoryResponse {
@@ -155,6 +162,13 @@ export const createMarketSyncTelemetry = (startedAt = Date.now()): MarketSyncTel
   },
 });
 
+export const createItemDetailTelemetry = (): ItemDetailTelemetry => ({
+  upstreamDurationMs: 0,
+  upstreamPayloadBytes: 0,
+  attempts: 0,
+  lastStatus: null,
+});
+
 export const summarizeMarketSyncTelemetry = (
   telemetry: MarketSyncTelemetry,
   completedAt = Date.now(),
@@ -211,6 +225,10 @@ const recordRequestAttempt = (metrics?: ChunkFetchMetrics) => {
   if (metrics) metrics.requests += 1;
 };
 
+const recordDetailRequestAttempt = (telemetry?: ItemDetailTelemetry) => {
+  if (telemetry) telemetry.attempts += 1;
+};
+
 const recordResponseStatus = (metrics: ChunkFetchMetrics | undefined, status: number) => {
   if (!metrics) return;
   if (status === 429) metrics.rateLimitResponses += 1;
@@ -222,44 +240,60 @@ const requestJson = async <T>(
   fetcher: Fetcher = fetch,
   signal?: AbortSignal,
   metrics?: ChunkFetchMetrics,
+  detailTelemetry?: ItemDetailTelemetry,
 ): Promise<T> => {
   let lastError: unknown;
+  const startedAt = Date.now();
 
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    const timeout = withTimeout(signal);
-    try {
-      recordRequestAttempt(metrics);
-      const response = await fetcher(url, {
-        headers: {
-          Accept: 'application/json',
-          'User-Agent': 'FF14Market/1.0 (+https://ff14market.pages.dev)',
-        },
-        signal: timeout.signal,
-      });
-      recordResponseStatus(metrics, response.status);
+  try {
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const timeout = withTimeout(signal);
+      try {
+        recordRequestAttempt(metrics);
+        recordDetailRequestAttempt(detailTelemetry);
+        const response = await fetcher(url, {
+          headers: {
+            Accept: 'application/json',
+            'User-Agent': 'FF14Market/1.0 (+https://ff14market.pages.dev)',
+          },
+          signal: timeout.signal,
+        });
+        recordResponseStatus(metrics, response.status);
+        if (detailTelemetry) detailTelemetry.lastStatus = response.status;
 
-      if (response.ok) return await response.json() as T;
+        if (response.ok) {
+          if (!detailTelemetry) return await response.json() as T;
 
-      const retryable = response.status === 429 || response.status === 500 || response.status === 502 || response.status === 503 || response.status === 504;
-      lastError = new MarketDataError(`Universalis responded with HTTP ${response.status}`, response.status);
-      if (!retryable || attempt === 1) throw lastError;
+          const body = await response.arrayBuffer();
+          detailTelemetry.upstreamPayloadBytes = body.byteLength;
+          return JSON.parse(new TextDecoder().decode(body)) as T;
+        }
 
-      if (metrics) metrics.retries += 1;
-      await wait(getRetryDelay(response, attempt));
-    } catch (error) {
-      lastError = error;
-      if (error instanceof MarketDataError && error.status && ![429, 500, 502, 503, 504].includes(error.status)) {
-        throw error;
+        const retryable = response.status === 429 || response.status === 500 || response.status === 502 || response.status === 503 || response.status === 504;
+        lastError = new MarketDataError(`Universalis responded with HTTP ${response.status}`, response.status);
+        if (!retryable || attempt === 1) throw lastError;
+
+        if (metrics) metrics.retries += 1;
+        await wait(getRetryDelay(response, attempt));
+      } catch (error) {
+        lastError = error;
+        if (error instanceof MarketDataError && error.status && ![429, 500, 502, 503, 504].includes(error.status)) {
+          throw error;
+        }
+        if (signal?.aborted || attempt === 1) throw error;
+        if (metrics) metrics.retries += 1;
+        await wait(300 * (2 ** attempt) + Math.floor(Math.random() * 150));
+      } finally {
+        timeout.cleanup();
       }
-      if (signal?.aborted || attempt === 1) throw error;
-      if (metrics) metrics.retries += 1;
-      await wait(300 * (2 ** attempt) + Math.floor(Math.random() * 150));
-    } finally {
-      timeout.cleanup();
+    }
+
+    throw lastError instanceof Error ? lastError : new MarketDataError('Universalis request failed');
+  } finally {
+    if (detailTelemetry) {
+      detailTelemetry.upstreamDurationMs = Math.max(0, Date.now() - startedAt);
     }
   }
-
-  throw lastError instanceof Error ? lastError : new MarketDataError('Universalis request failed');
 };
 
 const settledMapWithConcurrency = async <T, R>(
@@ -482,6 +516,7 @@ export const fetchItemDetail = async (
   itemId: number,
   fetcher: Fetcher = fetch,
   signal?: AbortSignal,
+  telemetry?: ItemDetailTelemetry,
 ): Promise<KoreaDCResponse | null> => {
   try {
     const params = new URLSearchParams({
@@ -490,7 +525,13 @@ export const fetchItemDetail = async (
       entries: String(ITEM_DETAIL_ENTRIES),
       fields: ITEM_DETAIL_FIELDS,
     });
-    return await requestJson<KoreaDCResponse>(`${UPSTREAM_BASE_URL}/Korea/${itemId}?${params.toString()}`, fetcher, signal);
+    return await requestJson<KoreaDCResponse>(
+      `${UPSTREAM_BASE_URL}/Korea/${itemId}?${params.toString()}`,
+      fetcher,
+      signal,
+      undefined,
+      telemetry,
+    );
   } catch (error) {
     if (error instanceof MarketDataError && error.status === 404) return null;
     throw error;

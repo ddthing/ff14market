@@ -3,6 +3,7 @@ import test from 'node:test';
 import {
   buildMarketSnapshotFromCurrent,
   createCurrentSnapshot,
+  createItemDetailTelemetry,
   createMarketSyncTelemetry,
   fetchItemDetail,
   fetchCurrentStats,
@@ -102,12 +103,14 @@ test('upstream retry metrics classify rate limits and server errors', async () =
 
 test('item detail requests only the fields and history points rendered by the UI', async () => {
   let requestedUrl = '';
+  const payload = { itemID: 33939, listings: [], recentHistory: [] };
   const fetcher = async (url: string) => {
     requestedUrl = url;
-    return response({ itemID: 33939, listings: [], recentHistory: [] });
+    return response(payload);
   };
 
-  const result = await fetchItemDetail(33939, fetcher);
+  const telemetry = createItemDetailTelemetry();
+  const result = await fetchItemDetail(33939, fetcher, undefined, telemetry);
   const url = new URL(requestedUrl);
 
   assert.equal(result?.itemID, 33939);
@@ -115,6 +118,13 @@ test('item detail requests only the fields and history points rendered by the UI
   assert.equal(url.searchParams.get('fields'), ITEM_DETAIL_FIELDS);
   assert.ok(url.searchParams.get('fields')?.includes('listings.worldName'));
   assert.ok(url.searchParams.get('fields')?.includes('recentHistory.timestamp'));
+  assert.equal(telemetry.attempts, 1);
+  assert.equal(telemetry.lastStatus, 200);
+  assert.equal(
+    telemetry.upstreamPayloadBytes,
+    new TextEncoder().encode(JSON.stringify(payload)).byteLength,
+  );
+  assert.ok(telemetry.upstreamDurationMs >= 0);
 });
 
 test('current snapshot preview is usable before history finishes', async () => {
