@@ -15,6 +15,7 @@ import {
   summarizeMarketSyncTelemetry,
   type SnapshotBucket,
 } from '../functions/_lib/market-data.ts';
+import { createItemDetailCacheKey } from '../functions/_lib/item-detail-cache.ts';
 
 const response = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
   status,
@@ -125,6 +126,21 @@ test('item detail requests only the fields and history points rendered by the UI
     new TextEncoder().encode(JSON.stringify(payload)).byteLength,
   );
   assert.ok(telemetry.upstreamDurationMs >= 0);
+});
+
+test('item detail cache keys ignore query strings', () => {
+  const first = createItemDetailCacheKey(
+    'https://ff14market.pages.dev/api/item/33939?measure=first',
+    33939,
+  );
+  const second = createItemDetailCacheKey(
+    'https://ff14market.pages.dev/api/item/33939?measure=second',
+    33939,
+  );
+
+  assert.equal(first.url, 'https://ff14market.pages.dev/api/item/33939');
+  assert.equal(first.url, second.url);
+  assert.equal(first.method, 'GET');
 });
 
 test('current snapshot preview is usable before history finishes', async () => {
