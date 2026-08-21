@@ -23,6 +23,12 @@ export interface KoreaDCResponse {
   minPriceHQ: number;
   regularSaleVelocity?: number;
   lastUploadTime?: number;
+  /** Present only when the API had to serve a bounded R2 stale fallback. */
+  marketMeta?: {
+    source: 'r2-stale';
+    cachedAt: number;
+    staleAgeMs: number;
+  };
 }
 
 export interface MarketSnapshot {

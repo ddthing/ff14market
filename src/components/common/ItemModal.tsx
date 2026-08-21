@@ -130,7 +130,9 @@ export const ItemModal = ({ item, onClose }: { item: Item; onClose: () => void }
             <span>
               {isLoading 
                 ? '한국 DC 통합 시세 조회 중...' 
-                : `업데이트: ${formatFreshness(itemData?.lastUploadTime)}`}
+                : itemData?.marketMeta
+                  ? `최근 정상 수집 데이터 · ${formatFreshness(itemData.marketMeta.cachedAt)}`
+                  : `업데이트: ${formatFreshness(itemData?.lastUploadTime)}`}
             </span>
             {!isLoading && (
               <>
@@ -138,7 +140,9 @@ export const ItemModal = ({ item, onClose }: { item: Item; onClose: () => void }
                 <div className="relative group flex items-center justify-center">
                   <HelpCircle className="w-3.5 h-3.5 text-gray-400 dark:text-[#9ea4aa] hover:text-gray-600 dark:hover:text-gray-200 cursor-help" />
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 w-60 hidden group-hover:block bg-gray-900/95 dark:bg-gray-800/95 text-white text-[11px] rounded-lg py-2 px-3 shadow-xl text-center leading-normal z-[120] pointer-events-none transition-all">
-                    Universalis 데이터 제공 시점에 따라 인게임과 약간의 차이가 있을 수 있습니다.
+                    {itemData?.marketMeta
+                      ? '현재 upstream 응답이 지연되어 마지막 정상 수집 데이터를 표시하고 있습니다.'
+                      : 'Universalis 데이터 제공 시점에 따라 인게임과 약간의 차이가 있을 수 있습니다.'}
                     <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900/95 dark:border-t-gray-800/95"></div>
                   </div>
                 </div>

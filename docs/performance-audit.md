@@ -16,6 +16,7 @@
 3. 서버별 최저가는 목록을 서버마다 다시 순회하지 않고 한 번의 누적으로 계산한다.
 4. 데스크톱에서 목록을 빠르게 훑을 때 상세 API 프리패치가 요청 폭주로 이어지지 않도록 320ms 체류와 캐시 상태를 확인한다.
 5. 목록에서 상세 링크에 포인터가 들어오면 상세 route chunk를 먼저 로드해 클릭 순간의 lazy-route 지연을 줄인다.
+6. 정상 상세 응답은 R2에 보관하고, upstream 오류·2.5초 초과 시 15분 이내의 마지막 정상 응답만 명시적인 stale 상태로 반환한다.
 
 ## 데이터 흐름과 책임 경계
 
@@ -71,6 +72,12 @@ Hot 화면을 이미 캐시한 뒤 상세를 반복해서 열면 약 `0.38초`�
 
 변경 전 배포본과 최신 배포본을 새 탭에서 같은 방식으로 측정했을 때 목록→상세 이동은 약 `3.03초`에서 `1.02초`로 줄었다. 측정 도구의 locator 자동 대기는 제외하고 실제 포인터 클릭 기준으로 비교했다.
 
+### P1 — upstream 지연 시 상세 장애 완화
+
+콜드 miss 표본에서 upstream 처리 시간이 `354–1,966ms`로 크게 흔들렸다. 정상 응답을 R2의 `item-details/{itemId}.json`에 별도 저장하고, 같은 아이템의 정상 저장본이 15분 이내에 있을 때만 2.5초 deadline을 둔다. deadline 안에 최신 응답을 받지 못하거나 upstream이 오류를 반환하면 저장본을 `X-Market-Cache: STALE`, `X-Market-Source: r2-stale`, `marketMeta`와 함께 반환한다.
+
+이 경로는 정상 cold miss를 더 빠르게 만든다고 주장하는 최적화가 아니다. 목적은 upstream 변동이 사용자 오류 화면으로 번지는 것을 줄이는 것이며, stale 응답은 `Cache-Control: no-store`로 다시 캐시되지 않는다. 15분을 넘긴 저장본은 사용하지 않아 정확성 경계를 보수적으로 유지한다.
+
 ### P2 — 서버 스냅샷 생성 비용
 
 시장 스냅샷은 current 요약과 최근·이전 7일 history를 분리한다. history는 두 기간을 순차 조회하고 각 기간 내부 동시성을 2로 제한한다. 이는 Universalis가 IP별 동시 연결을 제한하는 구조에서 안정성을 우선한 선택이다.
@@ -90,6 +97,7 @@ Hot 화면을 이미 캐시한 뒤 상세를 반복해서 열면 약 `0.38초`�
 - 서버를 추가할 때는 `src/constants/market.ts`의 `MARKET_SERVERS`만 수정하고, 헤더·Hot·상세 UI에 별도 배열을 만들지 않는다.
 - 서버별 최저가를 표시할 때는 `getServerMinPrices`와 `getAbsoluteMinPrice`를 사용한다.
 - 상세 API 필드를 추가하거나 줄일 때는 `ITEM_DETAIL_FIELDS`와 `scripts/market-data.test.ts`를 함께 수정한다.
+- 상세 fallback의 freshness 계약을 바꿀 때는 `functions/_lib/item-detail-stale-cache.ts`와 `scripts/item-detail-cache.test.ts`의 만료·오류 경계를 함께 수정한다.
 - 순위 계산의 의미를 바꾸는 변경은 `src/utils/marketHistory.test.ts`, `src/utils/marketRankings.test.ts`에 경계값을 먼저 추가한다.
 - 외부 API 동시성을 올리기 전에 Worker 실행 시간과 429/5xx 비율을 확인한다.
 - 성능 최적화는 “빠르게 보인다”와 “정확한 값이다”를 분리해서 검증한다. 서버별 최저가의 정확성을 위해 listings 전체의 가격 필드는 유지한다.
@@ -111,6 +119,7 @@ npm run build
 - 상세: 추천 목록 아이템과 검색 결과 아이템 모두 이름·가격·차트·서버별 최저가 표시
 - 네트워크: 목록을 마우스로 훑을 때 상세 요청이 무제한으로 늘지 않는지
 - API: `X-Market-Source`, `X-Market-History-Ready`, 캐시 헤더가 유지되는지
+- 상세 upstream 장애: `X-Market-Cache: STALE`·`marketMeta`가 표시되고 15분 초과 저장본은 503으로 처리되는지
 - PWA: 새 배포 후 service worker가 이전 JS chunk를 계속 가리키지 않는지
 
 ## 운영 cold/warm 측정
@@ -132,4 +141,4 @@ npm run build
 1. Worker에 서버별 실행 시간, current/history chunk 실패 수, 429·5xx 횟수를 구조화 로그로 남긴다. `market_snapshot_updated`, `market_snapshot_failed`, `market_sync_completed` 이벤트에 current/recent/previous 단계별 `durationMs`, `failedChunks`, `retries`, `rateLimitResponses`, `serverErrors`가 기록되도록 구현했다.
 2. Pages Function에 상세 응답의 upstream duration과 payload byte를 내부 로그로 남긴다. `item_detail_upstream_completed`, `item_detail_upstream_failed`, `item_detail_not_found` 이벤트에 아이템 ID, upstream 처리 시간·바이트·시도 횟수와 최종 상태를 기록하도록 구현했다. 응답 본문과 민감한 정보는 로그에 남기지 않는다.
 3. 명시적 Cache API 배포 후 동일 PoP에서 cold miss·warm hit를 재측정했고, `item_detail_cache_hit` 로그와 `X-Market-Cache` 헤더를 확인했다.
-4. cold miss upstream 지연의 대표 표본을 더 모은 뒤에만 R2/KV 사전 캐시나 상세 API 세분화를 검토한다. 현재는 payload 분할·전역 prewarm을 추가하지 않는다.
+4. R2 stale fallback을 배포한 뒤 `item_detail_stale_fallback` 발생률과 stale age를 관찰한다. 정상 cold miss를 줄이기 위한 KV 사전 캐시·payload 분할·전역 prewarm은 이 수치가 실제로 필요하다고 보여줄 때만 검토한다.

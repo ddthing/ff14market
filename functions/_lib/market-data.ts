@@ -113,8 +113,23 @@ interface CurrentResponse {
   items?: Record<string, UniversalisItemData>;
 }
 
-const wait = (milliseconds: number) => new Promise<void>((resolve) => {
-  setTimeout(resolve, milliseconds);
+const wait = (milliseconds: number, signal?: AbortSignal) => new Promise<void>((resolve) => {
+  if (signal?.aborted) {
+    resolve();
+    return;
+  }
+
+  const timer = setTimeout(() => {
+    signal?.removeEventListener('abort', abort);
+    resolve();
+  }, milliseconds);
+  const abort = () => {
+    clearTimeout(timer);
+    signal?.removeEventListener('abort', abort);
+    resolve();
+  };
+
+  signal?.addEventListener('abort', abort, { once: true });
 });
 
 const createChunkFetchMetrics = (): ChunkFetchMetrics => ({
@@ -274,7 +289,7 @@ const requestJson = async <T>(
         if (!retryable || attempt === 1) throw lastError;
 
         if (metrics) metrics.retries += 1;
-        await wait(getRetryDelay(response, attempt));
+        await wait(getRetryDelay(response, attempt), signal);
       } catch (error) {
         lastError = error;
         if (error instanceof MarketDataError && error.status && ![429, 500, 502, 503, 504].includes(error.status)) {
@@ -282,7 +297,7 @@ const requestJson = async <T>(
         }
         if (signal?.aborted || attempt === 1) throw error;
         if (metrics) metrics.retries += 1;
-        await wait(300 * (2 ** attempt) + Math.floor(Math.random() * 150));
+        await wait(300 * (2 ** attempt) + Math.floor(Math.random() * 150), signal);
       } finally {
         timeout.cleanup();
       }
