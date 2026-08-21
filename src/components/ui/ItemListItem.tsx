@@ -17,6 +17,9 @@ type SignalMetric = {
   tone?: 'positive' | 'negative' | 'neutral';
 };
 
+const DETAIL_PREFETCH_DELAY_MS = 320;
+const DETAIL_STALE_TIME_MS = 5 * 60 * 1000;
+
 export const ItemListItem = memo(({ item, signal }: {
   item: EnrichedItem;
   signal?: SignalMetric;
@@ -36,15 +39,27 @@ export const ItemListItem = memo(({ item, signal }: {
   const schedulePrefetch = () => {
     if (prefetchTimerRef.current !== null) return;
 
+    const queryKey = ['searchItem', 'Korea', item.id] as const;
+    const queryState = queryClient.getQueryState(queryKey);
+    if (
+      queryState?.fetchStatus === 'fetching'
+      || (queryState?.dataUpdatedAt && Date.now() - queryState.dataUpdatedAt < DETAIL_STALE_TIME_MS)
+    ) {
+      return;
+    }
+
     // Moving across a dense list should not start one full detail request per row.
     prefetchTimerRef.current = window.setTimeout(() => {
       prefetchTimerRef.current = null;
       queryClient.prefetchQuery({
-        queryKey: ['searchItem', 'Korea', item.id],
+        queryKey,
         queryFn: ({ signal: requestSignal }) => fetchKoreaDCData(item.id, requestSignal),
-        staleTime: 300000, // 5 minutes
+        staleTime: DETAIL_STALE_TIME_MS,
+      }).catch(() => {
+        // Prefetch is an opportunistic optimization. Navigation owns the
+        // visible error state, so a failed hover request stays silent.
       });
-    }, 120);
+    }, DETAIL_PREFETCH_DELAY_MS);
   };
 
   useEffect(() => () => {

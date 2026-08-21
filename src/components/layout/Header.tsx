@@ -4,14 +4,7 @@ import { NavLink, Link } from 'react-router-dom';
 import { useServerStore } from '../../store/useServerStore';
 import { useSearchStore } from '../../store/useSearchStore';
 import { useThemeStore } from '../../store/useThemeStore';
-
-const SERVERS = [
-  { id: 'Chocobo', name: '초코보' },
-  { id: 'Moogle', name: '모그리' },
-  { id: 'Carbuncle', name: '카벙클' },
-  { id: 'Tonberry', name: '톤베리' },
-  { id: 'Fenrir', name: '펜리르' },
-];
+import { MARKET_SERVERS } from '../../constants/market';
 
 export const Header = () => {
   const { server, setServer } = useServerStore();
@@ -88,7 +81,7 @@ export const Header = () => {
                 aria-label="장터 서버 선택"
                 className="h-10 w-[76px] appearance-none rounded-md bg-[var(--app-surface-subtle)] pl-2 pr-7 text-[12px] font-bold text-[var(--app-ink)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--app-accent)]/50 sm:w-auto sm:pl-3 sm:text-[13px]"
               >
-                {SERVERS.map(s => (
+                {MARKET_SERVERS.map(s => (
                   <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
               </select>

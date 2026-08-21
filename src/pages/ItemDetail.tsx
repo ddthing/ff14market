@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Flame, ArrowLeft } from 'lucide-react';
@@ -11,8 +11,12 @@ import { FavoriteButton } from '../components/ui/FavoriteButton';
 import { DataErrorState } from '../components/ui/DataErrorState';
 import { Seo } from '../components/seo/Seo';
 import { formatSaleVelocity } from '../utils/marketMetrics';
+import masterItems from '../data/masterItems.json';
+import { MARKET_SERVER_NAMES } from '../constants/market';
+import { getAbsoluteMinPrice, getServerMinPrices } from '../utils/marketListings';
 
 const PriceChart = lazy(() => import('../components/common/PriceChart').then(({ PriceChart: Component }) => ({ default: Component })));
+const MASTER_ITEMS_BY_ID = new Map(masterItems.map((candidate) => [candidate.id, candidate] as const));
 
 export const ItemDetail = () => {
   const { id } = useParams();
@@ -21,13 +25,25 @@ export const ItemDetail = () => {
 
   const itemId = id ? parseInt(id) : 0;
 
-  const { data: item, isLoading: isItemLoading, isError: isItemError, refetch: refetchItemMetadata } = useQuery({
+  const localItem = MASTER_ITEMS_BY_ID.get(itemId);
+  const {
+    data: fetchedItem,
+    isLoading: isMetadataLoading,
+    isError: isMetadataError,
+    refetch: refetchItemMetadata,
+  } = useQuery({
     queryKey: ['itemMetadata', itemId],
     queryFn: ({ signal }) => fetchItemMetadata(itemId, signal),
-    enabled: itemId > 0,
+    // Most detail links originate from the curated market list. Reuse the
+    // already bundled metadata and reserve the cold search endpoint for direct
+    // links to items outside that list.
+    enabled: itemId > 0 && !localItem,
     staleTime: 60 * 60 * 1000,
     retry: 1,
   });
+  const item = localItem ?? fetchedItem;
+  const isItemLoading = !localItem && isMetadataLoading;
+  const isItemError = !localItem && isMetadataError;
 
   useEffect(() => {
     if (itemId) {
@@ -44,6 +60,12 @@ export const ItemDetail = () => {
     staleTime: 60000,
     retry: 1,
   });
+
+  const serverPrices = useMemo(
+    () => getServerMinPrices(data?.listings, MARKET_SERVER_NAMES),
+    [data],
+  );
+  const absoluteMin = useMemo(() => getAbsoluteMinPrice(serverPrices), [serverPrices]);
 
   if (isItemLoading) {
     return (
@@ -103,15 +125,6 @@ export const ItemDetail = () => {
     : 0;
   const netPrice = Math.floor(globalMinPrice * 0.95);
   
-  const serverPrices = ['초코보', '모그리', '카벙클', '톤베리', '펜리르'].map(serverName => {
-    const serverListings = itemData?.listings?.filter(l => l.worldName === serverName) || [];
-    const minPrice = serverListings.length > 0 ? Math.min(...serverListings.map(l => l.pricePerUnit)) : 0;
-    return { serverName, minPrice };
-  });
-
-  const validPrices = serverPrices.filter(s => s.minPrice > 0).map(s => s.minPrice);
-  const absoluteMin = validPrices.length > 0 ? Math.min(...validPrices) : 0;
-
   return (
     <>
       <Seo

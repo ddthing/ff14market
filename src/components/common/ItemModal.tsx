@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Flame, X, RefreshCw, HelpCircle } from 'lucide-react';
 import { fetchKoreaDCData } from '../../api/universalis';
@@ -9,20 +9,14 @@ import { useServerStore } from '../../store/useServerStore';
 import { getIconUrl } from '../../utils/icon';
 import { DataErrorState } from '../ui/DataErrorState';
 import type { MarketSnapshotResponse } from '../../types/market';
+import { MARKET_SERVERS, MARKET_SERVER_NAMES } from '../../constants/market';
+import { getAbsoluteMinPrice, getServerMinPrices } from '../../utils/marketListings';
 
 interface Item {
   id: number;
   name: string;
   icon: string;
 }
-
-const SERVERS = [
-  { id: 'Chocobo', name: '초코보' },
-  { id: 'Moogle', name: '모그리' },
-  { id: 'Carbuncle', name: '카벙클' },
-  { id: 'Tonberry', name: '톤베리' },
-  { id: 'Fenrir', name: '펜리르' },
-];
 
 export const ItemModal = ({ item, onClose }: { item: Item; onClose: () => void }) => {
   const [isSpinning, setIsSpinning] = useState(false);
@@ -36,19 +30,22 @@ export const ItemModal = ({ item, onClose }: { item: Item; onClose: () => void }
     retry: 0, // Pages Function already applies bounded upstream retry/backoff
   });
 
+  const serverPrices = useMemo(
+    () => getServerMinPrices(data?.listings, MARKET_SERVER_NAMES),
+    [data],
+  );
+  const absoluteMin = useMemo(() => getAbsoluteMinPrice(serverPrices), [serverPrices]);
+
   // 모달에서 받은 최신 데이터를 리스트 벌크 캐시에 역방향 동기화
   // → 모달을 닫았을 때 리스트 가격이 즉시 최신화됨
   useEffect(() => {
     if (!data) return;
     
     // 현재 선택된 서버의 한글 이름 찾기 (예: '톤베리')
-    const myServerName = SERVERS.find(s => s.id === server)?.name ?? '';
+    const myServerName = MARKET_SERVERS.find((candidate) => candidate.id === server)?.name ?? '';
     
     // 모달이 불러온 Korea DC 전체 데이터 중, '현재 선택된 서버'의 매물만 필터링
-    const myServerListings = data.listings?.filter(l => l.worldName === myServerName) || [];
-    const myServerMinPrice = myServerListings.length > 0 
-      ? Math.min(...myServerListings.map(l => l.pricePerUnit)) 
-      : 0;
+    const myServerMinPrice = serverPrices.find(({ serverName }) => serverName === myServerName)?.minPrice ?? 0;
 
     if (myServerMinPrice <= 0) return;
 
@@ -75,7 +72,7 @@ export const ItemModal = ({ item, onClose }: { item: Item; onClose: () => void }
         };
       }
     );
-  }, [data, item.id, queryClient, server]);
+  }, [data, item.id, queryClient, server, serverPrices]);
 
   const handleRefresh = async () => {
     setIsSpinning(true);
@@ -93,15 +90,6 @@ export const ItemModal = ({ item, onClose }: { item: Item; onClose: () => void }
     ? computeTrueMinPrice(itemData.minPrice ?? 0, itemData.minPriceNQ ?? 0, itemData.minPriceHQ ?? 0)
     : 0;
   const netPrice = Math.floor(globalMinPrice * 0.95);
-
-  const serverPrices = SERVERS.map(s => s.name).map(serverName => {
-    const serverListings = itemData?.listings?.filter(l => l.worldName === serverName) || [];
-    const minPrice = serverListings.length > 0 ? Math.min(...serverListings.map(l => l.pricePerUnit)) : 0;
-    return { serverName, minPrice };
-  });
-
-  const validPrices = serverPrices.filter(s => s.minPrice > 0).map(s => s.minPrice);
-  const absoluteMin = validPrices.length > 0 ? Math.min(...validPrices) : 0;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-6">
