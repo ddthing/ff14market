@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  buildMarketSnapshotFromCurrent,
+  createCurrentSnapshot,
   fetchCurrentStats,
   isSnapshotRefreshDue,
   refreshSnapshotIfAllowed,
@@ -62,6 +64,45 @@ test('current market keeps successful chunks when one upstream chunk fails', asy
   assert.equal(result.partial, true);
   assert.equal(Object.keys(result.data).length, 50);
   assert.ok(callCount >= 3, 'the retry policy should make the failed chunk observable');
+});
+
+test('current snapshot preview is usable before history finishes', async () => {
+  const current = {
+    data: { '1': item(1) },
+    partial: false,
+  };
+  const preview = createCurrentSnapshot('Tonberry', current, 1_000_000);
+
+  assert.equal(preview.generatedAt, 1_000_000);
+  assert.equal(preview.historyReady, false);
+  assert.equal(preview.partial, false);
+  assert.deepEqual(preview.items, current.data);
+  assert.deepEqual(preview.priceChanges, {});
+});
+
+test('history can finish from an already fetched current snapshot', async () => {
+  const calls: string[] = [];
+  const current = {
+    data: { '1': item(1) },
+    partial: false,
+  };
+  const fetcher = async (url: string) => {
+    calls.push(url);
+    return response({
+      items: {
+        '1': {
+          entries: [{ pricePerUnit: 100, quantity: 2, timestamp: 1_000 }],
+        },
+      },
+    });
+  };
+
+  const snapshot = await buildMarketSnapshotFromCurrent('Tonberry', current, fetcher);
+
+  assert.equal(calls.length, 2, 'history should fetch recent and previous windows only');
+  assert.equal(snapshot.historyReady, true);
+  assert.equal(snapshot.partial, false);
+  assert.deepEqual(snapshot.items, current.data);
 });
 
 test('stale snapshot refresh is throttled and writes the refreshed snapshot', async () => {
