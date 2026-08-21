@@ -8,12 +8,13 @@ import { useThemeStore } from './store/useThemeStore'
 
 import { ToastContainer } from './components/ui/ToastContainer';
 import { GlobalSearch } from './components/ui/GlobalSearch';
+import { loadItemDetail } from './routes/itemDetail';
 
 // Lazy load pages
 const Dashboard = lazy(() => import('./features/dashboard/Dashboard').then(m => ({ default: m.Dashboard })));
 const HotIssues = lazy(() => import('./pages/HotIssues').then(m => ({ default: m.HotIssues })));
 const Favorites = lazy(() => import('./pages/Favorites').then(m => ({ default: m.Favorites })));
-const ItemDetail = lazy(() => import('./pages/ItemDetail').then(m => ({ default: m.ItemDetail })));
+const ItemDetail = lazy(loadItemDetail);
 const Guide = lazy(() => import('./pages/Guide').then(m => ({ default: m.Guide })));
 const FAQ = lazy(() => import('./pages/FAQ').then(m => ({ default: m.FAQ })));
 const About = lazy(() => import('./pages/About').then(m => ({ default: m.About })));
