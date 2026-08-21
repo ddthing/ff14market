@@ -62,6 +62,40 @@ export class MarketDataError extends Error {
   }
 }
 
+/**
+ * Metrics for one chunked upstream phase. `requests` includes retry attempts.
+ * Keeping this contract next to the fetch implementation prevents log callers
+ * from reconstructing request behaviour from loosely shaped console output.
+ */
+export interface ChunkFetchMetrics {
+  chunks: number;
+  failedChunks: number;
+  durationMs: number;
+  requests: number;
+  retries: number;
+  rateLimitResponses: number;
+  serverErrors: number;
+}
+
+export interface MarketSyncTelemetry {
+  startedAt: number;
+  current: ChunkFetchMetrics;
+  history: {
+    recent: ChunkFetchMetrics;
+    previous: ChunkFetchMetrics;
+  };
+}
+
+export interface MarketSyncTelemetrySummary {
+  durationMs: number;
+  current: ChunkFetchMetrics;
+  history: {
+    recent: ChunkFetchMetrics;
+    previous: ChunkFetchMetrics;
+  };
+  totals: ChunkFetchMetrics;
+}
+
 type Fetcher = (input: string, init?: RequestInit) => Promise<Response>;
 
 interface HistoryResponse {
@@ -74,6 +108,65 @@ interface CurrentResponse {
 
 const wait = (milliseconds: number) => new Promise<void>((resolve) => {
   setTimeout(resolve, milliseconds);
+});
+
+const createChunkFetchMetrics = (): ChunkFetchMetrics => ({
+  chunks: 0,
+  failedChunks: 0,
+  durationMs: 0,
+  requests: 0,
+  retries: 0,
+  rateLimitResponses: 0,
+  serverErrors: 0,
+});
+
+const resetChunkFetchMetrics = (target: ChunkFetchMetrics | undefined, chunks: number) => {
+  const metrics = target ?? createChunkFetchMetrics();
+  Object.assign(metrics, createChunkFetchMetrics(), { chunks });
+  return metrics;
+};
+
+const combineChunkFetchMetrics = (
+  metricsList: Array<ChunkFetchMetrics | undefined>,
+): ChunkFetchMetrics => {
+  const combined = createChunkFetchMetrics();
+
+  for (const metrics of metricsList) {
+    if (!metrics) continue;
+
+    combined.chunks += metrics.chunks;
+    combined.failedChunks += metrics.failedChunks;
+    combined.durationMs += metrics.durationMs;
+    combined.requests += metrics.requests;
+    combined.retries += metrics.retries;
+    combined.rateLimitResponses += metrics.rateLimitResponses;
+    combined.serverErrors += metrics.serverErrors;
+  }
+
+  return combined;
+};
+
+export const createMarketSyncTelemetry = (startedAt = Date.now()): MarketSyncTelemetry => ({
+  startedAt,
+  current: createChunkFetchMetrics(),
+  history: {
+    recent: createChunkFetchMetrics(),
+    previous: createChunkFetchMetrics(),
+  },
+});
+
+export const summarizeMarketSyncTelemetry = (
+  telemetry: MarketSyncTelemetry,
+  completedAt = Date.now(),
+): MarketSyncTelemetrySummary => ({
+  durationMs: Math.max(0, completedAt - telemetry.startedAt),
+  current: telemetry.current,
+  history: telemetry.history,
+  totals: combineChunkFetchMetrics([
+    telemetry.current,
+    telemetry.history.recent,
+    telemetry.history.previous,
+  ]),
 });
 
 const uniqueIds = (itemIds: number[]) => [...new Set(itemIds)].filter(Number.isSafeInteger);
@@ -114,16 +207,28 @@ const getRetryDelay = (response: Response, attempt: number) => {
   return 300 * (2 ** attempt) + Math.floor(Math.random() * 150);
 };
 
+const recordRequestAttempt = (metrics?: ChunkFetchMetrics) => {
+  if (metrics) metrics.requests += 1;
+};
+
+const recordResponseStatus = (metrics: ChunkFetchMetrics | undefined, status: number) => {
+  if (!metrics) return;
+  if (status === 429) metrics.rateLimitResponses += 1;
+  if (status >= 500 && status <= 599) metrics.serverErrors += 1;
+};
+
 const requestJson = async <T>(
   url: string,
   fetcher: Fetcher = fetch,
   signal?: AbortSignal,
+  metrics?: ChunkFetchMetrics,
 ): Promise<T> => {
   let lastError: unknown;
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
     const timeout = withTimeout(signal);
     try {
+      recordRequestAttempt(metrics);
       const response = await fetcher(url, {
         headers: {
           Accept: 'application/json',
@@ -131,6 +236,7 @@ const requestJson = async <T>(
         },
         signal: timeout.signal,
       });
+      recordResponseStatus(metrics, response.status);
 
       if (response.ok) return await response.json() as T;
 
@@ -138,6 +244,7 @@ const requestJson = async <T>(
       lastError = new MarketDataError(`Universalis responded with HTTP ${response.status}`, response.status);
       if (!retryable || attempt === 1) throw lastError;
 
+      if (metrics) metrics.retries += 1;
       await wait(getRetryDelay(response, attempt));
     } catch (error) {
       lastError = error;
@@ -145,6 +252,7 @@ const requestJson = async <T>(
         throw error;
       }
       if (signal?.aborted || attempt === 1) throw error;
+      if (metrics) metrics.retries += 1;
       await wait(300 * (2 ** attempt) + Math.floor(Math.random() * 150));
     } finally {
       timeout.cleanup();
@@ -204,6 +312,7 @@ const getHistoryUrl = (server: string, itemIds: number[], entriesUntil: number) 
 export interface ChunkFetchResult<T> {
   data: T;
   partial: boolean;
+  metrics?: ChunkFetchMetrics;
 }
 
 export const fetchCurrentStats = async (
@@ -211,10 +320,13 @@ export const fetchCurrentStats = async (
   itemIds: number[],
   fetcher: Fetcher = fetch,
   signal?: AbortSignal,
+  metrics?: ChunkFetchMetrics,
 ): Promise<ChunkFetchResult<Record<string, UniversalisItemData>>> => {
   const chunks = chunk(uniqueIds(itemIds), CURRENT_CHUNK_SIZE);
+  const startedAt = Date.now();
+  const fetchMetrics = resetChunkFetchMetrics(metrics, chunks.length);
   const results = await settledMapWithConcurrency(chunks, MAX_UPSTREAM_CONCURRENCY, (ids) =>
-    requestJson<CurrentResponse>(getCurrentUrl(server, ids), fetcher, signal));
+    requestJson<CurrentResponse>(getCurrentUrl(server, ids), fetcher, signal, fetchMetrics));
   const allItems: Record<string, UniversalisItemData> = {};
   let failures = 0;
 
@@ -223,13 +335,16 @@ export const fetchCurrentStats = async (
     else failures += 1;
   }
 
+  fetchMetrics.failedChunks = failures;
+  fetchMetrics.durationMs = Math.max(0, Date.now() - startedAt);
+
   if (Object.keys(allItems).length === 0 && failures > 0) {
     throw new MarketDataError('현재 장터 요약 데이터를 불러오지 못했습니다.', undefined, {
       cause: results.find((result) => result.status === 'rejected')?.reason,
     });
   }
 
-  return { data: allItems, partial: failures > 0 };
+  return { data: allItems, partial: failures > 0, metrics: fetchMetrics };
 };
 
 const fetchHistoryWindow = async (
@@ -238,16 +353,19 @@ const fetchHistoryWindow = async (
   entriesUntil: number,
   fetcher: Fetcher,
   signal?: AbortSignal,
+  metrics?: ChunkFetchMetrics,
 ): Promise<ChunkFetchResult<Record<string, SaleHistoryEntry[]>>> => {
   const chunks = chunk(uniqueIds(itemIds), HISTORY_CHUNK_SIZE);
+  const startedAt = Date.now();
+  const fetchMetrics = resetChunkFetchMetrics(metrics, chunks.length);
   const results = await settledMapWithConcurrency(chunks, MAX_UPSTREAM_CONCURRENCY, (ids) =>
-    requestJson<HistoryResponse>(getHistoryUrl(server, ids, entriesUntil), fetcher, signal));
+    requestJson<HistoryResponse>(getHistoryUrl(server, ids, entriesUntil), fetcher, signal, fetchMetrics));
   const allHistory: Record<string, SaleHistoryEntry[]> = {};
   let failures = 0;
 
   for (const result of results) {
     if (result.status === 'fulfilled') {
-        for (const [itemId, item] of Object.entries(result.value.items ?? {})) {
+      for (const [itemId, item] of Object.entries(result.value.items ?? {})) {
         allHistory[itemId] = (item.entries ?? []).map(({ pricePerUnit, quantity, timestamp }) => ({
           pricePerUnit,
           quantity,
@@ -259,13 +377,16 @@ const fetchHistoryWindow = async (
     }
   }
 
+  fetchMetrics.failedChunks = failures;
+  fetchMetrics.durationMs = Math.max(0, Date.now() - startedAt);
+
   if (Object.keys(allHistory).length === 0 && failures > 0) {
     throw new MarketDataError('가격 이력 데이터를 불러오지 못했습니다.', undefined, {
       cause: results.find((result) => result.status === 'rejected')?.reason,
     });
   }
 
-  return { data: allHistory, partial: failures > 0 };
+  return { data: allHistory, partial: failures > 0, metrics: fetchMetrics };
 };
 
 export const fetchPriceChanges = async (
@@ -273,16 +394,25 @@ export const fetchPriceChanges = async (
   itemIds: number[],
   fetcher: Fetcher = fetch,
   signal?: AbortSignal,
+  telemetry?: MarketSyncTelemetry['history'],
 ): Promise<ChunkFetchResult<Record<string, PriceChange>>> => {
   const now = Math.floor(Date.now() / 1000);
   // Keep the two windows sequential so one refresh never exceeds the upstream
   // simultaneous-connection limit. Each window is internally capped at two.
-  const recent = await fetchHistoryWindow(server, itemIds, now, fetcher, signal);
-  const previous = await fetchHistoryWindow(server, itemIds, now - HISTORY_WINDOW_SECONDS, fetcher, signal);
+  const recent = await fetchHistoryWindow(server, itemIds, now, fetcher, signal, telemetry?.recent);
+  const previous = await fetchHistoryWindow(
+    server,
+    itemIds,
+    now - HISTORY_WINDOW_SECONDS,
+    fetcher,
+    signal,
+    telemetry?.previous,
+  );
 
   return {
     data: buildPriceChanges(recent.data, previous.data),
     partial: recent.partial || previous.partial,
+    metrics: combineChunkFetchMetrics([recent.metrics, previous.metrics]),
   };
 };
 
@@ -305,6 +435,7 @@ export const buildMarketSnapshotFromCurrent = async (
   current: ChunkFetchResult<Record<string, UniversalisItemData>>,
   fetcher: Fetcher = fetch,
   signal?: AbortSignal,
+  telemetry?: MarketSyncTelemetry,
 ): Promise<MarketSnapshot> => {
   const preview = createCurrentSnapshot(server, current);
   let priceChanges: Record<string, PriceChange> = {};
@@ -312,7 +443,13 @@ export const buildMarketSnapshotFromCurrent = async (
   let partial = current.partial;
 
   try {
-    const history = await fetchPriceChanges(server, Object.keys(current.data).map(Number), fetcher, signal);
+    const history = await fetchPriceChanges(
+      server,
+      Object.keys(current.data).map(Number),
+      fetcher,
+      signal,
+      telemetry?.history,
+    );
     priceChanges = history.data;
     historyReady = !history.partial;
     partial ||= history.partial;
@@ -335,9 +472,10 @@ export const buildMarketSnapshot = async (
   itemIds: number[],
   fetcher: Fetcher = fetch,
   signal?: AbortSignal,
+  telemetry?: MarketSyncTelemetry,
 ): Promise<MarketSnapshot> => {
-  const current = await fetchCurrentStats(server, itemIds, fetcher, signal);
-  return buildMarketSnapshotFromCurrent(server, current, fetcher, signal);
+  const current = await fetchCurrentStats(server, itemIds, fetcher, signal, telemetry?.current);
+  return buildMarketSnapshotFromCurrent(server, current, fetcher, signal, telemetry);
 };
 
 export const fetchItemDetail = async (

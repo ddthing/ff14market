@@ -1,8 +1,10 @@
 import {
   buildMarketSnapshot,
+  createMarketSyncTelemetry,
   SNAPSHOT_TTL_MS,
   snapshotKey,
   SUPPORTED_SERVERS,
+  summarizeMarketSyncTelemetry,
   type SnapshotBucket,
 } from '../functions/_lib/market-data';
 import masterItems from '../src/data/masterItems.json';
@@ -14,6 +16,20 @@ interface Env {
 
 const FALLBACK_MARKET_ITEM_IDS = masterItems.map((item) => item.id);
 const DEFAULT_MARKET_API_BASE_URL = 'https://ff14market.pages.dev';
+
+const errorMessage = (error: unknown) => error instanceof Error ? error.message : String(error);
+
+const logEvent = (event: string, payload: Record<string, unknown>) => {
+  console.log(JSON.stringify({ event, ...payload }));
+};
+
+const warnEvent = (event: string, payload: Record<string, unknown>) => {
+  console.warn(JSON.stringify({ event, ...payload }));
+};
+
+const errorEvent = (event: string, payload: Record<string, unknown>) => {
+  console.error(JSON.stringify({ event, ...payload }));
+};
 
 const resolveMarketItemIds = async (env: Env): Promise<number[]> => {
   const baseUrl = (env.MARKET_API_BASE_URL ?? DEFAULT_MARKET_API_BASE_URL).replace(/\/$/, '');
@@ -35,7 +51,10 @@ const resolveMarketItemIds = async (env: Env): Promise<number[]> => {
 
     return uniqueItemIds;
   } catch (error) {
-    console.warn('Could not refresh market item ids; using embedded fallback', { error });
+    warnEvent('market_item_ids_fallback', {
+      itemCount: FALLBACK_MARKET_ITEM_IDS.length,
+      error: errorMessage(error),
+    });
     return FALLBACK_MARKET_ITEM_IDS;
   }
 };
@@ -49,30 +68,54 @@ const snapshotPutOptions = {
 
 export default {
   async scheduled(_event: unknown, env: Env) {
+    const syncStartedAt = Date.now();
+    let successfulServers = 0;
+    let failedServers = 0;
     const marketItemIds = await resolveMarketItemIds(env);
-    console.log('Market item ids resolved', { count: marketItemIds.length });
+    logEvent('market_item_ids_resolved', { count: marketItemIds.length });
 
     // Run servers serially. Each snapshot already uses at most two upstream
     // connections, keeping the worker below Universalis' connection cap.
     for (const server of SUPPORTED_SERVERS) {
+      const telemetry = createMarketSyncTelemetry();
       try {
-        const snapshot = await buildMarketSnapshot(server, marketItemIds);
+        const snapshot = await buildMarketSnapshot(server, marketItemIds, fetch, undefined, telemetry);
+        const writeStartedAt = Date.now();
         await env.MARKET_SNAPSHOTS.put(
           snapshotKey(server),
           JSON.stringify(snapshot),
           snapshotPutOptions,
         );
-        console.log('Market snapshot updated', {
+        successfulServers += 1;
+        const telemetrySummary = summarizeMarketSyncTelemetry(telemetry);
+        logEvent('market_snapshot_updated', {
           server,
+          itemCount: marketItemIds.length,
           generatedAt: snapshot.generatedAt,
           historyReady: snapshot.historyReady,
           partial: snapshot.partial,
+          r2WriteDurationMs: Date.now() - writeStartedAt,
+          telemetry: telemetrySummary,
         });
       } catch (error) {
+        failedServers += 1;
         // Keep the previous R2 snapshot when one server's upstream refresh
         // fails. The Pages Function will mark that snapshot as stale.
-        console.error('Market snapshot update failed', { server, error });
+        errorEvent('market_snapshot_failed', {
+          server,
+          itemCount: marketItemIds.length,
+          telemetry: summarizeMarketSyncTelemetry(telemetry),
+          error: errorMessage(error),
+        });
       }
     }
+
+    logEvent('market_sync_completed', {
+      durationMs: Date.now() - syncStartedAt,
+      successfulServers,
+      failedServers,
+      totalServers: SUPPORTED_SERVERS.length,
+      itemCount: marketItemIds.length,
+    });
   },
 };

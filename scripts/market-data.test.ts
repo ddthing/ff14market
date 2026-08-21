@@ -3,6 +3,7 @@ import test from 'node:test';
 import {
   buildMarketSnapshotFromCurrent,
   createCurrentSnapshot,
+  createMarketSyncTelemetry,
   fetchItemDetail,
   fetchCurrentStats,
   ITEM_DETAIL_ENTRIES,
@@ -10,6 +11,7 @@ import {
   isSnapshotRefreshDue,
   refreshSnapshotIfAllowed,
   SNAPSHOT_REFRESH_COOLDOWN_MS,
+  summarizeMarketSyncTelemetry,
   type SnapshotBucket,
 } from '../functions/_lib/market-data.ts';
 
@@ -42,6 +44,10 @@ test('current market requests use summary fields and 50-item chunks', async () =
   assert.equal(calls.length, 3);
   assert.equal(result.partial, false);
   assert.equal(Object.keys(result.data).length, 120);
+  assert.equal(result.metrics?.chunks, 3);
+  assert.equal(result.metrics?.failedChunks, 0);
+  assert.equal(result.metrics?.requests, 3);
+  assert.equal(result.metrics?.retries, 0);
 
   for (const call of calls) {
     const url = new URL(call);
@@ -67,6 +73,31 @@ test('current market keeps successful chunks when one upstream chunk fails', asy
   assert.equal(result.partial, true);
   assert.equal(Object.keys(result.data).length, 50);
   assert.ok(callCount >= 3, 'the retry policy should make the failed chunk observable');
+  assert.equal(result.metrics?.chunks, 2);
+  assert.equal(result.metrics?.failedChunks, 1);
+  assert.equal(result.metrics?.retries, 1);
+});
+
+test('upstream retry metrics classify rate limits and server errors', async () => {
+  const attempts = new Map<number, number>();
+  const fetcher = async (url: string) => {
+    const ids = new URL(url).pathname.split('/').pop()?.split(',').map(Number) ?? [];
+    const key = ids[0] ?? 0;
+    const attempt = (attempts.get(key) ?? 0) + 1;
+    attempts.set(key, attempt);
+
+    if (attempt === 1 && key === 1) return response({}, 429);
+    if (attempt === 1 && key === 51) return response({}, 503);
+    return response({ items: Object.fromEntries(ids.map((id) => [String(id), item(id)])) });
+  };
+
+  const result = await fetchCurrentStats('Tonberry', Array.from({ length: 100 }, (_, index) => index + 1), fetcher);
+
+  assert.equal(result.partial, false);
+  assert.equal(result.metrics?.requests, 4);
+  assert.equal(result.metrics?.retries, 2);
+  assert.equal(result.metrics?.rateLimitResponses, 1);
+  assert.equal(result.metrics?.serverErrors, 1);
 });
 
 test('item detail requests only the fields and history points rendered by the UI', async () => {
@@ -117,12 +148,22 @@ test('history can finish from an already fetched current snapshot', async () => 
     });
   };
 
-  const snapshot = await buildMarketSnapshotFromCurrent('Tonberry', current, fetcher);
+  const telemetry = createMarketSyncTelemetry(1_000);
+  const snapshot = await buildMarketSnapshotFromCurrent('Tonberry', current, fetcher, undefined, telemetry);
 
   assert.equal(calls.length, 2, 'history should fetch recent and previous windows only');
   assert.equal(snapshot.historyReady, true);
   assert.equal(snapshot.partial, false);
   assert.deepEqual(snapshot.items, current.data);
+  assert.equal(telemetry.history.recent.chunks, 1);
+  assert.equal(telemetry.history.recent.requests, 1);
+  assert.equal(telemetry.history.previous.chunks, 1);
+  assert.equal(telemetry.history.previous.requests, 1);
+
+  const summary = summarizeMarketSyncTelemetry(telemetry, 4_000);
+  assert.equal(summary.durationMs, 3_000);
+  assert.equal(summary.totals.chunks, 2);
+  assert.equal(summary.totals.requests, 2);
 });
 
 test('stale snapshot refresh is throttled and writes the refreshed snapshot', async () => {

@@ -117,7 +117,7 @@ npm run build
 
 다음 단계는 최적화를 더 넣는 것이 아니라 측정 가능성을 높이는 것이다.
 
-1. Worker에 서버별 실행 시간, current/history chunk 실패 수, 429·5xx 횟수를 구조화 로그로 남긴다.
+1. Worker에 서버별 실행 시간, current/history chunk 실패 수, 429·5xx 횟수를 구조화 로그로 남긴다. `market_snapshot_updated`, `market_snapshot_failed`, `market_sync_completed` 이벤트에 current/recent/previous 단계별 `durationMs`, `failedChunks`, `retries`, `rateLimitResponses`, `serverErrors`가 기록되도록 구현했다.
 2. Pages Function에 상세 응답의 upstream duration과 payload byte를 내부 로그로 남긴다. 사용자 응답에는 민감한 정보를 노출하지 않는다.
 3. 운영에서 cold start와 warm cache를 분리해 상세 페이지의 목표 시간을 다시 측정한다.
 4. 실제 병목이 확인될 때만 history 계산을 서버 사전계산하거나 상세 API를 더 세분화한다.
