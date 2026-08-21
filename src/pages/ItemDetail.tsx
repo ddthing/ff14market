@@ -14,6 +14,7 @@ import { formatSaleVelocity } from '../utils/marketMetrics';
 import masterItems from '../data/masterItems.json';
 import { MARKET_SERVER_NAMES } from '../constants/market';
 import { getAbsoluteMinPrice, getServerMinPrices } from '../utils/marketListings';
+import { formatFreshness } from '../utils/time';
 
 const PriceChart = lazy(() => import('../components/common/PriceChart').then(({ PriceChart: Component }) => ({ default: Component })));
 const MASTER_ITEMS_BY_ID = new Map(masterItems.map((candidate) => [candidate.id, candidate] as const));
@@ -157,7 +158,11 @@ export const ItemDetail = () => {
             {item.name}
           </h2>
           <p className="mt-2 text-[15px] font-medium text-[var(--app-ink-muted)]">
-            {isLoading ? '한국 DC 최근 수집 시세 조회 중...' : '한국 DC 최근 수집 시세'}
+            {isLoading
+              ? '한국 DC 최근 수집 시세 조회 중...'
+              : data?.marketMeta
+                ? `최근 정상 수집 데이터 · ${formatFreshness(data.marketMeta.cachedAt)}`
+                : '한국 DC 최근 수집 시세'}
           </p>
         </div>
         

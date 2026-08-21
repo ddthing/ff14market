@@ -55,7 +55,7 @@ FF14 장터탐지기는 단순히 최저가 하나를 나열하지 않습니다.
 
 - 서버별 현재 시세 스냅샷은 Worker가 5분 주기로 갱신하도록 구성되어 있습니다.
 - 스냅샷이 오래된 경우 화면에 이전 수집 데이터임을 표시합니다.
-- 아이템 상세의 가격 흐름은 선택한 시점에 별도로 조회하며 잠시 캐시됩니다.
+- 아이템 상세의 가격 흐름은 선택한 시점에 별도로 조회하며 잠시 캐시됩니다. upstream이 실패하거나 2.5초 이상 지연될 때는 최대 15분 이내의 마지막 정상 수집 데이터를 `STALE`로 표시해 보여줄 수 있습니다.
 - 실제 구매·판매 직전에는 게임 내 장터에서 최종 가격과 매물 상태를 확인하세요.
 
 따라서 장터 신호는 수익을 보장하는 추천이나 투자 자문이 아니라, 확인 순서를 정하는 탐색 도구입니다.
@@ -139,7 +139,7 @@ Cloudflare Pages Function까지 확인할 때는 `npm run pages:dev`를 사용�
 
 ## 배포 구성
 
-현재 배포 대상은 Cloudflare Pages이며, 시세 스냅샷은 Cloudflare R2와 Cron Worker를 사용합니다.
+현재 배포 대상은 Cloudflare Pages이며, 시세 스냅샷과 상세 장애 fallback은 Cloudflare R2, 주기 갱신은 Cron Worker를 사용합니다.
 
 최초 구성 또는 운영 환경 재현 시 필요한 순서입니다.
 
@@ -168,7 +168,7 @@ public/                ads.txt, robots.txt, sitemap.xml, PWA 아이콘
 .github/workflows/     아이템 카탈로그 자동 갱신
 ```
 
-브라우저는 Universalis API를 직접 호출하지 않고 같은 도메인의 Pages API를 사용합니다. Pages Function이 요청을 묶고 재시도·캐시·R2 fallback을 관리하므로, 화면 코드와 외부 데이터 제공자를 분리할 수 있습니다.
+브라우저는 Universalis API를 직접 호출하지 않고 같은 도메인의 Pages API를 사용합니다. Pages Function이 요청을 묶고 재시도·캐시·R2 fallback을 관리하므로, 화면 코드와 외부 데이터 제공자를 분리할 수 있습니다. 상세 fallback 응답에는 `X-Market-Cache: STALE`과 화면용 `marketMeta`가 함께 포함되어 오래된 데이터를 최신값처럼 오인하지 않게 합니다.
 
 ## 프로젝트의 기준
 
