@@ -123,6 +123,8 @@ npm run build
 
 배포된 Pages Function tail에서도 같은 아이템을 4회 호출해 `item_detail_cache_miss` 1회와 `item_detail_cache_hit` 3회를 확인했다. upstream 계측 로그는 miss에만 함께 남았고, hit 요청의 Function CPU 시간은 약 `3–4ms`였다. 이는 캐시가 응답 속도뿐 아니라 Universalis upstream 호출도 줄이고 있음을 보여준다.
 
+대표 아이템 10개의 첫 요청을 별도로 측정했을 때 모두 MISS였고, 전체 시간은 `354.2–1,966.1ms`, 중앙값 `922.4ms`, 평균 `1,054.5ms`였다. payload는 `1,027–20,406 bytes`였으며, 이 표본에서 payload 크기와 지연의 상관계수는 `0.018`이었다. `1,027 bytes` 응답도 `1,966.1ms`가 걸렸으므로 cold miss의 주된 변수는 응답 크기보다 upstream 처리 변동으로 판단한다. 즉시 이어진 다른 query string의 재요청은 모든 아이템에서 안정적인 HIT를 보장하지 않았으므로, 이 표본을 전역 hit ratio로 해석하지 않고 Pages tail의 실제 이벤트를 기준으로 삼는다.
+
 ## 다음 관찰 작업
 
 다음 단계는 최적화를 더 넣는 것이 아니라 측정 가능성을 높이는 것이다.
@@ -130,4 +132,4 @@ npm run build
 1. Worker에 서버별 실행 시간, current/history chunk 실패 수, 429·5xx 횟수를 구조화 로그로 남긴다. `market_snapshot_updated`, `market_snapshot_failed`, `market_sync_completed` 이벤트에 current/recent/previous 단계별 `durationMs`, `failedChunks`, `retries`, `rateLimitResponses`, `serverErrors`가 기록되도록 구현했다.
 2. Pages Function에 상세 응답의 upstream duration과 payload byte를 내부 로그로 남긴다. `item_detail_upstream_completed`, `item_detail_upstream_failed`, `item_detail_not_found` 이벤트에 아이템 ID, upstream 처리 시간·바이트·시도 횟수와 최종 상태를 기록하도록 구현했다. 응답 본문과 민감한 정보는 로그에 남기지 않는다.
 3. 명시적 Cache API 배포 후 동일 PoP에서 cold miss·warm hit를 재측정했고, `item_detail_cache_hit` 로그와 `X-Market-Cache` 헤더를 확인했다.
-4. 실제 병목이 확인될 때만 history 계산을 서버 사전계산하거나 상세 API를 더 세분화한다.
+4. cold miss upstream 지연의 대표 표본을 더 모은 뒤에만 R2/KV 사전 캐시나 상세 API 세분화를 검토한다. 현재는 payload 분할·전역 prewarm을 추가하지 않는다.
