@@ -121,6 +121,8 @@ npm run build
 
 명시적 Cache API 배포 후 같은 PoP에서 첫 요청은 `X-Market-Cache: MISS`, `396.8ms`였고, 서로 다른 query string을 사용한 후속 요청은 모두 `X-Market-Cache: HIT`, `15.7–22ms`, `CF-Cache-Status: HIT`였다. 응답 크기는 모든 요청에서 `7,885 bytes`로 유지됐다.
 
+배포된 Pages Function tail에서도 같은 아이템을 4회 호출해 `item_detail_cache_miss` 1회와 `item_detail_cache_hit` 3회를 확인했다. upstream 계측 로그는 miss에만 함께 남았고, hit 요청의 Function CPU 시간은 약 `3–4ms`였다. 이는 캐시가 응답 속도뿐 아니라 Universalis upstream 호출도 줄이고 있음을 보여준다.
+
 ## 다음 관찰 작업
 
 다음 단계는 최적화를 더 넣는 것이 아니라 측정 가능성을 높이는 것이다.
