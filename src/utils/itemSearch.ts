@@ -11,21 +11,29 @@ export interface SearchableItem {
 const MAX_SEARCH_RESULTS = 10;
 
 export const createItemSearcher = (entries: readonly CompactSearchEntry[]) => {
-  const searchableItems: SearchableItem[] = entries.map(([id, name, iconId]) => ({
-    id,
-    name,
-    iconId,
-  }));
-  const fuse = new Fuse(searchableItems, {
-    keys: ['name'],
-    threshold: 0.3,
-  });
+  let fuse: Fuse<SearchableItem> | undefined;
+
+  const getFuse = () => {
+    if (!fuse) {
+      const searchableItems: SearchableItem[] = entries.map(([id, name, iconId]) => ({
+        id,
+        name,
+        iconId,
+      }));
+      fuse = new Fuse(searchableItems, {
+        keys: ['name'],
+        threshold: 0.3,
+      });
+    }
+
+    return fuse;
+  };
 
   return (query: string, limit = MAX_SEARCH_RESULTS): SearchableItem[] => {
     const normalizedQuery = query.trim();
     if (!normalizedQuery) return [];
 
     const safeLimit = Math.max(1, Math.min(Math.floor(limit), MAX_SEARCH_RESULTS));
-    return fuse.search(normalizedQuery, { limit: safeLimit }).map(({ item }) => item);
+    return getFuse().search(normalizedQuery, { limit: safeLimit }).map(({ item }) => item);
   };
 };

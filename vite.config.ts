@@ -18,11 +18,26 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: 'script-defer',
       workbox: {
         maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
-        // Route-only chart code is loaded on demand and cached after first use.
-        globIgnores: ['**/PriceChart-*.js'],
+        // Route chunks and glyph-specific font subsets are loaded on demand.
+        globIgnores: ['**/PriceChart-*.js', '**/fonts/**/*.woff2'],
         runtimeCaching: [
+          {
+            urlPattern: /\/fonts\/pretendard-v1\.3\.9\/PretendardVariable\.subset\.\d+\.woff2$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'font-subsets',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 365 * 24 * 60 * 60,
+              },
+              cacheableResponse: {
+                statuses: [200],
+              },
+            },
+          },
           {
             urlPattern: /\/assets\/PriceChart-[^/]+\.js$/,
             handler: 'CacheFirst',

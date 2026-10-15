@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { exploreMarket, marketCsv } from './marketExplorer.ts';
+import {
+  exploreMarket,
+  marketCsv,
+  normalizeMarketExplorerPreferences,
+} from './marketExplorer.ts';
 import { formatFreshness } from './time.ts';
 import type { EnrichedItem } from '../hooks/useItemData';
 
@@ -72,6 +76,48 @@ test('CSV preserves Korean, escapes quotes and prevents formula evaluation', () 
   assert.ok(csv.includes('"초코보","1"'));
   assert.ok(csv.includes('"재료","","1","",""'));
   assert.ok(marketCsv([item(2, { fluctuation: -5 })], '초코보').includes(',"-5",'));
+});
+
+test('saved explorer preferences retain supported choices and replace invalid values', () => {
+  assert.deepEqual(
+    normalizeMarketExplorerPreferences({
+      query: '  포션 ',
+      category: '소모품',
+      sort: 'price-desc',
+      favoritesOnly: true,
+      pageSize: 48,
+    }),
+    {
+      query: '  포션 ',
+      category: '소모품',
+      sort: 'price-desc',
+      favoritesOnly: true,
+      pageSize: 48,
+    },
+  );
+  assert.deepEqual(
+    normalizeMarketExplorerPreferences({
+      query: 42,
+      category: null,
+      sort: 'unknown',
+      favoritesOnly: 'yes',
+      pageSize: 13,
+    }),
+    {
+      query: '',
+      category: '전체',
+      sort: 'volume',
+      favoritesOnly: false,
+      pageSize: 12,
+    },
+  );
+  assert.deepEqual(normalizeMarketExplorerPreferences(null), {
+    query: '',
+    category: '전체',
+    sort: 'volume',
+    favoritesOnly: false,
+    pageSize: 12,
+  });
 });
 
 test('freshness never presents unknown timestamps as freshly collected', () => {

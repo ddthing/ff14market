@@ -87,6 +87,7 @@ export const useItemData = () => {
     snapshotGeneratedAt: snapshot?.generatedAt,
     snapshotSource: snapshot?.source,
     snapshotStale: snapshot?.stale ?? false,
+    hasSnapshot: snapshot !== undefined,
     isLoading,
     isError,
     error,
