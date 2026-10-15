@@ -6,7 +6,6 @@ import { Header } from './components/layout/Header'
 import { Footer } from './components/layout/Footer'
 import { useEffect } from 'react'
 import { useThemeStore } from './store/useThemeStore'
-import { Dashboard } from './features/dashboard/Dashboard'
 
 import { ToastContainer } from './components/ui/ToastContainer';
 import { GlobalSearch } from './components/ui/GlobalSearch';
@@ -14,7 +13,9 @@ import { loadItemDetail } from './routes/itemDetail';
 import type { ItemCatalogEntry } from './api/itemCatalog';
 
 // Lazy load pages
-// The primary entry screen renders immediately; secondary routes stay split.
+// Keep the primary dashboard out of secondary-route bundles while preserving
+// its server-rendered markup through the route component supplied at hydration.
+const Dashboard = lazy(() => import('./features/dashboard/Dashboard').then(m => ({ default: m.Dashboard })));
 const HotIssues = lazy(() => import('./pages/HotIssues').then(m => ({ default: m.HotIssues })));
 const Favorites = lazy(() => import('./pages/Favorites').then(m => ({ default: m.Favorites })));
 const ItemDetail = lazy(loadItemDetail);
@@ -40,6 +41,7 @@ function RouteScrollReset() {
 }
 
 type InitialRouteComponents = {
+  dashboard?: ComponentType;
   hotIssues?: ComponentType;
   favorites?: ComponentType;
   itemDetail?: ComponentType<{ initialItem?: ItemCatalogEntry }>;
@@ -54,6 +56,7 @@ function AppContent({
 }) {
   const { theme } = useThemeStore();
   const [themeHydrated, setThemeHydrated] = useState(false);
+  const DashboardRoute = initialRouteComponents?.dashboard ?? Dashboard;
   const HotIssuesRoute = initialRouteComponents?.hotIssues ?? HotIssues;
   const FavoritesRoute = initialRouteComponents?.favorites ?? Favorites;
   const ItemDetailRoute = initialRouteComponents?.itemDetail ?? ItemDetail;
@@ -112,7 +115,7 @@ function AppContent({
           <ToastContainer />
           <Suspense fallback={<LoadingFallback />}>
             <Routes>
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/" element={<DashboardRoute />} />
               <Route path="/hot-issues" element={<HotIssuesRoute />} />
               <Route path="/favorites" element={<FavoritesRoute />} />
               <Route path="/item/:id" element={<ItemDetailRoute initialItem={initialItem} />} />
