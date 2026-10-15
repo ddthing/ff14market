@@ -49,10 +49,13 @@ export const HotIssues = () => {
     enrichedItems,
     priceChanges,
     historyReady,
+    hasSnapshot,
     snapshotStale,
     isLoading,
     isError,
     refetch,
+    currentFreshness,
+    historyFreshness,
   } = useItemData();
   const { server } = useServerStore();
   const openSearch = useSearchStore((state) => state.open);
@@ -60,6 +63,9 @@ export const HotIssues = () => {
   const activeConfig = TAB_CONFIG[activeTab];
   const ActiveIcon = activeConfig.icon;
   const isHistoryTab = activeTab !== 'price';
+  const usesHistorySnapshot = isHistoryTab && historyReady;
+  const activeFreshness = usesHistorySnapshot ? historyFreshness : currentFreshness;
+  const isCachedRefreshError = isError && hasSnapshot;
 
   const rankingItems = useMemo(() => {
     if (!isHistoryTab) return enrichedItems;
@@ -85,7 +91,7 @@ export const HotIssues = () => {
   );
 
   const isAnyLoading = isLoading;
-  const hasError = isError;
+  const hasError = isError && !hasSnapshot;
   const handleRetry = () => void refetch();
   const handleTabKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>, currentTab: TabType) => {
     const currentIndex = TAB_ORDER.indexOf(currentTab);
@@ -115,7 +121,7 @@ export const HotIssues = () => {
     <>
       <Seo
         title="장터 거래량·가격 하락 신호 | FF14 장터탐지기"
-        description="파이널판타지14 한국 서버의 거래 활발 품목, 최근 7일 가격 하락 신호, 최저 매물가 상위 품목을 확인하세요."
+        description="파이널판타지14 한국 서버의 주요 관측 품목에서 거래량 상승, 최근 7일 가격 하락, 최저 매물가를 확인하세요."
         path="/hot-issues"
       />
       <div className="w-full space-y-6">
@@ -124,11 +130,15 @@ export const HotIssues = () => {
           <p className="mb-2 text-[12px] font-bold uppercase tracking-[0.16em] text-[var(--app-accent)]">
             {getMarketServerLabel(server)} · {isLoading
               ? '스냅샷 조회 중'
-              : isError
+              : hasError
                 ? '스냅샷 조회 실패'
-                : snapshotStale
-                  ? '이전 수집 데이터'
-                  : '수집 스냅샷'}
+                : isCachedRefreshError
+                  ? '저장된 데이터 · 갱신 실패'
+                  : (activeFreshness?.stale ?? snapshotStale)
+                    ? '이전 수집 데이터'
+                    : activeFreshness?.partial
+                      ? '일부 항목 이전 데이터'
+                    : '수집 스냅샷'}
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-[24px] font-bold tracking-[-0.03em] text-[var(--app-ink)] sm:text-[28px]">
@@ -144,7 +154,7 @@ export const HotIssues = () => {
             </button>
           </div>
           <p className="mt-2 max-w-2xl text-[14px] leading-6 text-[var(--app-ink-muted)]">
-            같은 데이터를 서로 다른 기준으로 읽어보세요. 각 순위는 현재 선택한 장터 서버 기준입니다.
+            주요 관측 목록을 서로 다른 기준으로 살펴보세요. 각 순위는 현재 선택한 장터 서버 기준입니다.
           </p>
         </div>
         <div className="rounded-xl border border-[var(--app-hairline)] bg-[var(--app-surface)] px-4 py-3 text-left sm:text-right">

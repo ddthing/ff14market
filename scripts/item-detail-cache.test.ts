@@ -102,6 +102,7 @@ test('successful item detail requests populate both edge and R2 tiers', async ()
 
   assert.equal(first.status, 200);
   assert.equal(first.headers.get('X-Market-Cache'), 'MISS');
+  assert.equal(first.headers.get('Cache-Control'), 'public, max-age=5, s-maxage=15, stale-while-revalidate=15');
   assert.equal(upstreamCalls, 1);
   assert.ok(objects.has(itemDetailStaleKey(33939)));
   assert.equal(responses.size, 1);
@@ -115,6 +116,28 @@ test('successful item detail requests populate both edge and R2 tiers', async ()
 
   assert.equal(second.status, 200);
   assert.equal(second.headers.get('X-Market-Cache'), 'HIT');
+});
+
+test('concurrent detail requests share one fetch and receive independent bodies', async () => {
+  const { bucket } = createBucket();
+  const waiters: Promise<unknown>[] = [];
+  let release: () => void = () => {};
+  const gate = new Promise<void>((resolve) => { release = resolve; });
+  let calls = 0;
+  const fetcher = async () => {
+    calls += 1;
+    await gate;
+    return new Response(JSON.stringify(detail(33939)), { headers: { 'Content-Type': 'application/json' } });
+  };
+  const first = onRequestGet(requestContext(33939, bucket, undefined, waiters), fetcher);
+  const second = onRequestGet(requestContext(33939, bucket, undefined, waiters), fetcher);
+  release();
+  const responses = await Promise.all([first, second]);
+  assert.equal(calls, 1);
+  assert.deepEqual(await responses[0].json(), await responses[1].json());
+  await Promise.all(waiters);
+  await onRequestGet(requestContext(33939, bucket), fetcher);
+  assert.equal(calls, 2, 'Completed operations must leave the in-flight registry');
 });
 
 test('upstream failure returns a bounded, explicitly marked stale detail', async () => {

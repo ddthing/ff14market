@@ -8,6 +8,7 @@ import {
   MarketDataError,
 } from '../functions/_lib/market-data.ts';
 import type { MarketSnapshotResponse } from '../src/types/market.ts';
+import { getMarketServerWorldId } from '../src/constants/market.ts';
 import { onRequestGet as searchItems } from '../functions/api/search.ts';
 import { onRequestGet as itemMetadata } from '../functions/api/item-meta/[itemId].ts';
 
@@ -61,6 +62,7 @@ export const marketApiDevPlugin = (): Plugin => ({
           const snapshot = await buildMarketSnapshot(serverName, marketItemIds);
           const payload: MarketSnapshotResponse = {
             ...snapshot,
+            sourceWorldId: getMarketServerWorldId(serverName),
             source: 'upstream-fallback',
             stale: false,
           };

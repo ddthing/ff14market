@@ -18,6 +18,7 @@ import { MARKET_SERVER_NAMES } from '../constants/market';
 import { getAbsoluteMinPrice, getServerMinPrices } from '../utils/marketListings';
 import { formatFreshness } from '../utils/time';
 import { PurchasePlanner } from '../components/common/PurchasePlanner';
+import { getMarketPollInterval, MARKET_POLL_INTERVAL_MS } from '../hooks/marketPolling';
 
 const PriceChart = lazy(() => import('../components/common/PriceChart').then(({ PriceChart: Component }) => ({ default: Component })));
 const MASTER_ITEMS_BY_ID = new Map(masterItems.map((candidate) => [candidate.id, candidate] as const));
@@ -58,22 +59,35 @@ export const ItemDetail = ({ initialItem }: ItemDetailProps = {}) => {
     }
   }, [itemId, addRecentId]);
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isPending, isError, refetch } = useQuery({
     queryKey: ['searchItem', 'Korea', itemId],
     queryFn: ({ signal }) => fetchKoreaDCData(itemId, signal),
     // The item catalog and market detail request are independent. Start both
     // immediately so the 16k-entry search catalog cannot block price data.
+    // This detail query owns the only interval for its key; modal observers do not poll.
     enabled: itemId > 0,
-    staleTime: 60000,
+    staleTime: MARKET_POLL_INTERVAL_MS,
+    refetchInterval: (query) => getMarketPollInterval(query.state.fetchStatus),
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMount: true,
+    networkMode: 'online',
     retry: 1,
   });
+  const isLoading = isPending && data === undefined;
+  const hasStaleMarketData = data !== undefined
+    && data !== null
+    && (isError || data.marketMeta?.source === 'r2-stale');
   const plannerStatus = isLoading
     ? 'loading'
     : data === null
       ? 'unavailable'
-      : isError
-        ? data !== undefined ? 'stale' : 'error'
-        : data !== undefined ? 'ready' : 'error';
+      : hasStaleMarketData
+        ? 'stale'
+        : isError
+          ? 'error'
+          : data !== undefined ? 'ready' : 'error';
 
   const serverPrices = useMemo(
     () => getServerMinPrices(data?.listings, MARKET_SERVER_NAMES),
@@ -154,19 +168,21 @@ export const ItemDetail = ({ initialItem }: ItemDetailProps = {}) => {
         : '시세 미제공';
   const marketSubtitle = isLoading
     ? '시세 데이터 확인 중...'
-    : isError
-      ? data !== undefined && data !== null
-        ? '저장된 시세 · 갱신 실패'
+    : data?.marketMeta?.source === 'r2-stale'
+      ? `이전 수집 · 갱신 실패 · ${formatFreshness(data.marketMeta.cachedAt)}`
+      : isError
+        ? data !== undefined && data !== null
+          ? '저장된 시세 · 갱신 실패'
+          : data === null
+            ? '시세 자료 없음 · 갱신 실패'
+            : '시세 조회 실패'
         : data === null
-          ? '시세 자료 없음 · 갱신 실패'
-          : '시세 조회 실패'
-      : data === null
-        ? '시세 자료 없음'
-        : data?.marketMeta
-          ? `최근 정상 수집 · ${formatFreshness(data.marketMeta.cachedAt)}`
-          : data !== undefined
-            ? '한국 DC 최근 수집 시세'
-            : '시세 조회 실패';
+          ? '시세 자료 없음'
+          : data?.marketMeta
+            ? `최근 정상 수집 · ${formatFreshness(data.marketMeta.cachedAt)}`
+            : data !== undefined
+              ? '한국 DC 최근 수집 시세'
+              : '시세 조회 실패';
   
   return (
     <>
@@ -245,7 +261,7 @@ export const ItemDetail = ({ initialItem }: ItemDetailProps = {}) => {
               )}
             </div>
             
-            {isError ? (
+            {isError && !itemData ? (
               <div className="mt-3 flex min-h-[200px] items-center">
                 <div className="w-full">
                   <DataErrorState compact onRetry={() => void refetch()} />

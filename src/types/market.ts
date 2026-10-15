@@ -41,7 +41,28 @@ export interface MarketSnapshot {
   priceChanges: Record<string, PriceChange>;
 }
 
+export interface MarketPhaseFreshness {
+  /** Time of the most recent attempted phase refresh. */
+  generatedAt: number | null;
+  /** Time of the most recent successful upstream chunk in this phase. */
+  lastSuccessAt: number | null;
+  ageMs: number | null;
+  stale: boolean;
+  partial: boolean;
+  /** Number of values retained from earlier successful upstream reads. */
+  retainedItemCount: number;
+}
+
 export interface MarketSnapshotResponse extends MarketSnapshot {
   source: 'r2' | 'upstream-fallback';
+  /** Universalis world ID that produced this data (Korean worlds are numeric). */
+  sourceWorldId?: number;
+  /** Backward-compatible alias for current phase freshness. */
   stale: boolean;
+  currentGeneratedAt?: number;
+  historyGeneratedAt?: number | null;
+  freshness?: {
+    current: MarketPhaseFreshness;
+    history: MarketPhaseFreshness;
+  };
 }

@@ -5,7 +5,7 @@ import type {
   PriceChange,
   UniversalisItemData,
 } from '../../src/types/market.ts';
-import { MARKET_SERVERS } from '../../src/constants/market.ts';
+import { getMarketServerWorldId, MARKET_SERVERS } from '../../src/constants/market.ts';
 
 export const UPSTREAM_BASE_URL = 'https://universalis.app/api/v2';
 export const SUPPORTED_SERVERS = MARKET_SERVERS.map(({ id }) => id);
@@ -38,11 +38,20 @@ export const ITEM_DETAIL_FIELDS = [
 
 export interface SnapshotBucketObject {
   text(): Promise<string>;
+  etag?: string;
 }
 
 export interface SnapshotBucket {
   get(key: string): Promise<SnapshotBucketObject | null>;
-  put(key: string, value: string, options?: Record<string, unknown>): Promise<void>;
+  put(
+    key: string,
+    value: string,
+    options?: {
+      httpMetadata?: Record<string, unknown>;
+      onlyIf?: { etagMatches?: string } | Headers;
+    },
+  ): Promise<SnapshotBucketObject | null | void>;
+  delete?(key: string): Promise<void>;
 }
 
 export interface MarketRequestContext {
@@ -103,15 +112,32 @@ export interface ItemDetailTelemetry {
   lastStatus: number | null;
 }
 
-type Fetcher = (input: string, init?: RequestInit) => Promise<Response>;
+export type Fetcher = (input: string, init?: RequestInit) => Promise<Response>;
 
 interface HistoryResponse {
+  worldID?: number;
   items?: Record<string, { entries?: SaleHistoryEntry[] }>;
 }
 
 interface CurrentResponse {
+  worldID?: number;
   items?: Record<string, UniversalisItemData>;
 }
+
+export const getUniversalisWorldId = (server: string) => {
+  const worldId = getMarketServerWorldId(server);
+  if (!worldId) throw new MarketDataError(`Unsupported Universalis market world: ${server}`);
+  return worldId;
+};
+
+const assertUniversalisWorldId = (server: string, payload: { worldID?: number }) => {
+  const expectedWorldId = getUniversalisWorldId(server);
+  if (payload.worldID !== expectedWorldId) {
+    throw new MarketDataError(
+      `Universalis returned world ${String(payload.worldID)} for configured world ${expectedWorldId}.`,
+    );
+  }
+};
 
 const wait = (milliseconds: number, signal?: AbortSignal) => new Promise<void>((resolve) => {
   if (signal?.aborted) {
@@ -198,7 +224,7 @@ export const summarizeMarketSyncTelemetry = (
   ]),
 });
 
-const uniqueIds = (itemIds: number[]) => [...new Set(itemIds)].filter(Number.isSafeInteger);
+const uniqueIds = (itemIds: number[]) => [...new Set(itemIds)].filter((id) => Number.isSafeInteger(id) && id > 0);
 
 const chunk = <T>(items: T[], size: number): T[][] => {
   const chunks: T[][] = [];
@@ -228,7 +254,8 @@ const withTimeout = (signal?: AbortSignal, milliseconds = 12_000) => {
 };
 
 const getRetryDelay = (response: Response, attempt: number) => {
-  const retryAfter = Number(response.headers.get('retry-after'));
+  const retryAfterHeader = response.headers.get('retry-after');
+  const retryAfter = retryAfterHeader ? Number(retryAfterHeader) : Number.NaN;
   if (Number.isFinite(retryAfter) && retryAfter >= 0) {
     return Math.min(retryAfter * 1000, 5_000);
   }
@@ -338,6 +365,7 @@ const settledMapWithConcurrency = async <T, R>(
 };
 
 const getCurrentUrl = (server: string, itemIds: number[]) => {
+  const worldId = getUniversalisWorldId(server);
   const params = new URLSearchParams({
     // Universalis derives averagePrice and sale velocity from the requested
     // history sample. entries=0 silently zeros both; fields keeps the payload
@@ -346,22 +374,25 @@ const getCurrentUrl = (server: string, itemIds: number[]) => {
     entries: '20',
     fields: 'items.itemID,items.lastUploadTime,items.currentAveragePrice,items.regularSaleVelocity,items.averagePrice,items.minPrice,items.minPriceNQ,items.minPriceHQ',
   });
-  return `${UPSTREAM_BASE_URL}/${server}/${itemIds.join(',')}?${params.toString()}`;
+  return `${UPSTREAM_BASE_URL}/${worldId}/${itemIds.join(',')}?${params.toString()}`;
 };
 
 const getHistoryUrl = (server: string, itemIds: number[], entriesUntil: number) => {
+  const worldId = getUniversalisWorldId(server);
   const params = new URLSearchParams({
     entriesToReturn: String(HISTORY_ENTRIES_LIMIT),
     entriesWithin: String(HISTORY_WINDOW_SECONDS),
     entriesUntil: String(entriesUntil),
     statsWithin: String(HISTORY_WINDOW_MILLISECONDS),
   });
-  return `${UPSTREAM_BASE_URL}/history/${server}/${itemIds.join(',')}?${params.toString()}`;
+  return `${UPSTREAM_BASE_URL}/history/${worldId}/${itemIds.join(',')}?${params.toString()}`;
 };
 
 export interface ChunkFetchResult<T> {
   data: T;
   partial: boolean;
+  successfulItemIds?: number[];
+  failedItemIds?: number[];
   metrics?: ChunkFetchMetrics;
 }
 
@@ -371,30 +402,46 @@ export const fetchCurrentStats = async (
   fetcher: Fetcher = fetch,
   signal?: AbortSignal,
   metrics?: ChunkFetchMetrics,
-): Promise<ChunkFetchResult<Record<string, UniversalisItemData>>> => {
+): Promise<ChunkFetchResult<Record<string, UniversalisItemData>> & { successfulItemIds: number[]; failedItemIds: number[] }> => {
   const chunks = chunk(uniqueIds(itemIds), CURRENT_CHUNK_SIZE);
   const startedAt = Date.now();
   const fetchMetrics = resetChunkFetchMetrics(metrics, chunks.length);
-  const results = await settledMapWithConcurrency(chunks, MAX_UPSTREAM_CONCURRENCY, (ids) =>
-    requestJson<CurrentResponse>(getCurrentUrl(server, ids), fetcher, signal, fetchMetrics));
+  const results = await settledMapWithConcurrency(chunks, MAX_UPSTREAM_CONCURRENCY, async (ids) => {
+    const response = await requestJson<CurrentResponse>(getCurrentUrl(server, ids), fetcher, signal, fetchMetrics);
+    assertUniversalisWorldId(server, response);
+    return response;
+  });
   const allItems: Record<string, UniversalisItemData> = {};
+  const successfulItemIds: number[] = [];
+  const failedItemIds: number[] = [];
   let failures = 0;
 
-  for (const result of results) {
-    if (result.status === 'fulfilled') Object.assign(allItems, result.value.items ?? {});
-    else failures += 1;
-  }
+  results.forEach((result, index) => {
+    if (result.status === 'fulfilled') {
+      Object.assign(allItems, result.value.items ?? {});
+      successfulItemIds.push(...chunks[index]);
+    } else {
+      failures += 1;
+      failedItemIds.push(...chunks[index]);
+    }
+  });
 
   fetchMetrics.failedChunks = failures;
   fetchMetrics.durationMs = Math.max(0, Date.now() - startedAt);
 
-  if (Object.keys(allItems).length === 0 && failures > 0) {
+  if (successfulItemIds.length === 0 && failures > 0) {
     throw new MarketDataError('현재 장터 요약 데이터를 불러오지 못했습니다.', undefined, {
       cause: results.find((result) => result.status === 'rejected')?.reason,
     });
   }
 
-  return { data: allItems, partial: failures > 0, metrics: fetchMetrics };
+  return {
+    data: allItems,
+    partial: failures > 0,
+    successfulItemIds,
+    failedItemIds,
+    metrics: fetchMetrics,
+  };
 };
 
 const fetchHistoryWindow = async (
@@ -404,17 +451,23 @@ const fetchHistoryWindow = async (
   fetcher: Fetcher,
   signal?: AbortSignal,
   metrics?: ChunkFetchMetrics,
-): Promise<ChunkFetchResult<Record<string, SaleHistoryEntry[]>>> => {
+): Promise<ChunkFetchResult<Record<string, SaleHistoryEntry[]>> & { successfulItemIds: number[]; failedItemIds: number[] }> => {
   const chunks = chunk(uniqueIds(itemIds), HISTORY_CHUNK_SIZE);
   const startedAt = Date.now();
   const fetchMetrics = resetChunkFetchMetrics(metrics, chunks.length);
-  const results = await settledMapWithConcurrency(chunks, MAX_UPSTREAM_CONCURRENCY, (ids) =>
-    requestJson<HistoryResponse>(getHistoryUrl(server, ids, entriesUntil), fetcher, signal, fetchMetrics));
+  const results = await settledMapWithConcurrency(chunks, MAX_UPSTREAM_CONCURRENCY, async (ids) => {
+    const response = await requestJson<HistoryResponse>(getHistoryUrl(server, ids, entriesUntil), fetcher, signal, fetchMetrics);
+    assertUniversalisWorldId(server, response);
+    return response;
+  });
   const allHistory: Record<string, SaleHistoryEntry[]> = {};
+  const successfulItemIds: number[] = [];
+  const failedItemIds: number[] = [];
   let failures = 0;
 
-  for (const result of results) {
+  results.forEach((result, index) => {
     if (result.status === 'fulfilled') {
+      successfulItemIds.push(...chunks[index]);
       for (const [itemId, item] of Object.entries(result.value.items ?? {})) {
         allHistory[itemId] = (item.entries ?? []).map(({ pricePerUnit, quantity, timestamp }) => ({
           pricePerUnit,
@@ -424,19 +477,26 @@ const fetchHistoryWindow = async (
       }
     } else {
       failures += 1;
+      failedItemIds.push(...chunks[index]);
     }
-  }
+  });
 
   fetchMetrics.failedChunks = failures;
   fetchMetrics.durationMs = Math.max(0, Date.now() - startedAt);
 
-  if (Object.keys(allHistory).length === 0 && failures > 0) {
+  if (successfulItemIds.length === 0 && failures > 0) {
     throw new MarketDataError('가격 이력 데이터를 불러오지 못했습니다.', undefined, {
       cause: results.find((result) => result.status === 'rejected')?.reason,
     });
   }
 
-  return { data: allHistory, partial: failures > 0, metrics: fetchMetrics };
+  return {
+    data: allHistory,
+    partial: failures > 0,
+    successfulItemIds,
+    failedItemIds,
+    metrics: fetchMetrics,
+  };
 };
 
 export const fetchPriceChanges = async (
@@ -445,7 +505,7 @@ export const fetchPriceChanges = async (
   fetcher: Fetcher = fetch,
   signal?: AbortSignal,
   telemetry?: MarketSyncTelemetry['history'],
-): Promise<ChunkFetchResult<Record<string, PriceChange>>> => {
+): Promise<ChunkFetchResult<Record<string, PriceChange>> & { successfulItemIds: number[]; failedItemIds: number[] }> => {
   const now = Math.floor(Date.now() / 1000);
   // Keep the two windows sequential so one refresh never exceeds the upstream
   // simultaneous-connection limit. Each window is internally capped at two.
@@ -462,6 +522,8 @@ export const fetchPriceChanges = async (
   return {
     data: buildPriceChanges(recent.data, previous.data),
     partial: recent.partial || previous.partial,
+    successfulItemIds: recent.successfulItemIds.filter((id) => previous.successfulItemIds.includes(id)),
+    failedItemIds: [...new Set([...recent.failedItemIds, ...previous.failedItemIds])],
     metrics: combineChunkFetchMetrics([recent.metrics, previous.metrics]),
   };
 };

@@ -2,6 +2,7 @@ import type {
   KoreaDCResponse,
   MarketSnapshotResponse,
 } from '../types/market';
+import { getMarketServerWorldId } from '../constants/market.ts';
 
 export type { KoreaDCResponse, MarketSnapshotResponse } from '../types/market';
 
@@ -20,6 +21,8 @@ const getErrorMessage = (payload: unknown, fallback: string) => {
 const fetchJson = async <T>(url: string, signal?: AbortSignal): Promise<T> => {
   const response = await fetch(url, {
     headers: { Accept: 'application/json' },
+    // Revalidate browser entries from older releases; the API shares R2 data.
+    cache: 'no-cache',
     signal,
   });
 
@@ -38,10 +41,18 @@ const fetchJson = async <T>(url: string, signal?: AbortSignal): Promise<T> => {
 export const fetchMarketSnapshot = async (
   server: string,
   signal?: AbortSignal,
-): Promise<MarketSnapshotResponse> => fetchJson<MarketSnapshotResponse>(
-  `/api/market/${encodeURIComponent(server)}`,
-  signal,
-);
+): Promise<MarketSnapshotResponse> => {
+  const expectedWorldId = getMarketServerWorldId(server);
+  if (!expectedWorldId) throw new Error('지원하지 않는 서버입니다.');
+  const snapshot = await fetchJson<MarketSnapshotResponse>(
+    `/api/market/${encodeURIComponent(server)}`,
+    signal,
+  );
+  if (snapshot.server !== server || snapshot.sourceWorldId !== expectedWorldId) {
+    throw new Error('한국 서버 시세를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+  }
+  return snapshot;
+};
 
 export const fetchKoreaDCData = async (
   itemId: number,
