@@ -372,7 +372,7 @@ const getCurrentUrl = (server: string, itemIds: number[]) => {
     // compact without discarding the data needed to calculate the summaries.
     listings: '0',
     entries: '20',
-    fields: 'items.itemID,items.lastUploadTime,items.currentAveragePrice,items.regularSaleVelocity,items.averagePrice,items.minPrice,items.minPriceNQ,items.minPriceHQ',
+    fields: 'worldID,items.itemID,items.lastUploadTime,items.currentAveragePrice,items.regularSaleVelocity,items.averagePrice,items.minPrice,items.minPriceNQ,items.minPriceHQ',
   });
   return `${UPSTREAM_BASE_URL}/${worldId}/${itemIds.join(',')}?${params.toString()}`;
 };

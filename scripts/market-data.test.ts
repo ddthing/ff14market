@@ -81,7 +81,9 @@ test('current market requests use summary fields and 50-item chunks', async () =
     assert.match(url.pathname, /^\/api\/v2\/2078\//, 'Tonberry requests must use the Korean world ID');
     assert.equal(url.searchParams.get('listings'), '0');
     assert.equal(url.searchParams.get('entries'), '20');
-    assert.match(url.searchParams.get('fields') ?? '', /items\.minPrice/);
+    const selectedFields = url.searchParams.get('fields')?.split(',') ?? [];
+    assert.ok(selectedFields.includes('worldID'), 'the filtered response must retain the world ID for scope validation');
+    assert.ok(selectedFields.includes('items.minPrice'));
   }
 });
 
