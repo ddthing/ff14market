@@ -1,46 +1,64 @@
 import {
-  buildMarketSnapshot,
-  buildMarketSnapshotFromCurrent,
-  createCurrentSnapshot,
   fetchCurrentStats,
   isSupportedServer,
   MarketDataError,
-  refreshSnapshotIfAllowed,
-  SNAPSHOT_TTL_MS,
-  snapshotKey,
   type MarketRequestContext,
   type SnapshotBucket,
 } from '../../_lib/market-data';
+import {
+  getCurrentPhaseFreshness,
+  getHistoryPhaseFreshness,
+  mergeCurrentPhaseSnapshot,
+  readCurrentPhaseSnapshot,
+  readHistoryPhaseSnapshot,
+  type CurrentPhaseSnapshot,
+  type HistoryPhaseSnapshot,
+} from '../../_lib/market-phase-cache';
+import { refreshCurrentPhase, refreshHistoryPhase } from '../../_lib/market-phase-refresh';
 import masterItems from '../../../src/data/masterItems.json';
-import type { MarketSnapshot, MarketSnapshotResponse } from '../../../src/types/market';
+import type { MarketSnapshotResponse } from '../../../src/types/market';
+import { getMarketServerWorldId } from '../../../src/constants/market';
 
 const MARKET_ITEM_IDS = masterItems.map((item) => item.id);
 
 const jsonHeaders = (snapshot: MarketSnapshotResponse) => ({
   'Content-Type': 'application/json; charset=utf-8',
-  'Cache-Control': 'public, max-age=30, s-maxage=60, stale-while-revalidate=300',
+  'Cache-Control': 'public, max-age=10, s-maxage=15, stale-while-revalidate=30',
   'X-Market-Source': snapshot.source,
   'X-Market-Generated-At': String(snapshot.generatedAt),
   'X-Market-History-Ready': String(snapshot.historyReady),
+  'X-Market-Current-Stale': String(snapshot.freshness?.current.stale ?? snapshot.stale),
+  'X-Market-History-Stale': String(snapshot.freshness?.history.stale ?? true),
 });
 
-const toResponse = (snapshot: MarketSnapshot, source: MarketSnapshotResponse['source'], stale: boolean) => {
-  const responseSnapshot: MarketSnapshotResponse = { ...snapshot, source, stale };
-  return new Response(JSON.stringify(responseSnapshot), {
-    headers: jsonHeaders(responseSnapshot),
-  });
-};
-
-const readStoredSnapshot = async (bucket: SnapshotBucket, key: string) => {
-  const object = await bucket.get(key);
-  if (!object) return null;
-
-  try {
-    return JSON.parse(await object.text()) as MarketSnapshot;
-  } catch (error) {
-    console.warn('Stored market snapshot was invalid', { key, error });
-    return null;
-  }
+const toResponse = (
+  server: string,
+  current: CurrentPhaseSnapshot | null,
+  history: HistoryPhaseSnapshot | null,
+  source: MarketSnapshotResponse['source'],
+  now = Date.now(),
+) => {
+  const currentFreshness = getCurrentPhaseFreshness(current, now);
+  const historyFreshness = getHistoryPhaseFreshness(history, now);
+  const responseSnapshot: MarketSnapshotResponse = {
+    schemaVersion: 1,
+    server,
+    sourceWorldId: getMarketServerWorldId(server)!,
+    generatedAt: current?.generatedAt ?? now,
+    currentGeneratedAt: current?.generatedAt,
+    historyGeneratedAt: history?.generatedAt ?? null,
+    historyReady: history?.historyReady ?? false,
+    partial: (current?.partial ?? false) || (history?.partial ?? false),
+    items: current?.items ?? {},
+    priceChanges: history?.priceChanges ?? {},
+    source,
+    stale: currentFreshness.stale,
+    freshness: {
+      current: currentFreshness,
+      history: historyFreshness,
+    },
+  };
+  return new Response(JSON.stringify(responseSnapshot), { headers: jsonHeaders(responseSnapshot) });
 };
 
 const errorResponse = (status: number, message: string) => new Response(JSON.stringify({
@@ -53,24 +71,29 @@ const errorResponse = (status: number, message: string) => new Response(JSON.str
   headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
 });
 
-const scheduleStaleSnapshotRefresh = (
+const scheduleCurrentRefresh = (
   context: MarketRequestContext,
   bucket: SnapshotBucket,
   server: string,
-  buildSnapshot: () => Promise<MarketSnapshot> = () => buildMarketSnapshot(server, MARKET_ITEM_IDS),
 ) => {
-  if (!context.waitUntil) return;
+  context.waitUntil?.(refreshCurrentPhase(bucket, server, MARKET_ITEM_IDS).catch((error) => {
+    console.error('Stale current market phase refresh failed', { server, error });
+  }));
+};
 
-  // Keep the stale response fast while repairing the shared snapshot in the background.
-  context.waitUntil(
-    refreshSnapshotIfAllowed(
-      bucket,
-      server,
-      buildSnapshot,
-    ).catch((error) => {
-      console.error('Stale market snapshot refresh failed', { server, error });
-    }),
-  );
+const scheduleHistoryRefresh = (
+  context: MarketRequestContext,
+  bucket: SnapshotBucket,
+  server: string,
+) => {
+  context.waitUntil?.(refreshHistoryPhase(bucket, server, MARKET_ITEM_IDS).catch((error) => {
+    console.error('Stale history market phase refresh failed', { server, error });
+  }));
+};
+
+const createUncachedCurrent = async (server: string): Promise<CurrentPhaseSnapshot> => {
+  const fetched = await fetchCurrentStats(server, MARKET_ITEM_IDS);
+  return mergeCurrentPhaseSnapshot(server, MARKET_ITEM_IDS, fetched, null);
 };
 
 export const onRequestGet = async (context: MarketRequestContext & { params: { server?: string } }) => {
@@ -78,44 +101,48 @@ export const onRequestGet = async (context: MarketRequestContext & { params: { s
   if (!isSupportedServer(server)) return errorResponse(400, '지원하지 않는 서버입니다.');
 
   const bucket = context.env?.MARKET_SNAPSHOTS;
+  let current: CurrentPhaseSnapshot | null;
+  let history: HistoryPhaseSnapshot | null = null;
+
   if (bucket) {
-    const stored = await readStoredSnapshot(bucket, snapshotKey(server));
-    if (stored) {
-      const stale = Date.now() - stored.generatedAt > SNAPSHOT_TTL_MS;
-      if (stale) scheduleStaleSnapshotRefresh(context, bucket, server);
-      return toResponse(stored, 'r2', stale);
+    [current, history] = await Promise.all([
+      readCurrentPhaseSnapshot(bucket, server),
+      readHistoryPhaseSnapshot(bucket, server),
+    ]);
+
+    if (!current) {
+      try {
+        const refreshed = await refreshCurrentPhase(bucket, server, MARKET_ITEM_IDS);
+        current = refreshed.snapshot ?? await readCurrentPhaseSnapshot(bucket, server);
+      } catch (error) {
+        console.error('Initial current market phase refresh failed', { server, error });
+        current = await readCurrentPhaseSnapshot(bucket, server);
+      }
+    }
+
+    if (current && getCurrentPhaseFreshness(current).stale) {
+      scheduleCurrentRefresh(context, bucket, server);
+    }
+    if (!history || getHistoryPhaseFreshness(history).stale) {
+      scheduleHistoryRefresh(context, bucket, server);
+    }
+
+    if (current) return toResponse(server, current, history, 'r2');
+  } else {
+    try {
+      current = await createUncachedCurrent(server);
+    } catch (error) {
+      console.error('Failed to fetch current market phase', { server, error });
+      const message = error instanceof MarketDataError
+        ? error.message
+        : '장터 스냅샷을 준비하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+      return errorResponse(503, message);
     }
   }
 
-  try {
-    const current = await fetchCurrentStats(server, MARKET_ITEM_IDS);
-    if (bucket && context.waitUntil) {
-      // Show current prices immediately; history ranking is filled into R2 in the background.
-      const preview = createCurrentSnapshot(server, current);
-      scheduleStaleSnapshotRefresh(
-        context,
-        bucket,
-        server,
-        () => buildMarketSnapshotFromCurrent(server, current),
-      );
-      return toResponse(preview, 'upstream-fallback', false);
-    }
-
-    const snapshot = await buildMarketSnapshotFromCurrent(server, current);
-    if (bucket) {
-      context.waitUntil?.(bucket.put(snapshotKey(server), JSON.stringify(snapshot), {
-        httpMetadata: {
-          contentType: 'application/json',
-          cacheControl: 'public, max-age=60',
-        },
-      }));
-    }
-    return toResponse(snapshot, 'upstream-fallback', false);
-  } catch (error) {
-    console.error('Failed to build market snapshot', { server, error });
-    const message = error instanceof MarketDataError
-      ? error.message
-      : '장터 스냅샷을 준비하지 못했습니다. 잠시 후 다시 시도해 주세요.';
-    return errorResponse(503, message);
+  if (!current) {
+    return errorResponse(503, '현재 장터 시세를 준비하는 중입니다. 잠시 후 다시 시도해 주세요.');
   }
+
+  return toResponse(server, current, history, 'upstream-fallback');
 };

@@ -27,10 +27,21 @@ import { MarketSpotlight } from './MarketSpotlight';
 import { useToastStore } from '../../store/useToastStore';
 
 export function Dashboard() {
-  const { enrichedItems, isLoading, isError, refetch, snapshotGeneratedAt, snapshotStale, hasSnapshot } =
-    useItemData();
+  const {
+    enrichedItems,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+    snapshotGeneratedAt,
+    snapshotStale,
+    currentFreshness,
+    hasSnapshot,
+  } = useItemData();
   const unavailable = isError && !hasSnapshot;
-  const outdated = snapshotStale || (isError && hasSnapshot);
+  const currentDataStale = currentFreshness?.stale ?? snapshotStale;
+  const currentDataPartial = currentFreshness?.partial ?? false;
+  const isCurrentDataOutdated = currentDataStale || currentDataPartial || (isError && hasSnapshot);
   const favoriteIds = useFavoriteStore((state) => state.favoriteIds);
   const recentIds = useRecentStore((state) => state.recentIds);
   const server = useServerStore((state) => state.server);
@@ -87,7 +98,7 @@ export function Dashboard() {
             <HeroSearch recommendedItems={enrichedItems.slice(0, 3)} />
             <p className="hero-search-hint">아이템 검색부터 서버별 가격 비교까지 <span>로그인 없이, 바로.</span></p>
           </div>
-          <MarketSpotlight items={enrichedItems} server={serverName} loading={isLoading} unavailable={unavailable} stale={outdated} />
+          <MarketSpotlight items={enrichedItems} server={serverName} loading={isLoading} unavailable={unavailable} stale={isCurrentDataOutdated} />
         </section>
         {isError && hasSnapshot && (
           <div className="snapshot-warning" role="status">
@@ -130,19 +141,25 @@ export function Dashboard() {
               </strong>
             </span>
           </div>
-          <div className="snapshot-stat" aria-busy={isRefreshing}>
+          <div className="snapshot-stat" aria-busy={isRefreshing || isFetching}>
             <span className="stat-icon">
               <Clock3 size={18} />
             </span>
             <span>
-              <small>{outdated ? '이전 수집 데이터' : '스냅샷 수집 시점'}</small>
+              <small>{currentDataStale
+                ? '이전 가격 데이터'
+                : currentDataPartial
+                  ? '일부 가격 데이터 이전'
+                  : '가격 수집 시점'}</small>
               <strong className="stat-time">
-                {snapshotGeneratedAt ? formatFreshness(snapshotGeneratedAt) : '수집 대기'}
+                {currentFreshness?.generatedAt || snapshotGeneratedAt
+                  ? formatFreshness(currentFreshness?.generatedAt ?? snapshotGeneratedAt)
+                  : '수집 대기'}
               </strong>
             </span>
             <button
               className="refresh-button"
-              disabled={isRefreshing || isLoading}
+              disabled={isRefreshing || isLoading || isFetching}
               onClick={() => void refresh()}
               aria-label="시세 새로고침"
             >

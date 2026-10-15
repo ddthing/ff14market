@@ -20,10 +20,14 @@ export const Favorites = () => {
     getServerReadySnapshot,
   );
   const favoriteIds = useFavoriteStore((state) => state.favoriteIds);
-  const { enrichedItems, isLoading, isError, refetch } = useItemData({
+  const { enrichedItems, isLoading, isError, hasSnapshot, snapshotStale, currentFreshness, refetch } = useItemData({
     enabled: isClientReady && favoriteIds.length > 0,
   });
   const favoriteItemsList = useSavedItems(favoriteIds, enrichedItems);
+  const isShowingOldSnapshot = snapshotStale
+    || currentFreshness?.stale === true
+    || currentFreshness?.partial === true
+    || (isError && hasSnapshot);
 
   return (
     <>
@@ -37,7 +41,9 @@ export const Favorites = () => {
         <div className="mb-2 flex items-center justify-between px-2">
           <h1 className="text-[1.3rem] font-bold tracking-tight">내 관심템</h1>
           <span className="text-sm font-medium text-[var(--app-ink-muted)]">
-            {isClientReady ? `${favoriteItemsList.length}개` : '불러오는 중'}
+            {isClientReady
+              ? `${favoriteItemsList.length}개${favoriteItemsList.length > 0 && isShowingOldSnapshot ? ' · 이전 시세' : ''}`
+              : '불러오는 중'}
           </span>
         </div>
 
@@ -49,7 +55,7 @@ export const Favorites = () => {
             </div>
           ) : (
             <>
-              {isError && <DataErrorState compact onRetry={() => void refetch()} />}
+              {favoriteIds.length > 0 && isError && !hasSnapshot && <DataErrorState compact onRetry={() => void refetch()} />}
               {isLoading ? (
                 <div className="overflow-hidden rounded-xl border border-[var(--app-hairline)] bg-[var(--app-surface)] shadow-[0_2px_10px_rgba(0,0,0,0.02)] dark:shadow-none">
                   {favoriteItemsList.map((item) => <SkeletonRow key={`fav-skel-${item.id}`} />)}

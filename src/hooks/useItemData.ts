@@ -4,6 +4,7 @@ import { fetchMarketSnapshot } from '../api/universalis';
 import type { MarketSnapshotResponse } from '../types/market';
 import masterItems from '../data/masterItems.json';
 import { useServerStore } from '../store/useServerStore';
+import { getMarketPollInterval, MARKET_POLL_INTERVAL_MS } from './marketPolling';
 import {
   computeMarketPriceGapPercent,
   computeTrueMinPrice,
@@ -33,16 +34,22 @@ export const getBulkQueryKey = getMarketSnapshotQueryKey;
 export const useItemData = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const { server } = useServerStore();
 
-  // 현재 선택된 서버의 요약 지표와 사전 계산된 순위를 한 번에 조회
-  const { data: snapshot, isLoading, isError, error, refetch } = useQuery<MarketSnapshotResponse>({
+  // This shared observer owns polling for the selected server's snapshot key.
+  const { data: snapshot, isPending, isFetching, isError, error, refetch } = useQuery<MarketSnapshotResponse>({
     queryKey: getMarketSnapshotQueryKey(server),
     queryFn: ({ signal }) => fetchMarketSnapshot(server, signal),
     enabled,
-    staleTime: 300000, // 5 minutes (모달에서 수동으로 덮어씌운 최신 캐시가 백그라운드 리패치에 의해 과거 벌크 데이터로 즉시 롤백되는 현상 방지)
+    staleTime: MARKET_POLL_INTERVAL_MS,
     gcTime: 900000,
-    refetchOnWindowFocus: false,
+    refetchInterval: (query) => getMarketPollInterval(query.state.fetchStatus),
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMount: true,
+    networkMode: 'online',
     retry: 0,
   });
+  const isLoading = enabled && isPending && snapshot === undefined;
 
   const apiData = snapshot?.items;
 
@@ -88,8 +95,11 @@ export const useItemData = ({ enabled = true }: { enabled?: boolean } = {}) => {
     snapshotGeneratedAt: snapshot?.generatedAt,
     snapshotSource: snapshot?.source,
     snapshotStale: snapshot?.stale ?? false,
+    currentFreshness: snapshot?.freshness?.current,
+    historyFreshness: snapshot?.freshness?.history,
     hasSnapshot: snapshot !== undefined,
     isLoading,
+    isFetching,
     isError,
     error,
     refetch,

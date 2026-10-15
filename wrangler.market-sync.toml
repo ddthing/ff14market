@@ -3,11 +3,19 @@ main = "workers/market-sync.ts"
 compatibility_date = "2026-08-20"
 workers_dev = false
 
+[observability]
+enabled = true
+
+[observability.logs]
+enabled = true
+invocation_logs = true
+head_sampling_rate = 1
+
 [vars]
 MARKET_API_BASE_URL = "https://ff14market.pages.dev"
 
 [triggers]
-crons = ["*/5 * * * *"]
+crons = ["* * * * *", "*/3 * * * *"]
 
 [[r2_buckets]]
 binding = "MARKET_SNAPSHOTS"

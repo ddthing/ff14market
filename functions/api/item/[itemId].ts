@@ -69,7 +69,7 @@ const createDetailResponse = (
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': stale
       ? 'no-store'
-      : 'public, max-age=30, s-maxage=60, stale-while-revalidate=120',
+      : 'public, max-age=5, s-maxage=15, stale-while-revalidate=15',
     'X-Market-Cache': cacheStatus,
   });
 
@@ -100,7 +100,7 @@ const errorResponse = (status: number, message: string) => new Response(JSON.str
   headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
 });
 
-export const onRequestGet = async (
+const handleItemDetailGet = async (
   context: ItemDetailContext,
   fetcher: ItemDetailFetcher = fetch,
 ) => {
@@ -212,5 +212,34 @@ export const onRequestGet = async (
     return errorResponse(503, message);
   } finally {
     deadline?.cleanup();
+  }
+};
+
+// Concurrent requests handled by this isolate share one upstream operation.
+// Cloudflare's short response cache shares completed results across requests.
+const pendingDetails = new WeakMap<ItemDetailFetcher, Map<string, Promise<Response>>>();
+
+export const onRequestGet = async (
+  context: ItemDetailContext,
+  fetcher: ItemDetailFetcher = fetch,
+) => {
+  const itemId = Number(context.params.itemId);
+  if (!Number.isSafeInteger(itemId) || itemId <= 0) return errorResponse(400, '잘못된 아이템 ID입니다.');
+
+  let requests = pendingDetails.get(fetcher);
+  if (!requests) {
+    requests = new Map();
+    pendingDetails.set(fetcher, requests);
+  }
+  const key = createItemDetailCacheKey(context.request?.url, itemId).url;
+  const existing = requests.get(key);
+  if (existing) return (await existing).clone();
+
+  const operation = handleItemDetailGet(context, fetcher);
+  requests.set(key, operation);
+  try {
+    return (await operation).clone();
+  } finally {
+    requests.delete(key);
   }
 };
