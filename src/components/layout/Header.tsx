@@ -33,24 +33,24 @@ export const Header = () => {
 
   return (
     <>
-      <header className="relative sticky top-0 z-40 border-b border-[var(--app-hairline)] bg-[var(--app-surface)]/95 backdrop-blur-md transition-colors">
-        <div className="container mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
+      <header className="market-header sticky top-0 z-40 border-b border-[var(--app-hairline)] bg-[var(--app-surface)]/95 backdrop-blur-md transition-colors">
+        <div className="header-inner container mx-auto flex h-[72px] max-w-[1360px] items-center gap-3 px-4 md:px-8">
           <div className="flex shrink-0 items-center space-x-4 md:space-x-6">
             <Link to="/" aria-label="FF14 장터탐지기 홈" className="flex min-h-10 items-center whitespace-nowrap text-[1rem] font-bold tracking-tight">
-              <span className="mr-1.5 inline-flex items-center text-[var(--app-accent)]" aria-hidden="true">
-                <Coins className="h-[18px] w-[18px]" />
+              <span className="brand-mark mr-2.5 inline-flex items-center" aria-hidden="true">
+                <Coins className="h-[20px] w-[20px]" />
               </span>
-              <span className="hidden sm:inline">FF14 장터탐지기</span>
+              <span className="hidden sm:inline">FF14 <span className="brand-subtitle">장터탐지기</span></span>
               <span className="sm:hidden">FF14 마켓</span>
             </Link>
             <nav className="hidden items-center space-x-4 md:flex" aria-label="주요 메뉴">
-              <NavLink to="/" className={navLinkClass}>홈</NavLink>
-              <NavLink to="/hot-issues" className={navLinkClass}>실시간 Hot</NavLink>
-              <NavLink to="/favorites" className={navLinkClass}>내 관심템</NavLink>
+              <NavLink to="/" className={navLinkClass}>대시보드</NavLink>
+              <NavLink to="/hot-issues" className={navLinkClass}>장터 신호</NavLink>
+              <NavLink to="/favorites" className={navLinkClass}>관심 아이템</NavLink>
             </nav>
           </div>
 
-          <div className="ml-auto flex shrink-0 items-center space-x-2">
+          <div className="header-actions ml-auto flex shrink-0 items-center space-x-2">
             <button
               type="button"
               onClick={openSearch}
@@ -98,7 +98,7 @@ export const Header = () => {
       <nav className="mobile-bottom-nav fixed inset-x-3 z-40 border border-[var(--app-hairline)] bg-[var(--app-surface)]/95 backdrop-blur-lg md:hidden" aria-label="주요 메뉴">
         <div className="mobile-bottom-nav__inner mx-auto grid max-w-md grid-cols-3 gap-1">
           <MobileNavLink to="/" label="홈" icon={<Home className="h-[22px] w-[22px]" aria-hidden="true" />} />
-          <MobileNavLink to="/hot-issues" label="실시간 Hot" icon={<Flame className="h-[22px] w-[22px]" aria-hidden="true" />} />
+          <MobileNavLink to="/hot-issues" label="장터 신호" icon={<Flame className="h-[22px] w-[22px]" aria-hidden="true" />} />
           <MobileNavLink to="/favorites" label="관심템" icon={<Heart className="h-[22px] w-[22px]" aria-hidden="true" />} />
         </div>
       </nav>

@@ -45,7 +45,7 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ itemId, classNam
         className={`h-[18px] w-[18px] transition-colors duration-200 ${
           isFavorite 
             ? 'text-red-500 fill-red-500' 
-            : 'text-[var(--app-hairline)] hover:text-red-400'
+            : 'text-[var(--app-ink-muted)] hover:text-red-400'
         }`} 
       />
     </button>

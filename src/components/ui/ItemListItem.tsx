@@ -109,7 +109,7 @@ export const ItemListItem = memo(({ item, signal }: {
       >
         <div className="mt-0.5 h-10 w-10 shrink-0 rounded-full bg-[var(--app-surface-subtle)] p-[2px] sm:mt-0 sm:h-[42px] sm:w-[42px]">
           <img
-            src={getIconUrl(item.icon)}
+            src={getIconUrl(item.icon) || undefined}
             alt=""
             loading="lazy"
             decoding="async"
