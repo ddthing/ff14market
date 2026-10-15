@@ -1,6 +1,7 @@
 import { memo, useEffect, useId, useRef, useState, type ChangeEvent, type FocusEvent, type KeyboardEvent } from 'react';
 import { BarChart3, Flame, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { fetchItemSearch, type ItemCatalogEntry } from '../../api/itemCatalog';
 import { getIconUrl } from '../../utils/icon';
 import type { EnrichedItem } from '../../hooks/useItemData';
@@ -12,6 +13,7 @@ type ItemSearchProps = {
   autoFocus?: boolean;
   onSelect?: () => void;
   onEscape?: () => void;
+  resultsLayout?: 'dropdown' | 'inline';
 };
 
 /**
@@ -25,10 +27,8 @@ export const ItemSearch = memo(({
   autoFocus = false,
   onSelect,
   onEscape,
+  resultsLayout = 'dropdown',
 }: ItemSearchProps) => {
-  const [searchResults, setSearchResults] = useState<ItemCatalogEntry[]>([]);
-  const [isSearchLoading, setIsSearchLoading] = useState(false);
-  const [hasSearchError, setHasSearchError] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -37,6 +37,7 @@ export const ItemSearch = memo(({
   const listboxId = useId();
   const navigate = useNavigate();
   const isHero = variant === 'hero';
+  const isInline = resultsLayout === 'inline';
   // iOS Safari zooms focused inputs below 16px; compact sizing starts at md.
   const inputClassName = isHero ? 'pl-4 pr-6 text-[16px] md:text-[18px]' : 'px-2.5 pr-3 text-[16px] md:text-[13px]';
 
@@ -47,26 +48,14 @@ export const ItemSearch = memo(({
     return () => window.clearTimeout(timer);
   }, [searchQuery]);
 
-  useEffect(() => {
-    const query = debouncedSearchQuery.trim();
-    if (!query) return;
-
-    const controller = new AbortController();
-
-    void fetchItemSearch(query, controller.signal)
-      .then(setSearchResults)
-      .catch((error: unknown) => {
-        if (controller.signal.aborted) return;
-        setSearchResults([]);
-        setHasSearchError(true);
-        console.error('Item search failed', error);
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setIsSearchLoading(false);
-      });
-
-    return () => controller.abort();
-  }, [debouncedSearchQuery]);
+  const query = debouncedSearchQuery.trim();
+  const { data: searchResults = [], isFetching, isError: hasSearchError } = useQuery({
+    queryKey: ['itemSearch', query],
+    queryFn: ({ signal }) => fetchItemSearch(query, signal),
+    enabled: query.length > 0,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  });
 
   useEffect(() => {
     setActiveResultIndex((currentIndex) => (
@@ -74,21 +63,14 @@ export const ItemSearch = memo(({
     ));
   }, [searchResults.length]);
 
-  const isSearching = searchQuery !== debouncedSearchQuery || (searchQuery.trim().length > 0 && isSearchLoading);
+  const isSearching = searchQuery.trim() !== query || (query.length > 0 && isFetching);
   const activeResult = activeResultIndex === null ? null : searchResults[activeResultIndex];
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextQuery = event.target.value;
-    const hasQuery = nextQuery.trim().length > 0;
     setSearchQuery(nextQuery);
-    setIsDropdownOpen(nextQuery.length > 0);
+    setIsDropdownOpen(nextQuery.trim().length > 0);
     setActiveResultIndex(null);
-    setIsSearchLoading(hasQuery);
-    setHasSearchError(false);
-    if (!hasQuery) {
-      setSearchResults([]);
-      setIsSearchLoading(false);
-    }
   };
 
   const handleSearchBlur = (event: FocusEvent<HTMLDivElement>) => {
@@ -110,6 +92,13 @@ export const ItemSearch = memo(({
       setIsDropdownOpen(false);
       setActiveResultIndex(null);
       onEscape?.();
+      return;
+    }
+
+    // A previous query's results remain in memory during the debounce window.
+    // Never navigate to those results while a different query is being resolved.
+    if (isSearching || hasSearchError || !query || (event.key === 'Enter' && !isDropdownOpen)) {
+      if (event.key === 'Enter') event.preventDefault();
       return;
     }
 
@@ -141,19 +130,17 @@ export const ItemSearch = memo(({
     setSearchQuery(item.name);
     setIsDropdownOpen(true);
     setActiveResultIndex(null);
-    setIsSearchLoading(true);
-    setHasSearchError(false);
     inputRef.current?.focus();
   };
 
   return (
     <div
-      className={isHero ? 'mb-6 mt-2 flex w-full flex-col items-center' : 'relative w-full'}
+      className={isInline ? 'flex min-h-0 w-full flex-col' : isHero ? 'mb-6 mt-2 flex w-full flex-col items-center' : 'relative w-full'}
       onBlur={handleSearchBlur}
       role="search"
     >
-      <div className={isHero ? 'relative w-full max-w-2xl' : 'relative w-full'}>
-        <div className={`relative flex w-full items-center border border-[var(--app-hairline)] bg-[var(--app-surface)] transition-[border-color,box-shadow] focus-within:border-[var(--app-accent)] focus-within:ring-2 focus-within:ring-[var(--app-accent)]/30 ${
+      <div className={isInline ? 'relative flex min-h-0 w-full flex-col' : isHero ? 'relative w-full max-w-2xl' : 'relative w-full'}>
+        <div className={`relative flex w-full shrink-0 items-center border border-[var(--app-hairline)] bg-[var(--app-surface)] transition-[border-color,box-shadow] focus-within:border-[var(--app-accent)] focus-within:ring-2 focus-within:ring-[var(--app-accent)]/30 ${
           isHero
             ? 'h-[60px] rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-none'
             : 'h-10 rounded-md shadow-none'
@@ -212,18 +199,18 @@ export const ItemSearch = memo(({
           <div
             id={listboxId}
             role="listbox"
-            className={`absolute left-0 z-50 w-full animate-fade-in overflow-hidden rounded-xl border border-[var(--app-hairline)] bg-[var(--app-surface)] shadow-[0_10px_40px_rgb(0,0,0,0.1)] ${
-              isHero ? 'top-[calc(100%+12px)]' : 'top-[calc(100%+8px)]'
+            className={`z-50 min-h-0 w-full animate-fade-in overflow-hidden rounded-xl border border-[var(--app-hairline)] bg-[var(--app-surface)] ${
+              isInline ? 'relative mt-2 flex flex-col' : `absolute left-0 shadow-[0_10px_40px_rgb(0,0,0,0.1)] ${isHero ? 'top-[calc(100%+12px)]' : 'top-[calc(100%+8px)]'}`
             }`}
           >
-            <div className={`scrollbar-hide max-h-[360px] overflow-y-auto ${isHero ? 'p-3' : 'p-2'}`}>
-              {hasSearchError ? (
-                <div className="py-8 text-center text-[13px] font-medium text-[var(--destructive)]" role="alert">
-                  검색 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
-                </div>
-              ) : isSearching ? (
+            <div className={`scrollbar-hide min-h-0 max-h-[360px] overflow-y-auto overscroll-contain ${isHero ? 'p-3' : 'p-2'}`}>
+              {isSearching ? (
                 <div className="py-8 text-center text-[13px] font-medium text-[var(--app-ink-muted)]" aria-live="polite">
                   검색 중...
+                </div>
+              ) : hasSearchError ? (
+                <div className="py-8 text-center text-[13px] font-medium text-[var(--destructive)]" role="alert">
+                  검색 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
                 </div>
               ) : searchResults.length > 0 ? (
                 searchResults.map((item, index) => (

@@ -82,6 +82,8 @@ Hot 화면을 이미 캐시한 뒤 상세를 반복해서 열면 약 `0.38초`�
 
 시장 스냅샷은 current 요약과 최근·이전 7일 history를 분리한다. history는 두 기간을 순차 조회하고 각 기간 내부 동시성을 2로 제한한다. 이는 Universalis가 IP별 동시 연결을 제한하는 구조에서 안정성을 우선한 선택이다.
 
+2026-10-15 모바일 운영 점검에서 current 요청의 `entries=0`이 `averagePrice`와 `regularSaleVelocity`를 모두 0으로 만드는 문제를 재현했다. 최근 거래 20건을 통계 계산에 포함하고 `fields`로 이력 배열을 응답에서 제외한다. Pages Functions와 예약 수집 Worker를 함께 배포해야 기존 Worker가 0인 스냅샷을 다시 저장하지 않는다.
+
 이 영역은 아직 기능 변경 대상이 아니다. Worker 실행 시간, 실패한 chunk 수, 서버별 `historyReady` 비율을 운영 로그로 수집한 뒤에만 동시성을 조정한다. `Promise.all`로 두 기간을 무조건 병렬화하면 upstream 제한과 재시도 폭주를 다시 만들 수 있다.
 
 ### P2 — 클라이언트 순위 계산

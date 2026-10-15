@@ -1097,7 +1097,19 @@ button:disabled {
 }
 @media (max-width: 479px) {
   .header-inner { gap: 4px; }
-  .header-actions > button { min-width: 36px; min-height: 44px; }
+  .header-actions > button { min-width: 44px; min-height: 44px; }
   .header-actions select { width: 68px; }
   .brand-mark { margin-right: 6px; }
+}
+
+/* Keep essential controls legible and reachable on narrow touch screens. */
+@media (max-width: 767px) {
+  .header-actions > button { min-width: 44px; min-height: 44px; }
+  .header-actions select { height: 44px; }
+  .explorer-toolbar { flex-direction: column; }
+  .sort-control { justify-content: flex-end; }
+  .sort-control select { width: auto; max-width: 100%; min-width: 190px; font-size: 12px; }
+  .category-toolbar { align-items: center; }
+  .category-tabs { min-width: 0; flex: 1; flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; }
+  .category-tabs button { flex-shrink: 0; }
 }
