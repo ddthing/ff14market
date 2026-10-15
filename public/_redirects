@@ -1,9 +1,3 @@
-/ /index.html 200
-/hot-issues /spa 200
-/hot-issues/ /spa 200
-/favorites /spa 200
-/favorites/ /spa 200
-/item/* /spa 200
 /guide /spa 200
 /guide/ /spa 200
 /faq /spa 200
@@ -16,3 +10,4 @@
 /privacy/ /spa 200
 /support /spa 200
 /support/ /spa 200
+/item/* /spa 200

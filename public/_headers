@@ -1,5 +1,11 @@
 # Keep user-specific and legal documents accessible for crawlers to read the
 # noindex directive, while keeping them out of search results and the sitemap.
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/rendered-item-template.template
+  Cache-Control: no-store
+  Content-Type: text/plain; charset=utf-8
+  X-Robots-Tag: noindex, nofollow
 /favorites
   X-Robots-Tag: noindex, follow
 /favorites/*

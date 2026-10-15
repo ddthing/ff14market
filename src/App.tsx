@@ -1,4 +1,4 @@
-import { Suspense, lazy, useState } from 'react'
+import { Suspense, lazy, useState, type ComponentType } from 'react'
 import { BrowserRouter as Router, StaticRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './queryClient'
@@ -11,6 +11,7 @@ import { Dashboard } from './features/dashboard/Dashboard'
 import { ToastContainer } from './components/ui/ToastContainer';
 import { GlobalSearch } from './components/ui/GlobalSearch';
 import { loadItemDetail } from './routes/itemDetail';
+import type { ItemCatalogEntry } from './api/itemCatalog';
 
 // Lazy load pages
 // The primary entry screen renders immediately; secondary routes stay split.
@@ -38,9 +39,24 @@ function RouteScrollReset() {
   return null;
 }
 
-function AppContent() {
+type InitialRouteComponents = {
+  hotIssues?: ComponentType;
+  favorites?: ComponentType;
+  itemDetail?: ComponentType<{ initialItem?: ItemCatalogEntry }>;
+};
+
+function AppContent({
+  initialRouteComponents,
+  initialItem,
+}: {
+  initialRouteComponents?: InitialRouteComponents;
+  initialItem?: ItemCatalogEntry;
+}) {
   const { theme } = useThemeStore();
   const [themeHydrated, setThemeHydrated] = useState(false);
+  const HotIssuesRoute = initialRouteComponents?.hotIssues ?? HotIssues;
+  const FavoritesRoute = initialRouteComponents?.favorites ?? Favorites;
+  const ItemDetailRoute = initialRouteComponents?.itemDetail ?? ItemDetail;
 
   useEffect(() => {
     let active = true;
@@ -97,9 +113,9 @@ function AppContent() {
           <Suspense fallback={<LoadingFallback />}>
             <Routes>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/hot-issues" element={<HotIssues />} />
-              <Route path="/favorites" element={<Favorites />} />
-              <Route path="/item/:id" element={<ItemDetail />} />
+              <Route path="/hot-issues" element={<HotIssuesRoute />} />
+              <Route path="/favorites" element={<FavoritesRoute />} />
+              <Route path="/item/:id" element={<ItemDetailRoute initialItem={initialItem} />} />
               <Route path="/guide" element={<Guide />} />
               <Route path="/faq" element={<FAQ />} />
               <Route path="/about" element={<About />} />
@@ -117,20 +133,22 @@ function AppContent() {
   )
 }
 
-type AppProps = {
+export type AppProps = {
   staticLocation?: string;
+  initialRouteComponents?: InitialRouteComponents;
+  initialItem?: ItemCatalogEntry;
 }
 
-function App({ staticLocation }: AppProps = {}) {
+function App({ staticLocation, initialRouteComponents, initialItem }: AppProps = {}) {
   return (
     <QueryClientProvider client={queryClient}>
       {staticLocation === undefined ? (
         <Router>
-          <AppContent />
+          <AppContent initialRouteComponents={initialRouteComponents} initialItem={initialItem} />
         </Router>
       ) : (
         <StaticRouter location={staticLocation}>
-          <AppContent />
+          <AppContent initialRouteComponents={initialRouteComponents} initialItem={initialItem} />
         </StaticRouter>
       )}
     </QueryClientProvider>
