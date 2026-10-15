@@ -28,17 +28,51 @@ function inlineInitialStyles(): Plugin {
         { source: '/src/pages/ItemDetail.tsx', prefix: 'rendered-item-' },
       ];
       const files = await readdir(outputDirectory);
+      const chunksByFile = new Map(
+        Object.values(bundle)
+          .filter(candidate => candidate.type === 'chunk')
+          .map(candidate => [candidate.fileName, candidate] as const),
+      );
+      const getStaticPreloadFiles = (entryFile: string) => {
+        const visited = new Set<string>();
+        const orderedFiles: string[] = [];
+        const visit = (fileName: string) => {
+          if (visited.has(fileName)) return;
+          visited.add(fileName);
+          orderedFiles.push(fileName);
+          const chunk = chunksByFile.get(fileName);
+          for (const importedFile of chunk?.imports ?? []) {
+            if (chunksByFile.has(importedFile)) visit(importedFile);
+          }
+        };
+        visit(entryFile);
+        return orderedFiles;
+      };
       for (const route of routeModules) {
         const chunk = Object.values(bundle).find(candidate =>
           candidate.type === 'chunk' && candidate.facadeModuleId?.replaceAll('\\', '/').endsWith(route.source),
         );
         if (!chunk) throw new Error(`Missing initial route chunk: ${route.source}`);
+        const preloadFiles = getStaticPreloadFiles(chunk.fileName);
         const routeFiles = files.filter(file => file.startsWith(route.prefix)
           && (file.endsWith('.html') || file === 'rendered-item-template.template'));
         for (const file of routeFiles) {
           const htmlPath = path.join(outputDirectory, file);
           const html = await readFile(htmlPath, 'utf8');
-          await writeFile(htmlPath, html.replace('</head>', `<link rel="modulepreload" crossorigin href="/${chunk.fileName}"></head>`));
+          const existingPreloads = new Set(
+            [...html.matchAll(/<link\b[^>]*>/g)]
+              .map(([tag]) => {
+                if (!/\brel=["']modulepreload["']/i.test(tag)) return null;
+                return tag.match(/\bhref=["']([^"']+)["']/i)?.[1] ?? null;
+              })
+              .filter((href): href is string => href !== null),
+          );
+          const newPreloads = preloadFiles
+            .map(fileName => `/${fileName}`)
+            .filter(href => !existingPreloads.has(href))
+            .map(href => `<link rel="modulepreload" crossorigin href="${href}">`)
+            .join('');
+          if (newPreloads) await writeFile(htmlPath, html.replace('</head>', `${newPreloads}</head>`));
         }
       }
     },
