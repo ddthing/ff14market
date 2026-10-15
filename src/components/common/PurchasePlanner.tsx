@@ -5,7 +5,7 @@ import { useServerStore } from '../../store/useServerStore';
 import { getAbsoluteMinPrice, getServerMinPrices } from '../../utils/marketListings';
 import type { KoreaDCResponse } from '../../types/market';
 
-type PurchasePlannerStatus = 'loading' | 'error' | 'ready';
+type PurchasePlannerStatus = 'loading' | 'error' | 'unavailable' | 'stale' | 'ready';
 
 export function PurchasePlanner({
   listings,
@@ -34,11 +34,15 @@ export function PurchasePlanner({
     ? '시세 조회 중'
     : status === 'error'
       ? '시세 조회 실패'
-      : minimum > 0
-        ? '선택한 품질의 서버별 최저가 기준'
-        : quality === 'all'
-          ? '현재 등록된 매물이 없습니다.'
-          : '선택한 품질에 매물이 없습니다.';
+      : status === 'unavailable'
+        ? '시세 자료 없음'
+        : status === 'stale'
+          ? '저장된 시세 · 갱신 실패'
+          : minimum > 0
+            ? '선택한 품질의 서버별 최저가 기준'
+            : quality === 'all'
+              ? '현재 등록된 매물이 없습니다.'
+              : '선택한 품질에 매물이 없습니다.';
   const count = Number(quantity);
   const valid = Number.isSafeInteger(count) && count >= 1 && count <= 9999;
   const homePrice = prices.find((price) => price.serverName === homeName)?.minPrice ?? 0;
@@ -102,16 +106,18 @@ export function PurchasePlanner({
                 ? '조회 중'
                 : status === 'error'
                   ? '조회 실패'
-                  : !valid
-                    ? '계산 불가'
-                    : price.minPrice > 0
-                      ? `${(price.minPrice * count).toLocaleString()} G`
-                      : '매물 없음'}
+                  : status === 'unavailable'
+                    ? '미제공'
+                    : !valid
+                      ? '계산 불가'
+                      : price.minPrice > 0
+                        ? `${(price.minPrice * count).toLocaleString()} G`
+                        : '매물 없음'}
             </strong>
           </div>
         ))}
       </div>
-      {status === 'ready' && valid && minimum > 0 && homePrice > minimum && (
+      {(status === 'ready' || status === 'stale') && valid && minimum > 0 && homePrice > minimum && (
         <p className="planner-saving">
           {homeName} 서버 대비 예상 차액{' '}
           <strong>{((homePrice - minimum) * count).toLocaleString()} G</strong>

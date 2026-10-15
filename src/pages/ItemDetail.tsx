@@ -67,6 +67,13 @@ export const ItemDetail = ({ initialItem }: ItemDetailProps = {}) => {
     staleTime: 60000,
     retry: 1,
   });
+  const plannerStatus = isLoading
+    ? 'loading'
+    : data === null
+      ? 'unavailable'
+      : isError
+        ? data !== undefined ? 'stale' : 'error'
+        : data !== undefined ? 'ready' : 'error';
 
   const serverPrices = useMemo(
     () => getServerMinPrices(data?.listings, MARKET_SERVER_NAMES),
@@ -138,6 +145,28 @@ export const ItemDetail = ({ initialItem }: ItemDetailProps = {}) => {
     ? computeTrueMinPrice(itemData.minPrice ?? 0, itemData.minPriceNQ ?? 0, itemData.minPriceHQ ?? 0)
     : 0;
   const netPrice = Math.floor(globalMinPrice * 0.95);
+  const emptyPriceLabel = data === null
+    ? '시세 미제공'
+    : data !== undefined
+      ? '매물 없음'
+      : isError
+        ? '시세 확인 실패'
+        : '시세 미제공';
+  const marketSubtitle = isLoading
+    ? '시세 데이터 확인 중...'
+    : isError
+      ? data !== undefined && data !== null
+        ? '저장된 시세 · 갱신 실패'
+        : data === null
+          ? '시세 자료 없음 · 갱신 실패'
+          : '시세 조회 실패'
+      : data === null
+        ? '시세 자료 없음'
+        : data?.marketMeta
+          ? `최근 정상 수집 · ${formatFreshness(data.marketMeta.cachedAt)}`
+          : data !== undefined
+            ? '한국 DC 최근 수집 시세'
+            : '시세 조회 실패';
   
   return (
     <>
@@ -171,13 +200,7 @@ export const ItemDetail = ({ initialItem }: ItemDetailProps = {}) => {
           </h1>
           <p className="mt-2 flex min-h-[3rem] items-center justify-center text-center text-[15px] font-medium leading-6 text-[var(--app-ink-muted)]">
             <span className="block w-full">
-              {isLoading
-                ? '시세 데이터 확인 중...'
-                : isError
-                  ? '시세 조회 실패'
-                  : data?.marketMeta
-                    ? `최근 정상 수집 · ${formatFreshness(data.marketMeta.cachedAt)}`
-                    : '한국 DC 최근 수집 시세'}
+              {marketSubtitle}
             </span>
           </p>
         </div>
@@ -192,11 +215,7 @@ export const ItemDetail = ({ initialItem }: ItemDetailProps = {}) => {
               ) : (
                 <div className="flex min-h-10 flex-col justify-center text-right">
                   <div className="text-[20px] font-bold leading-none text-[var(--app-ink)]">
-                    {globalMinPrice > 0
-                      ? `${globalMinPrice.toLocaleString()} G`
-                      : isError
-                        ? '시세 확인 실패'
-                        : '매물 없음'}
+                    {globalMinPrice > 0 ? `${globalMinPrice.toLocaleString()} G` : emptyPriceLabel}
                   </div>
                   {globalMinPrice > 0 && (
                     <div className="mt-1 text-[12px] font-medium text-blue-600 dark:text-blue-400">
@@ -238,6 +257,10 @@ export const ItemDetail = ({ initialItem }: ItemDetailProps = {}) => {
                   <div key={i} className="flex-1 animate-pulse rounded-t-sm bg-[var(--app-hairline)]" style={{ height: `${h}%` }} />
                 ))}
               </div>
+            ) : data === null ? (
+              <div className="mt-3 flex min-h-[200px] items-center justify-center rounded-xl bg-[var(--app-surface-subtle)] text-[13px] text-[var(--app-ink-muted)]">
+                시세 자료가 없습니다.
+              </div>
             ) : (
               <Suspense fallback={<div className="mt-3 flex h-[200px] items-center justify-center rounded-xl bg-[var(--app-surface-subtle)] text-[12px] text-[var(--app-ink-muted)]">가격 흐름 준비 중...</div>}>
                 <div className="mt-3 flex min-h-[200px] items-center">
@@ -273,7 +296,11 @@ export const ItemDetail = ({ initialItem }: ItemDetailProps = {}) => {
                         )}
                       </div>
                       <span className={`text-[14px] font-medium ${isLowest ? 'font-bold text-[var(--app-accent)]' : 'text-[var(--app-ink)]'}`}>
-                        {s.minPrice > 0 ? `${s.minPrice.toLocaleString()} G` : '-'}
+                        {data === null
+                          ? '미제공'
+                          : data === undefined
+                            ? isError ? '조회 실패' : '미제공'
+                            : s.minPrice > 0 ? `${s.minPrice.toLocaleString()} G` : '매물 없음'}
                       </span>
                     </div>
                   );
@@ -293,7 +320,7 @@ export const ItemDetail = ({ initialItem }: ItemDetailProps = {}) => {
       <PurchasePlanner
         key={itemId}
         listings={data?.listings ?? []}
-        status={data ? 'ready' : isError ? 'error' : 'loading'}
+        status={plannerStatus}
       />
       </div>
       </div>
