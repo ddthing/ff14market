@@ -3,7 +3,7 @@
  * Returns human-friendly text like "방금 전", "5분 전", "2시간 전", etc.
  */
 export const formatFreshness = (timestamp?: number): string => {
-  if (!timestamp) return '방금 전';
+  if (!timestamp || !Number.isFinite(timestamp)) return '시점 미제공';
   
   const diffMs = Date.now() - timestamp;
   const diffMins = Math.max(0, Math.floor(diffMs / 60000));

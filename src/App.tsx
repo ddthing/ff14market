@@ -1,5 +1,5 @@
 import { Suspense, lazy } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Header } from './components/layout/Header'
 import { Footer } from './components/layout/Footer'
@@ -40,6 +40,12 @@ const LoadingFallback = () => (
   </div>
 );
 
+function RouteScrollReset() {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [pathname]);
+  return null;
+}
+
 function App() {
   const { theme } = useThemeStore();
 
@@ -69,6 +75,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
+        <RouteScrollReset />
         <div className="min-h-screen flex flex-col font-sans">
           <div id="app-content" className="flex min-h-screen flex-col">
             <a className="skip-link" href="#main-content">
@@ -78,7 +85,7 @@ function App() {
             <main
               id="main-content"
               tabIndex={-1}
-              className="mobile-page-main container mx-auto flex-grow px-4 pb-20 pt-6 outline-none md:max-w-6xl md:py-8"
+              className="mobile-page-main container mx-auto flex-grow px-4 pb-20 pt-6 outline-none md:max-w-[1360px] md:px-8 md:py-8"
             >
               <ToastContainer />
               <Suspense fallback={<LoadingFallback />}>

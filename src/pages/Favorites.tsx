@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useFavoriteStore } from '../store/useFavoriteStore';
 import { useItemData } from '../hooks/useItemData';
 import { Heart } from 'lucide-react';
@@ -6,15 +5,13 @@ import { Link } from 'react-router-dom';
 import { SkeletonRow } from '../components/ui/SkeletonRow';
 import { ItemListItem } from '../components/ui/ItemListItem';
 import { Seo } from '../components/seo/Seo';
+import { useSavedItems } from '../hooks/useSavedItems';
+import { DataErrorState } from '../components/ui/DataErrorState';
 
 export const Favorites = () => {
   const favoriteIds = useFavoriteStore((state) => state.favoriteIds);
-  const { enrichedItems, isLoading } = useItemData();
-
-  const favoriteItemsList = useMemo(() => {
-    const favoriteIdSet = new Set(favoriteIds);
-    return enrichedItems.filter((item) => favoriteIdSet.has(item.id));
-  }, [enrichedItems, favoriteIds]);
+  const { enrichedItems, isLoading, isError, refetch } = useItemData();
+  const favoriteItemsList = useSavedItems(favoriteIds, enrichedItems);
 
   return (
     <>
@@ -32,6 +29,7 @@ export const Favorites = () => {
         </span>
       </div>
 
+      {isError && <DataErrorState compact onRetry={() => void refetch()} />}
       {isLoading ? (
         <div className="overflow-hidden rounded-xl border border-[var(--app-hairline)] bg-[var(--app-surface)] shadow-[0_2px_10px_rgba(0,0,0,0.02)] dark:shadow-none">
           {Array.from({ length: 3 }).map((_, idx) => <SkeletonRow key={`fav-skel-${idx}`} />)}

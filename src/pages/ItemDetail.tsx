@@ -15,6 +15,7 @@ import masterItems from '../data/masterItems.json';
 import { MARKET_SERVER_NAMES } from '../constants/market';
 import { getAbsoluteMinPrice, getServerMinPrices } from '../utils/marketListings';
 import { formatFreshness } from '../utils/time';
+import { PurchasePlanner } from '../components/common/PurchasePlanner';
 
 const PriceChart = lazy(() => import('../components/common/PriceChart').then(({ PriceChart: Component }) => ({ default: Component })));
 const MASTER_ITEMS_BY_ID = new Map(masterItems.map((candidate) => [candidate.id, candidate] as const));
@@ -134,7 +135,7 @@ export const ItemDetail = () => {
         description={`${item.name}의 한국 데이터센터 최저 매물가, 최근 판매량, 가격 흐름을 확인하세요.`}
         path={`/item/${item.id}`}
       />
-      <div className="max-w-md mx-auto py-8 px-2 sm:px-4 animate-fade-in">
+      <div className="item-detail-page mx-auto py-4 animate-fade-in">
       <button 
         onClick={() => navigate(-1)}
         className="mb-6 flex items-center space-x-2 font-medium text-[var(--app-ink-muted)] transition-colors hover:text-[var(--app-ink)]"
@@ -143,7 +144,7 @@ export const ItemDetail = () => {
         <span>뒤로 가기</span>
       </button>
 
-      <div className="relative w-full rounded-xl border border-[var(--app-hairline)] bg-[var(--app-surface)] p-6 shadow-sm sm:p-8">
+      <div className="detail-layout"><div className="detail-summary relative w-full rounded-xl border border-[var(--app-hairline)] bg-[var(--app-surface)] p-6 shadow-sm sm:p-8">
         <div className="absolute right-6 top-6">
           <FavoriteButton itemId={itemId} />
         </div>
@@ -253,6 +254,8 @@ export const ItemDetail = () => {
         >
           장터 둘러보기
         </button>
+      </div>
+      {!isLoading && !isError && <PurchasePlanner key={itemId} listings={data?.listings ?? []} />}
       </div>
       </div>
     </>
