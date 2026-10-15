@@ -15,8 +15,8 @@ export const getIconUrl = (iconPath: string) => {
   // Extract folder and file from formats like "/i/056000/056892.png" or "https://xivapi.com/i/056000/056892.png"
   const match = iconPath.match(/\/i\/(\d{6})\/(\d{6})\.png/);
   if (match) {
-    // XIVAPI v2 endpoint for high-resolution item icons
-    return `https://v2.xivapi.com/api/asset?path=ui/icon/${match[1]}/${match[2]}_hr1.tex&format=png`;
+    // Keep the high-resolution source for dense screens with a smaller WebP payload.
+    return `https://v2.xivapi.com/api/asset?path=ui/icon/${match[1]}/${match[2]}_hr1.tex&format=webp`;
   }
   
   // Fallback for legacy paths

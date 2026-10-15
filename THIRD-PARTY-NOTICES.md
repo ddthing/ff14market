@@ -29,6 +29,11 @@
 | `@types/node`, `@types/react`, `@types/react-dom` | TypeScript 타입 정의 | MIT | [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped) |
 | `globals` | ESLint 환경 전역 정의 | MIT | [sindresorhus/globals](https://github.com/sindresorhus/globals) |
 
+## Fonts
+
+- Pretendard Variable v1.3.9 is self-hosted from the official [Pretendard repository](https://github.com/orioncactus/pretendard/tree/v1.3.9) using its dynamic Unicode subsets. The font is copyright (c) 2021, Kil Hyung-jin and is licensed under the SIL Open Font License 1.1. The font files are unmodified; the CSS points to the local copies in `public/fonts/pretendard-v1.3.9/`.
+- The upstream [subset stylesheet](https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css) and [OFL license](https://github.com/orioncactus/pretendard/blob/v1.3.9/LICENSE) are pinned to v1.3.9. The license copy is included at `public/fonts/pretendard-v1.3.9/OFL.txt`.
+
 ## Data, API, and external assets
 
 - [Universalis](https://github.com/Universalis-FFXIV/Universalis)는 장터 시세와 판매 이력 API의 출처입니다. 저장소는 MIT 라이선스를 표시하지만, 게임 데이터와 상표 권리까지 프로젝트에 이전하는 의미는 아닙니다.

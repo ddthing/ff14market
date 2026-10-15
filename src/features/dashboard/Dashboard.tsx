@@ -23,16 +23,21 @@ import { Seo } from '../../components/seo/Seo';
 import { MARKET_SERVERS } from '../../constants/market';
 import { getIconUrl } from '../../utils/icon';
 import { formatFreshness } from '../../utils/time';
+import { MarketSpotlight } from './MarketSpotlight';
+import { useToastStore } from '../../store/useToastStore';
 
 export function Dashboard() {
-  const { enrichedItems, isLoading, isError, refetch, snapshotGeneratedAt, snapshotStale } =
+  const { enrichedItems, isLoading, isError, refetch, snapshotGeneratedAt, snapshotStale, hasSnapshot } =
     useItemData();
+  const unavailable = isError && !hasSnapshot;
+  const outdated = snapshotStale || (isError && hasSnapshot);
   const favoriteIds = useFavoriteStore((state) => state.favoriteIds);
   const recentIds = useRecentStore((state) => state.recentIds);
   const server = useServerStore((state) => state.server);
   const openSearch = useSearchStore((state) => state.open);
   const serverName = MARKET_SERVERS.find((value) => value.id === server)?.name ?? server;
   const [isRefreshing, setRefreshing] = useState(false);
+  const addToast = useToastStore((state) => state.addToast);
   const favorites = useSavedItems(favoriteIds, enrichedItems);
   const recent = useSavedItems(recentIds.slice(0, 4), enrichedItems);
   const pricedCount = enrichedItems.filter((item) => item.price > 0).length;
@@ -43,7 +48,8 @@ export function Dashboard() {
   const refresh = async () => {
     setRefreshing(true);
     try {
-      await refetch();
+      const result = await refetch();
+      addToast(result.isError ? '시세를 갱신하지 못했습니다. 잠시 후 다시 시도해 주세요.' : '최신 수집 데이터를 확인했습니다.');
     } finally {
       setRefreshing(false);
     }
@@ -68,7 +74,7 @@ export function Dashboard() {
         </div>
         <section className="market-hero">
           <div className="hero-copy">
-            <p className="eyebrow">YOUR NEXT TRADE STARTS HERE</p>
+            <p className="eyebrow hero-eyebrow"><span /> YOUR NEXT TRADE STARTS HERE</p>
             <h1>
               장터의 흐름을 읽다.
               <br />
@@ -79,43 +85,17 @@ export function Dashboard() {
               <br className="sm:hidden" /> 한국 서버의 시세를 한곳에서 살펴보세요.
             </p>
             <HeroSearch recommendedItems={enrichedItems.slice(0, 3)} />
+            <p className="hero-search-hint">아이템 검색부터 서버별 가격 비교까지 <span>로그인 없이, 바로.</span></p>
           </div>
-          <aside className="market-brief">
-            <div className="brief-heading">
-              <Activity size={19} />
-              <span>오늘의 장터 브리핑</span>
-              <span className="brief-index">KR · 5 WORLDS</span>
-            </div>
-            <h2>
-              숫자 사이에서{' '}
-              <br />
-              다음 기회를 발견하세요.
-            </h2>
-            <p>
-              판매가 빨라진 아이템과 가격 하락 신호.
-              <br />
-              장터에 가기 전, 확인할 순서를 정해보세요.
-            </p>
-            <Link to="/hot-issues">
-              장터 신호 살펴보기 <ArrowUpRight size={17} />
-            </Link>
-            <div className="brief-art" aria-hidden="true">
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-            </div>
-            <span className="brief-footnote">MARKET SIGNALS · UNIVERSALIS</span>
-          </aside>
+          <MarketSpotlight items={enrichedItems} server={serverName} loading={isLoading} unavailable={unavailable} stale={outdated} />
         </section>
+        {isError && hasSnapshot && (
+          <div className="snapshot-warning" role="status">
+            <Clock3 size={17} aria-hidden="true" />
+            <p>시세 갱신에 실패해 마지막 수집 데이터를 표시합니다. 구매 전 게임 내 가격을 확인하세요.</p>
+            <button type="button" className="quiet-button" disabled={isRefreshing} onClick={() => void refresh()}>다시 시도</button>
+          </div>
+        )}
         <div className="market-stats">
           <div>
             <span className="stat-icon">
@@ -124,7 +104,7 @@ export function Dashboard() {
             <span>
               <small>시세 확인 가능</small>
               <strong>
-                {isLoading || isError ? '—' : pricedCount.toLocaleString()} <em>아이템</em>
+                {isLoading || unavailable ? '—' : pricedCount.toLocaleString()} <em>아이템</em>
               </strong>
             </span>
           </div>
@@ -133,9 +113,9 @@ export function Dashboard() {
               <TrendingDown size={18} />
             </span>
             <span>
-              <small>평균 매물가 &lt; 최근 판매가</small>
+              <small>최근 판매가보다 낮은 평균 매물가</small>
               <strong>
-              {isLoading || isError || comparableCount === 0 ? '—' : belowSaleCount.toLocaleString()} <em>아이템</em>
+              {isLoading || unavailable || comparableCount === 0 ? '—' : belowSaleCount.toLocaleString()} <em>아이템</em>
               </strong>
             </span>
           </div>
@@ -150,12 +130,12 @@ export function Dashboard() {
               </strong>
             </span>
           </div>
-          <div className="snapshot-stat">
+          <div className="snapshot-stat" aria-busy={isRefreshing}>
             <span className="stat-icon">
               <Clock3 size={18} />
             </span>
             <span>
-              <small>{snapshotStale ? '이전 수집 데이터' : '스냅샷 수집 시점'}</small>
+              <small>{outdated ? '이전 수집 데이터' : '스냅샷 수집 시점'}</small>
               <strong className="stat-time">
                 {snapshotGeneratedAt ? formatFreshness(snapshotGeneratedAt) : '수집 대기'}
               </strong>
@@ -172,7 +152,7 @@ export function Dashboard() {
         </div>
         <div className="workspace-columns">
           <div className="workspace-primary">
-            {isError ? (
+            {unavailable ? (
               <DataErrorState onRetry={() => void refetch()} />
             ) : isLoading ? (
               <div className="terminal-panel" role="status" aria-label="시세 불러오는 중">
@@ -197,7 +177,7 @@ export function Dashboard() {
               {favorites.length ? (
                 favorites.slice(0, 5).map((item) => (
                   <Link key={item.id} to={`/item/${item.id}`} className="compact-item">
-                    <img src={getIconUrl(item.icon) || undefined} alt="" loading="lazy" />
+                    <img src={getIconUrl(item.icon) || undefined} width="36" height="36" alt="" loading="lazy" decoding="async" />
                     <span>
                       <strong>{item.name}</strong>
                       <small>
@@ -232,7 +212,7 @@ export function Dashboard() {
                 </div>
                 {recent.map((item) => (
                   <Link key={item.id} className="compact-item" to={`/item/${item.id}`}>
-                    <img src={getIconUrl(item.icon) || undefined} alt="" loading="lazy" />
+                    <img src={getIconUrl(item.icon) || undefined} width="36" height="36" alt="" loading="lazy" decoding="async" />
                     <span>
                       <strong>{item.name}</strong>
                       <small>

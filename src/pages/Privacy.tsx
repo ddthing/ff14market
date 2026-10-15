@@ -13,7 +13,7 @@ export const Privacy = () => (
       eyebrow="개인정보 안내"
       title="개인정보처리방침"
       description="회원가입 없이 이용하는 서비스의 브라우저 저장소, 외부 API, 광고 관련 처리 기준을 안내합니다."
-      updatedAt="2026년 8월 20일"
+      updatedAt="2026년 10월 15일"
     >
       <section className="info-page__section">
         <h2 className="info-page__section-title">데이터 최소화의 원칙</h2>
@@ -27,6 +27,9 @@ export const Privacy = () => (
         <div className="info-page__callout">
           <p>
             관심 아이템, 최근 본 아이템, 선택한 서버와 테마 설정은 이용자 본인의 브라우저 로컬 저장소에만 보관됩니다. 해당 값은 본 서비스의 외부 데이터베이스로 전송되지 않으며, 브라우저 저장소를 삭제하면 초기화됩니다.
+          </p>
+          <p>
+            시세 탐색기의 검색어, 분류, 정렬, 관심 필터와 표시 개수도 같은 브라우저에 저장됩니다. 탐색기의 '설정 초기화' 버튼으로 이 설정을 지울 수 있습니다.
           </p>
         </div>
       </section>

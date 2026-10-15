@@ -5,13 +5,14 @@ import { Header } from './components/layout/Header'
 import { Footer } from './components/layout/Footer'
 import { useEffect } from 'react'
 import { useThemeStore } from './store/useThemeStore'
+import { Dashboard } from './features/dashboard/Dashboard'
 
 import { ToastContainer } from './components/ui/ToastContainer';
 import { GlobalSearch } from './components/ui/GlobalSearch';
 import { loadItemDetail } from './routes/itemDetail';
 
 // Lazy load pages
-const Dashboard = lazy(() => import('./features/dashboard/Dashboard').then(m => ({ default: m.Dashboard })));
+// The primary entry screen renders immediately; secondary routes stay split.
 const HotIssues = lazy(() => import('./pages/HotIssues').then(m => ({ default: m.HotIssues })));
 const Favorites = lazy(() => import('./pages/Favorites').then(m => ({ default: m.Favorites })));
 const ItemDetail = lazy(loadItemDetail);
@@ -34,7 +35,7 @@ const queryClient = new QueryClient({
 
 // Simple Loading Spinner for Suspense Fallback
 const LoadingFallback = () => (
-  <div className="flex min-h-[50vh] items-center justify-center" role="status" aria-live="polite" aria-label="페이지를 불러오는 중">
+  <div className="flex min-h-[calc(100dvh-72px)] items-center justify-center" role="status" aria-live="polite" aria-label="페이지를 불러오는 중">
     <span className="sr-only">페이지를 불러오는 중입니다.</span>
     <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--app-hairline)] border-t-[var(--app-accent)]" aria-hidden="true"></div>
   </div>

@@ -50,7 +50,7 @@ export function PurchasePlanner({
             step="1"
             value={quantity}
             aria-invalid={!valid}
-            aria-describedby="quantity-help"
+            aria-describedby={valid ? 'quantity-help' : 'quantity-help quantity-error'}
             onChange={(event) => setQuantity(event.target.value)}
           />
         </label>
@@ -63,8 +63,11 @@ export function PurchasePlanner({
           </select>
         </label>
       </div>
+      <p id="quantity-help" className="table-note">
+        1~9,999 사이의 정수를 입력하면 예상 비용을 계산합니다.
+      </p>
       {!valid && (
-        <p id="quantity-help" role="alert" className="planner-error">
+        <p id="quantity-error" role="alert" className="planner-error">
           수량은 1~9,999 사이의 정수로 입력해 주세요.
         </p>
       )}

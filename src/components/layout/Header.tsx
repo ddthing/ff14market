@@ -54,20 +54,23 @@ export const Header = () => {
             <button
               type="button"
               onClick={openSearch}
-              className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-md text-[var(--app-ink-muted)] transition-colors hover:bg-[var(--app-surface-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-surface)]"
-              aria-label="아이템 검색 열기"
+              className="header-search inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-md text-[var(--app-ink-muted)] transition-colors hover:bg-[var(--app-surface-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-surface)]"
+              aria-label="아이템 검색 열기 (Ctrl K 또는 Command K)"
               aria-expanded={isSearchOpen}
               aria-controls={isSearchOpen ? 'global-item-search' : undefined}
               data-search-trigger="true"
+              aria-keyshortcuts="Control+K Meta+K"
             >
               <Search className="h-[18px] w-[18px]" aria-hidden="true" />
+              <span className="hidden text-xs lg:inline">아이템 검색</span>
+              <kbd className="header-shortcut hidden lg:inline" aria-hidden="true">Ctrl K</kbd>
             </button>
 
             {/* 테마 토글 */}
             <button
               type="button"
               onClick={toggleTheme}
-              className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-md text-[var(--app-ink-muted)] transition-colors hover:bg-[var(--app-surface-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-surface)]"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-[var(--app-ink-muted)] transition-colors hover:bg-[var(--app-surface-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-surface)]"
               aria-label={isDark ? '라이트 모드로 전환' : '다크 모드로 전환'}
             >
               {isDark ? <Sun className="h-[18px] w-[18px]" aria-hidden="true" /> : <Moon className="h-[18px] w-[18px]" aria-hidden="true" />}
@@ -79,7 +82,7 @@ export const Header = () => {
                 value={server}
                 onChange={(e) => setServer(e.target.value)}
                 aria-label="장터 서버 선택"
-                className="h-10 w-[76px] appearance-none rounded-md bg-[var(--app-surface-subtle)] pl-2 pr-7 text-[12px] font-bold text-[var(--app-ink)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--app-accent)]/50 sm:w-auto sm:pl-3 sm:text-[13px]"
+                className="h-11 w-[76px] appearance-none rounded-md bg-[var(--app-surface-subtle)] pl-2 pr-7 text-[12px] font-bold text-[var(--app-ink)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--app-accent)]/50 sm:w-auto sm:pl-3 sm:text-[13px]"
               >
                 {MARKET_SERVERS.map(s => (
                   <option key={s.id} value={s.id}>{s.name}</option>

@@ -1,4 +1,4 @@
-import { memo, useEffect, useId, useRef, useState, type ChangeEvent, type FocusEvent, type KeyboardEvent } from 'react';
+import { memo, useEffect, useId, useRef, useState, type ChangeEvent, type CompositionEvent, type FocusEvent, type KeyboardEvent } from 'react';
 import { BarChart3, Flame, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -34,6 +34,8 @@ export const ItemSearch = memo(({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [activeResultIndex, setActiveResultIndex] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isComposingRef = useRef(false);
+  const activeOptionRef = useRef<HTMLButtonElement>(null);
   const listboxId = useId();
   const navigate = useNavigate();
   const isHero = variant === 'hero';
@@ -63,6 +65,10 @@ export const ItemSearch = memo(({
     ));
   }, [searchResults.length]);
 
+  useEffect(() => {
+    activeOptionRef.current?.scrollIntoView({ block: 'nearest' });
+  }, [activeResultIndex]);
+
   const isSearching = searchQuery.trim() !== query || (query.length > 0 && isFetching);
   const activeResult = activeResultIndex === null ? null : searchResults[activeResultIndex];
 
@@ -88,6 +94,10 @@ export const ItemSearch = memo(({
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    // Enter is used by IMEs to confirm the composed text, so it must not select
+    // a result until composition has finished.
+    if (isComposingRef.current || event.nativeEvent.isComposing || event.keyCode === 229) return;
+
     if (event.key === 'Escape') {
       setIsDropdownOpen(false);
       setActiveResultIndex(null);
@@ -159,8 +169,15 @@ export const ItemSearch = memo(({
             aria-autocomplete="list"
             aria-haspopup="listbox"
             aria-expanded={isDropdownOpen}
-            aria-controls={isDropdownOpen ? listboxId : undefined}
+            aria-controls={isDropdownOpen && !isSearching && !hasSearchError && searchResults.length > 0 ? listboxId : undefined}
             aria-activedescendant={isDropdownOpen && activeResult ? `${listboxId}-option-${activeResult.id}` : undefined}
+            onCompositionStart={() => { isComposingRef.current = true; }}
+            onCompositionEnd={(event: CompositionEvent<HTMLInputElement>) => {
+              isComposingRef.current = false;
+              setSearchQuery(event.currentTarget.value);
+              setIsDropdownOpen(event.currentTarget.value.trim().length > 0);
+              setActiveResultIndex(null);
+            }}
             onChange={handleSearchChange}
             onKeyDown={handleKeyDown}
             onFocus={() => {
@@ -196,30 +213,49 @@ export const ItemSearch = memo(({
         )}
 
         {isDropdownOpen && (
-          <div
-            id={listboxId}
-            role="listbox"
-            className={`z-50 min-h-0 w-full animate-fade-in overflow-hidden rounded-xl border border-[var(--app-hairline)] bg-[var(--app-surface)] ${
+          <div className={`z-50 min-h-0 w-full animate-fade-in overflow-hidden rounded-xl border border-[var(--app-hairline)] bg-[var(--app-surface)] ${
               isInline ? 'relative mt-2 flex flex-col' : `absolute left-0 shadow-[0_10px_40px_rgb(0,0,0,0.1)] ${isHero ? 'top-[calc(100%+12px)]' : 'top-[calc(100%+8px)]'}`
-            }`}
-          >
-            <div className={`scrollbar-hide min-h-0 max-h-[360px] overflow-y-auto overscroll-contain ${isHero ? 'p-3' : 'p-2'}`}>
-              {isSearching ? (
-                <div className="py-8 text-center text-[13px] font-medium text-[var(--app-ink-muted)]" aria-live="polite">
-                  검색 중...
-                </div>
-              ) : hasSearchError ? (
-                <div className="py-8 text-center text-[13px] font-medium text-[var(--destructive)]" role="alert">
-                  검색 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
-                </div>
-              ) : searchResults.length > 0 ? (
-                searchResults.map((item, index) => (
+            }`}>
+            <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+              {isSearching
+                ? '검색 중...'
+                : hasSearchError
+                  ? '검색 데이터를 불러오지 못했습니다.'
+                  : searchResults.length > 0
+                    ? `${searchResults.length}개 검색 결과`
+                    : '검색 결과가 없습니다.'}
+            </div>
+            {isSearching ? (
+              <div className="py-8 text-center text-[13px] font-medium text-[var(--app-ink-muted)]">
+                검색 중...
+              </div>
+            ) : hasSearchError ? (
+              <div className="py-8 text-center text-[13px] font-medium text-[var(--destructive)]" role="alert">
+                검색 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
+              </div>
+            ) : searchResults.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 text-[var(--app-ink-muted)]">
+                <Search className="mb-3 h-7 w-7 opacity-20" aria-hidden="true" />
+                <span className="text-[13px] font-medium">검색 결과가 없습니다.</span>
+              </div>
+            ) : (
+              <div
+                id={listboxId}
+                role="listbox"
+                aria-label="아이템 검색 결과"
+                className={`scrollbar-hide min-h-0 max-h-[360px] overflow-y-auto overscroll-contain ${isHero ? 'p-3' : 'p-2'}`}
+              >
+                {searchResults.map((item, index) => (
                   <button
                     type="button"
                     role="option"
                     id={`${listboxId}-option-${item.id}`}
                     aria-selected={activeResultIndex === index}
+                    aria-label={item.name}
+                    tabIndex={-1}
+                    ref={activeResultIndex === index ? activeOptionRef : undefined}
                     key={item.id}
+                    onMouseDown={(event) => event.preventDefault()}
                     onMouseEnter={() => setActiveResultIndex(index)}
                     onClick={() => handleItemClick(item)}
                     className={`flex w-full items-center text-left transition-colors hover:bg-[var(--app-surface-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/50 active:scale-[0.98] ${
@@ -235,14 +271,9 @@ export const ItemSearch = memo(({
                     />
                     <span className={`truncate font-bold text-[var(--app-ink)] ${isHero ? 'text-[16px]' : 'text-[13px]'}`}>{item.name}</span>
                   </button>
-                ))
-              ) : (
-                <div className="flex flex-col items-center justify-center py-10 text-[var(--app-ink-muted)]">
-                  <Search className="mb-3 h-7 w-7 opacity-20" aria-hidden="true" />
-                  <span className="text-[13px] font-medium">검색 결과가 없습니다.</span>
-                </div>
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

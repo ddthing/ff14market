@@ -68,9 +68,9 @@ export const PriceChart = ({ history }: ChartProps) => {
         className="h-[112px] w-full overflow-visible"
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         role="img"
-        aria-label="최근 7건 판매 가격 차트"
+        aria-labelledby="price-chart-title"
       >
-        <title>최근 7건 판매 가격 차트</title>
+        <title id="price-chart-title">최근 {points.length}건 판매 가격 차트</title>
         {[0, 0.5, 1].map((ratio) => {
           const y = PADDING_Y + ratio * plotHeight;
           return <line key={ratio} x1={PADDING_X} x2={WIDTH - PADDING_X} y1={y} y2={y} stroke="var(--app-hairline)" strokeWidth="1" strokeDasharray="2 4" />;
@@ -92,21 +92,11 @@ export const PriceChart = ({ history }: ChartProps) => {
                 cy={point.y}
                 r="11"
                 fill="transparent"
-                tabIndex={0}
-                role="button"
-                aria-label={`${formatSaleTime(point.timestamp)} ${formatPrice(point.pricePerUnit)}`}
                 onPointerEnter={() => setActiveIndex(index)}
                 onPointerLeave={() => setActiveIndex(null)}
-                onFocus={() => setActiveIndex(index)}
-                onBlur={() => setActiveIndex(null)}
-                onClick={() => setActiveIndex(isActive ? null : index)}
-                onKeyDown={(event) => {
-                  if (event.key !== 'Enter' && event.key !== ' ') return;
-                  event.preventDefault();
-                  setActiveIndex(isActive ? null : index);
-                }}
+                aria-hidden="true"
               >
-                <title>{`${formatSaleTime(point.timestamp)} · ${formatPrice(point.pricePerUnit)}`}</title>
+                <title aria-hidden="true">{`${formatSaleTime(point.timestamp)} · ${formatPrice(point.pricePerUnit)}`}</title>
               </circle>
               <circle cx={point.x} cy={point.y} r={isActive ? 5 : 3.5} fill={isActive ? strokeColor : 'var(--app-surface)'} stroke={strokeColor} strokeWidth="2" pointerEvents="none" />
             </g>
@@ -117,6 +107,30 @@ export const PriceChart = ({ history }: ChartProps) => {
         <span>최저 {formatPrice(minPrice)}</span>
         <span aria-live="polite">{activePoint ? `${formatSaleTime(activePoint.timestamp)} · ${formatPrice(activePoint.pricePerUnit)}` : `최고 ${formatPrice(maxPrice)}`}</span>
       </div>
+      <details className="mt-2 text-xs text-[var(--app-ink-muted)]">
+        <summary className="min-h-11 cursor-pointer py-2 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/50">
+          최근 판매 기록 데이터 보기
+        </summary>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <caption className="sr-only">최근 판매 기록의 시각과 개당 가격</caption>
+            <thead>
+              <tr>
+                <th scope="col" className="py-1 pr-3 font-semibold">판매 시각</th>
+                <th scope="col" className="py-1 text-right font-semibold">개당 가격</th>
+              </tr>
+            </thead>
+            <tbody>
+              {points.map((point, index) => (
+                <tr key={`${point.timestamp}-${index}`}>
+                  <td className="py-1 pr-3">{formatSaleTime(point.timestamp)}</td>
+                  <td className="py-1 text-right tabular-nums">{formatPrice(point.pricePerUnit)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </details>
     </div>
   );
 };
