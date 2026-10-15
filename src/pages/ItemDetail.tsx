@@ -224,22 +224,27 @@ export const ItemDetail = ({ initialItem }: ItemDetailProps = {}) => {
         <div className="space-y-5 rounded-xl bg-[var(--app-surface-subtle)] p-5">
           {/* Chart Section */}
           <div className="w-full">
-            <div className="flex justify-between items-end mb-2">
-              <span className="text-[14px] font-bold text-[var(--app-ink)]">한국 전체 최저가</span>
-              {isLoading ? (
-                <div className="h-14 w-24 animate-pulse rounded bg-[var(--app-hairline)]" />
-              ) : (
-                <div className="flex min-h-14 flex-col justify-center text-right">
-                  <div className="text-[20px] font-bold leading-none text-[var(--app-ink)]">
-                    {globalMinPrice > 0 ? `${globalMinPrice.toLocaleString()} G` : emptyPriceLabel}
+            <div className="mb-2 flex items-end justify-between gap-3">
+              <span className="min-w-0 text-[14px] font-bold text-[var(--app-ink)]">한국 전체 최저가</span>
+              <div className="flex min-h-16 w-44 max-w-[60%] shrink-0 flex-col justify-center text-right">
+                {isLoading ? (
+                  <div className="w-full" aria-hidden="true">
+                    <div className="ml-auto h-[18px] w-3/4 animate-pulse rounded bg-[var(--app-hairline)] md:h-5" />
+                    <div className="ml-auto mt-1 h-4 w-full animate-pulse rounded bg-[var(--app-hairline)]" />
                   </div>
-                  {globalMinPrice > 0 && (
-                    <div className="mt-1 text-[12px] font-medium text-blue-600 dark:text-blue-400">
-                      (수수료 5% 제외: {netPrice.toLocaleString()} G)
+                ) : (
+                  <>
+                    <div className="w-full min-w-0 text-[18px] font-bold leading-none text-[var(--app-ink)] md:text-[20px]">
+                      {globalMinPrice > 0 ? `${globalMinPrice.toLocaleString()} G` : emptyPriceLabel}
                     </div>
-                  )}
-                </div>
-              )}
+                    {globalMinPrice > 0 && (
+                      <div className="mt-1 w-full min-w-0 text-[12px] font-medium text-blue-600 dark:text-blue-400">
+                        (수수료 5% 제외: {netPrice.toLocaleString()} G)
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
             
             {/* Keep the status slot in place as market data loads or fails. */}
