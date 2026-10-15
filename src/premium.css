@@ -53,6 +53,11 @@ button:disabled {
   outline: 2px solid var(--app-accent);
   outline-offset: 3px;
 }
+/* Search wrappers already expose focus with a border and ring. */
+.global-search-dialog input:focus-visible,
+.hero-copy [role='search'] input:focus-visible {
+  outline: none;
+}
 .brand-mark {
   width: 36px;
   height: 36px;
