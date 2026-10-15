@@ -22,6 +22,7 @@ function inlineInitialStyles(): Plugin {
       // Finalize the HTML before the PWA plugin computes its precache revisions.
       await prerenderHome(outputDirectory);
       const routeModules = [
+        { source: '/src/features/dashboard/Dashboard.tsx', prefix: 'index' },
         { source: '/src/pages/HotIssues.tsx', prefix: 'rendered-hot-issues' },
         { source: '/src/pages/Favorites.tsx', prefix: 'rendered-favorites' },
         { source: '/src/pages/ItemDetail.tsx', prefix: 'rendered-item-' },

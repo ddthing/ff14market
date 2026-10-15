@@ -41,6 +41,11 @@ function readInitialItem(expectedId: number): ItemCatalogEntry | null {
 }
 
 async function loadInitialRouteComponents(marker: string): Promise<InitialRouteComponents> {
+  if (marker === 'home') {
+    const { Dashboard } = await import('./features/dashboard/Dashboard')
+    return { dashboard: Dashboard }
+  }
+
   if (marker === 'hot-issues') {
     const { HotIssues } = await import('./pages/HotIssues')
     return { hotIssues: HotIssues }
