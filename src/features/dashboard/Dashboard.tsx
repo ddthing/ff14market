@@ -62,7 +62,7 @@ export function Dashboard() {
         description="파이널판타지14 한국 데이터센터 장터의 최저 매물가, 판매량, 가격 흐름을 한눈에 확인하세요."
         path="/"
       />
-      <div className="market-workspace animate-fade-in">
+      <div className="market-workspace">
         <div className="workspace-topline">
           <span>
             <span className="status-dot" /> KOREA DATA CENTER{' '}
