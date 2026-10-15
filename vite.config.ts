@@ -1,10 +1,45 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { marketApiDevPlugin } from './scripts/vite-market-api.ts'
+import { prerenderHome } from './scripts/prerender-home.ts'
+
+// The initial document can paint without a second round trip for its UI styles.
+// Keep the emitted assets available for route loading and the offline cache.
+function inlineInitialStyles(): Plugin {
+  let outputDirectory: string;
+  return {
+    name: 'inline-initial-styles',
+    apply: 'build',
+    configResolved(config) {
+      outputDirectory = path.resolve(config.root, config.build.outDir);
+    },
+    async writeBundle() {
+      // Finalize the HTML before the PWA plugin computes its precache revisions.
+      await prerenderHome(outputDirectory);
+    },
+    transformIndexHtml: {
+      order: 'post',
+      handler(html, context) {
+        const bundle = context.bundle;
+        if (!bundle) return html;
+        return html.replace(/<link\b[^>]*\brel="stylesheet"[^>]*>/g, (tag) => {
+          const href = tag.match(/\bhref="([^"]+)"/)?.[1];
+          if (!href) return tag;
+          const asset = bundle[href.replace(/^\//, '')];
+          const css = asset?.type === 'asset' && href.endsWith('.css')
+              ? typeof asset.source === 'string' ? asset.source : Buffer.from(asset.source).toString('utf8')
+              : null;
+          if (css === null) return tag;
+          return `<style data-entry-style="${href}">${css.replace(/<\/style/gi, '<\\/style')}</style>`;
+        });
+      },
+    },
+  };
+}
 
 export default defineConfig({
   resolve: {
@@ -16,10 +51,13 @@ export default defineConfig({
     marketApiDevPlugin(),
     react(), 
     tailwindcss(),
+    inlineInitialStyles(),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'script-defer',
       workbox: {
+        // A cached navigation can target any client route; keep its shell neutral.
+        navigateFallback: '/spa.html',
         maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
         // Route chunks and glyph-specific font subsets are loaded on demand.
         globIgnores: ['**/PriceChart-*.js', '**/fonts/**/*.woff2'],

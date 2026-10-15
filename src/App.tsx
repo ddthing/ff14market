@@ -1,6 +1,7 @@
-import { Suspense, lazy } from 'react'
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { Suspense, lazy, useState } from 'react'
+import { BrowserRouter as Router, StaticRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { queryClient } from './queryClient'
 import { Header } from './components/layout/Header'
 import { Footer } from './components/layout/Footer'
 import { useEffect } from 'react'
@@ -23,16 +24,6 @@ const Terms = lazy(() => import('./pages/Terms').then(m => ({ default: m.Terms }
 const Privacy = lazy(() => import('./pages/Privacy').then(m => ({ default: m.Privacy })));
 const Support = lazy(() => import('./pages/Support').then(m => ({ default: m.Support })));
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 300000, // 5 minutes caching
-      gcTime: 300000, // 5 minutes garbage collection (cacheTime)
-      refetchOnWindowFocus: false,
-    },
-  },
-})
-
 // Simple Loading Spinner for Suspense Fallback
 const LoadingFallback = () => (
   <div className="flex min-h-[calc(100dvh-72px)] items-center justify-center" role="status" aria-live="polite" aria-label="페이지를 불러오는 중">
@@ -47,10 +38,27 @@ function RouteScrollReset() {
   return null;
 }
 
-function App() {
+function AppContent() {
   const { theme } = useThemeStore();
+  const [themeHydrated, setThemeHydrated] = useState(false);
 
   useEffect(() => {
+    let active = true;
+    const persist = useThemeStore.persist;
+    const hydration = persist?.hasHydrated()
+      ? Promise.resolve()
+      : persist?.rehydrate() ?? Promise.resolve();
+
+    void Promise.resolve(hydration).finally(() => {
+      if (active) setThemeHydrated(true);
+    });
+
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!themeHydrated) return;
+
     const root = window.document.documentElement;
     
     const applyTheme = () => {
@@ -71,46 +79,62 @@ function App() {
       mediaQuery.addEventListener('change', handleChange);
       return () => mediaQuery.removeEventListener('change', handleChange);
     }
-  }, [theme]);
+  }, [theme, themeHydrated]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <RouteScrollReset />
-        <div className="min-h-screen flex flex-col font-sans">
-          <div id="app-content" className="flex min-h-screen flex-col">
-            <a className="skip-link" href="#main-content">
-              본문으로 바로가기
-            </a>
-            <Header />
-            <main
-              id="main-content"
-              tabIndex={-1}
-              className="mobile-page-main container mx-auto flex-grow px-4 pb-20 pt-6 outline-none md:max-w-[1360px] md:px-8 md:py-8"
-            >
-              <ToastContainer />
-              <Suspense fallback={<LoadingFallback />}>
-                <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/hot-issues" element={<HotIssues />} />
-                  <Route path="/favorites" element={<Favorites />} />
-                  <Route path="/item/:id" element={<ItemDetail />} />
-                  <Route path="/guide" element={<Guide />} />
-                  <Route path="/faq" element={<FAQ />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/terms" element={<Terms />} />
-                  <Route path="/privacy" element={<Privacy />} />
-                  <Route path="/support" element={<Support />} />
-                </Routes>
-              </Suspense>
-            </main>
-            <Footer />
-          </div>
-          <GlobalSearch />
-        </div>
-      </Router>
-    </QueryClientProvider>
+    <div className="min-h-screen flex flex-col font-sans">
+      <div id="app-content" className="flex min-h-screen flex-col">
+        <a className="skip-link" href="#main-content">
+          본문으로 바로가기
+        </a>
+        <Header />
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="mobile-page-main container mx-auto flex-grow px-4 pb-20 pt-6 outline-none md:max-w-[1360px] md:px-8 md:py-8"
+        >
+          <ToastContainer />
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/hot-issues" element={<HotIssues />} />
+              <Route path="/favorites" element={<Favorites />} />
+              <Route path="/item/:id" element={<ItemDetail />} />
+              <Route path="/guide" element={<Guide />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/support" element={<Support />} />
+            </Routes>
+          </Suspense>
+        </main>
+        <Footer />
+      </div>
+      <GlobalSearch />
+      <RouteScrollReset />
+    </div>
   )
+}
+
+type AppProps = {
+  staticLocation?: string;
+}
+
+function App({ staticLocation }: AppProps = {}) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      {staticLocation === undefined ? (
+        <Router>
+          <AppContent />
+        </Router>
+      ) : (
+        <StaticRouter location={staticLocation}>
+          <AppContent />
+        </StaticRouter>
+      )}
+    </QueryClientProvider>
+  );
 }
 
 export default App
