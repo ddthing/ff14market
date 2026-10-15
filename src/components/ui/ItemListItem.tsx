@@ -30,6 +30,7 @@ export const ItemListItem = memo(({ item, signal }: {
   const metricValue = signal ? signal.value : item.fluctuation;
   const metricTone = signal?.tone ?? (metricValue === null ? 'neutral' : metricValue > 0 ? 'positive' : metricValue < 0 ? 'negative' : 'neutral');
   const formattedPrice = item.price > 0 ? `${item.price.toLocaleString()} G` : '데이터 없음';
+  const hasMarketData = item.price > 0 || item.averageListingPrice > 0 || item.averageSalePrice > 0 || item.volume > 0;
 
   const cancelPrefetch = () => {
     if (prefetchTimerRef.current === null) return;
@@ -120,14 +121,14 @@ export const ItemListItem = memo(({ item, signal }: {
           <div className="min-w-0 sm:flex sm:items-center">
             <div className="flex min-w-0 items-start gap-2 sm:contents">
               <div className="min-w-0 flex-1 overflow-hidden">
-                <span className="block truncate text-[15px] font-bold leading-tight text-[var(--app-ink)] sm:text-[16px]">
+                <span className="block break-words text-[15px] font-bold leading-snug text-[var(--app-ink)] sm:truncate sm:text-[16px]">
                   {item.name}
                 </span>
-                <span className="mt-[2px] flex min-w-0 items-center space-x-2 truncate text-[12px] font-medium text-[var(--app-ink-muted)]">
+                <span className="mt-[2px] flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[12px] font-medium text-[var(--app-ink-muted)]">
                   <span className="shrink-0">{item.category}</span>
                   <span className="h-[3px] w-[3px] shrink-0 rounded-full bg-[var(--app-hairline)]"></span>
-                  <span className="inline-flex min-w-0 items-center truncate text-xs text-[var(--app-ink-muted)]">
-                    최근 판매속도 {formatSaleVelocity(item.volume)}건/일 {item.volume >= 50 && <Flame className="ml-1 h-3.5 w-3.5 shrink-0 text-[var(--app-accent)]" aria-hidden="true" />}
+                  <span className="inline-flex min-w-0 items-center text-xs text-[var(--app-ink-muted)]">
+                    {hasMarketData ? `판매 ${formatSaleVelocity(item.volume)}건/일` : '판매속도 미제공'} {item.volume >= 50 && <Flame className="ml-1 h-3.5 w-3.5 shrink-0 text-[var(--app-accent)]" aria-hidden="true" />}
                   </span>
                 </span>
               </div>

@@ -15,7 +15,8 @@ export interface ItemCatalogEntry {
   icon: string;
 }
 
-const entries = (searchCatalog as CompactSearchCatalog).entries;
+// JSON inference widens tuples to arrays; data:validate checks this catalog.
+const entries = (searchCatalog as unknown as CompactSearchCatalog).entries;
 const search = createItemSearcher(entries);
 const entriesById = new Map(entries.map(([id, name, iconId]) => [id, { id, name, iconId }]));
 

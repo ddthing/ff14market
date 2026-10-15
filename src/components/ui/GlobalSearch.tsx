@@ -1,4 +1,4 @@
-import { useEffect, useRef, type KeyboardEvent as ReactKeyboardEvent } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { Command, Search, X } from 'lucide-react';
 import { ItemSearch } from './ItemSearch';
 import { useSearchStore } from '../../store/useSearchStore';
@@ -28,6 +28,20 @@ export const GlobalSearch = () => {
   const appContentRef = useRef<HTMLElement | null>(null);
   const previousAppContentInert = useRef(false);
   const previousAppContentAriaHidden = useRef<string | null>(null);
+  const [viewport, setViewport] = useState<{ height: number; top: number } | null>(null);
+
+  useEffect(() => {
+    const visibleViewport = window.visualViewport;
+    if (!isOpen || !visibleViewport) return;
+    const updateViewport = () => setViewport({ height: visibleViewport.height, top: visibleViewport.offsetTop });
+    updateViewport();
+    visibleViewport.addEventListener('resize', updateViewport);
+    visibleViewport.addEventListener('scroll', updateViewport);
+    return () => {
+      visibleViewport.removeEventListener('resize', updateViewport);
+      visibleViewport.removeEventListener('scroll', updateViewport);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
@@ -133,7 +147,8 @@ export const GlobalSearch = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-[color-mix(in_srgb,var(--app-ink)_18%,transparent)] p-0 backdrop-blur-[2px] md:items-start md:p-4 md:pt-[12vh]"
+      className="fixed inset-x-0 z-50 flex items-end justify-center bg-[color-mix(in_srgb,var(--app-ink)_18%,transparent)] pt-4 backdrop-blur-[2px] md:items-start md:p-4 md:pt-[12vh]"
+      style={{ top: viewport?.top ?? 0, height: viewport?.height ?? '100dvh' }}
       onClick={(event) => {
         if (event.target === event.currentTarget) close();
       }}
@@ -144,11 +159,12 @@ export const GlobalSearch = () => {
         id={SEARCH_DIALOG_ID}
         aria-labelledby={`${SEARCH_DIALOG_ID}-title`}
         aria-modal="true"
-        className="w-full max-h-[min(80vh,540px)] overflow-visible rounded-t-2xl border border-b-0 border-[var(--app-hairline)] bg-[var(--app-surface)] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_-12px_36px_rgba(23,25,28,0.14)] animate-slide-up md:max-w-2xl md:rounded-2xl md:border-b md:p-5 md:pb-5 md:shadow-[0_20px_60px_rgba(23,25,28,0.16)] md:animate-pop-in"
+        className="global-search-dialog flex min-h-0 w-full flex-col overflow-hidden rounded-t-2xl border border-b-0 border-[var(--app-hairline)] bg-[var(--app-surface)] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_-12px_36px_rgba(23,25,28,0.14)] animate-slide-up md:max-w-2xl md:rounded-2xl md:border-b md:p-5 md:pb-5 md:shadow-[0_20px_60px_rgba(23,25,28,0.16)] md:animate-pop-in"
+        style={{ maxHeight: 'min(620px, 100%)' }}
         onKeyDown={handleDialogKeyDown}
         role="dialog"
       >
-        <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="mb-3 flex shrink-0 items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--app-surface-subtle)] text-[var(--app-ink)]" aria-hidden="true">
               <Search className="h-4 w-4" />
@@ -170,7 +186,7 @@ export const GlobalSearch = () => {
             <button
               type="button"
               onClick={close}
-              className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-md text-[var(--app-ink-muted)] transition-colors hover:bg-[var(--app-surface-subtle)] hover:text-[var(--app-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/60"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-[var(--app-ink-muted)] transition-colors hover:bg-[var(--app-surface-subtle)] hover:text-[var(--app-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/60"
               aria-label="아이템 검색 닫기"
             >
               <X className="h-[18px] w-[18px]" aria-hidden="true" />
@@ -180,12 +196,14 @@ export const GlobalSearch = () => {
 
         <ItemSearch
           variant="compact"
+          resultsLayout="inline"
           autoFocus
           onSelect={close}
           onEscape={close}
         />
 
-        <div className="mt-3 flex items-center gap-2 text-[11px] text-[var(--app-ink-muted)]" aria-label="검색 단축키 안내">
+        <p className="mt-3 shrink-0 text-[11px] text-[var(--app-ink-muted)] sm:hidden">아이템을 선택하면 서버별 시세로 이동합니다.</p>
+        <div className="mt-3 hidden shrink-0 items-center gap-2 text-[11px] text-[var(--app-ink-muted)] sm:flex" aria-label="검색 단축키 안내">
           <Command className="h-3.5 w-3.5" aria-hidden="true" />
           <span><kbd className="font-semibold">Ctrl</kbd>/<kbd className="font-semibold">⌘</kbd> + <kbd className="font-semibold">K</kbd>로 언제든 열 수 있습니다.</span>
         </div>

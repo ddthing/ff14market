@@ -56,9 +56,26 @@ test('current market requests use summary fields and 50-item chunks', async () =
     const ids = url.pathname.split('/').pop()?.split(',') ?? [];
     assert.ok(ids.length <= 50);
     assert.equal(url.searchParams.get('listings'), '0');
-    assert.equal(url.searchParams.get('entries'), '0');
+    assert.equal(url.searchParams.get('entries'), '20');
     assert.match(url.searchParams.get('fields') ?? '', /items\.minPrice/);
   }
+});
+
+test('current snapshots preserve sale metrics that depend on upstream history sampling', async () => {
+  const fetcher = async (url: string) => {
+    // Universalis returns zero summaries when entries=0, even for traded items.
+    const includesHistory = Number(new URL(url).searchParams.get('entries') ?? 5) > 0;
+    return response({ items: { '45070': {
+      ...item(45070),
+      averagePrice: includesHistory ? 3143439.2 : 0,
+      regularSaleVelocity: includesHistory ? 0.42857143 : 0,
+    } } });
+  };
+
+  const current = await fetchCurrentStats('Tonberry', [45070], fetcher);
+  const snapshot = createCurrentSnapshot('Tonberry', current);
+  assert.equal(snapshot.items['45070'].averagePrice, 3143439.2);
+  assert.equal(snapshot.items['45070'].regularSaleVelocity, 0.42857143);
 });
 
 test('current market keeps successful chunks when one upstream chunk fails', async () => {

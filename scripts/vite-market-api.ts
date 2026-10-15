@@ -8,6 +8,8 @@ import {
   MarketDataError,
 } from '../functions/_lib/market-data.ts';
 import type { MarketSnapshotResponse } from '../src/types/market.ts';
+import { onRequestGet as searchItems } from '../functions/api/search.ts';
+import { onRequestGet as itemMetadata } from '../functions/api/item-meta/[itemId].ts';
 
 const marketItemIds = masterItems.map((item) => item.id);
 
@@ -39,6 +41,16 @@ export const marketApiDevPlugin = (): Plugin => ({
       }
 
       try {
+        if (parts[1] === 'search' || (parts[1] === 'item-meta' && parts[2])) {
+          const result = parts[1] === 'search'
+            ? searchItems({ request: new Request(new URL(request.url ?? '/', 'http://localhost')) })
+            : itemMetadata({ params: { itemId: parts[2] } });
+          response.statusCode = result.status;
+          result.headers.forEach((value, key) => response.setHeader(key, value));
+          response.end(await result.text());
+          return;
+        }
+
         if (parts[1] === 'market' && parts[2]) {
           const serverName = decodeURIComponent(parts[2]);
           if (!isSupportedServer(serverName)) {

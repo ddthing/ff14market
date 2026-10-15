@@ -339,10 +339,11 @@ const settledMapWithConcurrency = async <T, R>(
 
 const getCurrentUrl = (server: string, itemIds: number[]) => {
   const params = new URLSearchParams({
-    // The dashboard only needs summary metrics. Avoid downloading every listing
-    // and recent entry from the current-data endpoint.
+    // Universalis derives averagePrice and sale velocity from the requested
+    // history sample. entries=0 silently zeros both; fields keeps the payload
+    // compact without discarding the data needed to calculate the summaries.
     listings: '0',
-    entries: '0',
+    entries: '20',
     fields: 'items.itemID,items.lastUploadTime,items.currentAveragePrice,items.regularSaleVelocity,items.averagePrice,items.minPrice,items.minPriceNQ,items.minPriceHQ',
   });
   return `${UPSTREAM_BASE_URL}/${server}/${itemIds.join(',')}?${params.toString()}`;
