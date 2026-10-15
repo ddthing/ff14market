@@ -7,6 +7,20 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <script>
+      // Item identity and market data are independent; begin the request with HTML.
+      (() => {
+        const item = /^\/item\/([1-9]\d*)\/?$/.exec(location.pathname);
+        if (!item || !Number.isSafeInteger(Number(item[1]))) return;
+        const request = document.createElement('link');
+        request.rel = 'preload';
+        request.as = 'fetch';
+        request.href = `/api/item/${item[1]}`;
+        request.crossOrigin = 'anonymous';
+        request.fetchPriority = 'low';
+        document.head.appendChild(request);
+      })();
+    </script>
+    <script>
       // Apply the saved theme before the prerendered document's first paint.
       (() => {
         let theme = 'system';

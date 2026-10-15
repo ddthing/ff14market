@@ -1,5 +1,6 @@
 import { defineConfig, type Plugin } from 'vite'
 import path from 'node:path'
+import { readFile, readdir, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -17,9 +18,28 @@ function inlineInitialStyles(): Plugin {
     configResolved(config) {
       outputDirectory = path.resolve(config.root, config.build.outDir);
     },
-    async writeBundle() {
+    async writeBundle(_options, bundle) {
       // Finalize the HTML before the PWA plugin computes its precache revisions.
       await prerenderHome(outputDirectory);
+      const routeModules = [
+        { source: '/src/pages/HotIssues.tsx', prefix: 'rendered-hot-issues' },
+        { source: '/src/pages/Favorites.tsx', prefix: 'rendered-favorites' },
+        { source: '/src/pages/ItemDetail.tsx', prefix: 'rendered-item-' },
+      ];
+      const files = await readdir(outputDirectory);
+      for (const route of routeModules) {
+        const chunk = Object.values(bundle).find(candidate =>
+          candidate.type === 'chunk' && candidate.facadeModuleId?.replaceAll('\\', '/').endsWith(route.source),
+        );
+        if (!chunk) throw new Error(`Missing initial route chunk: ${route.source}`);
+        const routeFiles = files.filter(file => file.startsWith(route.prefix)
+          && (file.endsWith('.html') || file === 'rendered-item-template.template'));
+        for (const file of routeFiles) {
+          const htmlPath = path.join(outputDirectory, file);
+          const html = await readFile(htmlPath, 'utf8');
+          await writeFile(htmlPath, html.replace('</head>', `<link rel="modulepreload" crossorigin href="/${chunk.fileName}"></head>`));
+        }
+      }
     },
     transformIndexHtml: {
       order: 'post',
@@ -54,14 +74,24 @@ export default defineConfig({
     inlineInitialStyles(),
     VitePWA({
       registerType: 'autoUpdate',
-      injectRegister: 'script-defer',
+      injectRegister: false,
       workbox: {
-        // A cached navigation can target any client route; keep its shell neutral.
-        navigateFallback: '/spa.html',
+        skipWaiting: true,
+        clientsClaim: true,
+        // Online navigations always use the deployed HTML, with a neutral offline shell.
+        navigateFallback: null,
         maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
         // Route chunks and glyph-specific font subsets are loaded on demand.
-        globIgnores: ['**/PriceChart-*.js', '**/fonts/**/*.woff2'],
+        globIgnores: ['**/PriceChart-*.js', '**/fonts/**/*.woff2', '**/index.html', '**/rendered-*.html'],
         runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkOnly',
+            options: {
+              fetchOptions: { cache: 'no-store' },
+              precacheFallback: { fallbackURL: '/spa.html' },
+            },
+          },
           {
             urlPattern: /\/fonts\/pretendard-v1\.3\.9\/PretendardVariable\.subset\.\d+\.woff2$/,
             handler: 'CacheFirst',

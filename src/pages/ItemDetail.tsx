@@ -10,6 +10,8 @@ import { useRecentStore } from '../store/useRecentStore';
 import { FavoriteButton } from '../components/ui/FavoriteButton';
 import { DataErrorState } from '../components/ui/DataErrorState';
 import { Seo } from '../components/seo/Seo';
+import { itemDetailSeoMetadata } from '../components/seo/seoHead';
+import type { ItemCatalogEntry } from '../api/itemCatalog';
 import { formatSaleVelocity } from '../utils/marketMetrics';
 import masterItems from '../data/masterItems.json';
 import { MARKET_SERVER_NAMES } from '../constants/market';
@@ -20,14 +22,17 @@ import { PurchasePlanner } from '../components/common/PurchasePlanner';
 const PriceChart = lazy(() => import('../components/common/PriceChart').then(({ PriceChart: Component }) => ({ default: Component })));
 const MASTER_ITEMS_BY_ID = new Map(masterItems.map((candidate) => [candidate.id, candidate] as const));
 
-export const ItemDetail = () => {
+type ItemDetailProps = { initialItem?: ItemCatalogEntry };
+
+export const ItemDetail = ({ initialItem }: ItemDetailProps = {}) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const addRecentId = useRecentStore((state) => state.addRecentId);
 
-  const itemId = id ? parseInt(id) : 0;
+  const itemId = id && /^[1-9]\d*$/.test(id) ? Number(id) : 0;
 
   const localItem = MASTER_ITEMS_BY_ID.get(itemId);
+  const routeInitialItem = initialItem?.id === itemId ? initialItem : undefined;
   const {
     data: fetchedItem,
     isLoading: isMetadataLoading,
@@ -39,13 +44,13 @@ export const ItemDetail = () => {
     // Most detail links originate from the curated market list. Reuse the
     // already bundled metadata and reserve the cold search endpoint for direct
     // links to items outside that list.
-    enabled: itemId > 0 && !localItem,
+    enabled: itemId > 0 && !localItem && !routeInitialItem,
     staleTime: 60 * 60 * 1000,
     retry: 1,
   });
-  const item = localItem ?? fetchedItem;
-  const isItemLoading = !localItem && isMetadataLoading;
-  const isItemError = !localItem && isMetadataError;
+  const item = routeInitialItem ?? localItem ?? fetchedItem;
+  const isItemLoading = !routeInitialItem && !localItem && isMetadataLoading;
+  const isItemError = !routeInitialItem && !localItem && isMetadataError;
 
   useEffect(() => {
     if (itemId) {
@@ -78,9 +83,12 @@ export const ItemDetail = () => {
           path={`/item/${itemId}`}
           noIndex
         />
-        <div className="mx-auto flex max-w-md flex-col items-center justify-center py-20" role="status" aria-live="polite" aria-label="아이템 정보를 불러오는 중">
-          <h1 className="sr-only">아이템 시세 조회 중</h1>
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--app-hairline)] border-t-[var(--app-accent)]" aria-hidden="true" />
+        <div className="mx-auto flex max-w-3xl flex-col items-center justify-center gap-4 px-4 py-16 text-center">
+          <h1 className="text-2xl font-bold text-[var(--app-ink)]">아이템 정보를 확인하는 중</h1>
+          <div className="flex flex-col items-center gap-4" role="status" aria-live="polite" aria-label="아이템 정보를 불러오는 중">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--app-hairline)] border-t-[var(--app-accent)]" aria-hidden="true" />
+            <p className="text-sm text-[var(--app-ink-muted)]">요청한 아이템 정보를 확인하고 있습니다.</p>
+          </div>
         </div>
       </>
     );
@@ -95,7 +103,10 @@ export const ItemDetail = () => {
           path={`/item/${itemId}`}
           noIndex
         />
-        <DataErrorState onRetry={() => void refetchItemMetadata()} />
+        <div className="mx-auto max-w-3xl py-8">
+          <h1 className="mb-4 text-2xl font-bold text-[var(--app-ink)]">아이템 정보를 불러오지 못했습니다</h1>
+          <DataErrorState onRetry={() => void refetchItemMetadata()} />
+        </div>
       </>
     );
   }
@@ -130,12 +141,8 @@ export const ItemDetail = () => {
   
   return (
     <>
-      <Seo
-        title={`${item.name} 시세 | FF14 장터탐지기`}
-        description={`${item.name}의 한국 데이터센터 최저 매물가, 최근 판매량, 가격 흐름을 확인하세요.`}
-        path={`/item/${item.id}`}
-      />
-      <div className="item-detail-page mx-auto py-4 animate-fade-in">
+      <Seo {...itemDetailSeoMetadata(item)} />
+      <div className="item-detail-page mx-auto py-4">
       <button 
         onClick={() => navigate(-1)}
         className="mb-6 flex items-center space-x-2 font-medium text-[var(--app-ink-muted)] transition-colors hover:text-[var(--app-ink)]"
@@ -150,21 +157,28 @@ export const ItemDetail = () => {
         </div>
         
         <div className="flex flex-col items-center pt-8 pb-8">
-          <img 
-            src={getIconUrl(item.icon)} 
+          <img
+            src={getIconUrl(item.icon)}
             alt=""
-            loading="lazy"
-            className="mb-5 h-[100px] w-[100px] rounded-full bg-[var(--app-surface-subtle)] p-[3px] shadow-sm" 
+            width={80}
+            height={80}
+            loading="eager"
+            fetchPriority="high"
+            className="mb-5 h-14 w-14 rounded-full bg-[var(--app-surface-subtle)] p-[3px] shadow-sm md:h-[100px] md:w-[100px]"
           />
           <h1 className="text-center text-[24px] font-bold leading-tight text-[var(--app-ink)]">
             {item.name}
           </h1>
-          <p className="mt-2 text-[15px] font-medium text-[var(--app-ink-muted)]">
-            {isLoading
-              ? '한국 DC 최근 수집 시세 조회 중...'
-              : data?.marketMeta
-                ? `최근 정상 수집 데이터 · ${formatFreshness(data.marketMeta.cachedAt)}`
-                : '한국 DC 최근 수집 시세'}
+          <p className="mt-2 flex min-h-[3rem] items-center justify-center text-center text-[15px] font-medium leading-6 text-[var(--app-ink-muted)]">
+            <span className="block w-full">
+              {isLoading
+                ? '시세 데이터 확인 중...'
+                : isError
+                  ? '시세 조회 실패'
+                  : data?.marketMeta
+                    ? `최근 정상 수집 · ${formatFreshness(data.marketMeta.cachedAt)}`
+                    : '한국 DC 최근 수집 시세'}
+            </span>
           </p>
         </div>
         
@@ -174,11 +188,15 @@ export const ItemDetail = () => {
             <div className="flex justify-between items-end mb-2">
               <span className="text-[14px] font-bold text-[var(--app-ink)]">한국 전체 최저가</span>
               {isLoading ? (
-                <div className="h-6 w-24 animate-pulse rounded bg-[var(--app-hairline)]" />
+                <div className="h-10 w-24 animate-pulse rounded bg-[var(--app-hairline)]" />
               ) : (
-                <div className="text-right">
+                <div className="flex min-h-10 flex-col justify-center text-right">
                   <div className="text-[20px] font-bold leading-none text-[var(--app-ink)]">
-                    {globalMinPrice > 0 ? `${globalMinPrice.toLocaleString()} G` : '매물 없음'}
+                    {globalMinPrice > 0
+                      ? `${globalMinPrice.toLocaleString()} G`
+                      : isError
+                        ? '시세 확인 실패'
+                        : '매물 없음'}
                   </div>
                   {globalMinPrice > 0 && (
                     <div className="mt-1 text-[12px] font-medium text-blue-600 dark:text-blue-400">
@@ -189,18 +207,31 @@ export const ItemDetail = () => {
               )}
             </div>
             
-            {/* Daily Sales Announcement */}
-            {!isLoading && itemData?.regularSaleVelocity !== undefined && (
-              <div className="mb-3 flex w-full items-center justify-between rounded-lg border border-[var(--app-accent)]/20 bg-[var(--app-surface)] px-3 py-2">
-                <span className="flex items-center text-[13px] font-medium text-[var(--app-accent)]">
-                  {itemData.regularSaleVelocity >= 50 && <Flame className="mr-1.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
-                  최근 판매속도 기준 하루 평균 {formatSaleVelocity(itemData.regularSaleVelocity)}건이 판매되었습니다.
+            {/* Keep the status slot in place as market data loads or fails. */}
+            <div className="mb-3 flex min-h-14 w-full items-center justify-between gap-3 rounded-lg border border-[var(--app-accent)]/20 bg-[var(--app-surface)] px-3 py-2">
+              <span className="shrink-0 text-[13px] font-medium text-[var(--app-ink-muted)]">최근 판매속도</span>
+              {isLoading ? (
+                <span className="text-right text-[13px] font-medium text-[var(--app-ink-muted)]" role="status" aria-live="polite">
+                  확인 중
                 </span>
-              </div>
-            )}
+              ) : itemData?.regularSaleVelocity !== undefined ? (
+                <span className="whitespace-nowrap text-right text-[15px] font-bold tabular-nums text-[var(--app-accent)]" aria-live="polite">
+                  {itemData.regularSaleVelocity >= 50 && <Flame className="mr-1.5 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />}
+                  {formatSaleVelocity(itemData.regularSaleVelocity)}{' '}건/일
+                </span>
+              ) : (
+                <span className="whitespace-nowrap text-right text-[13px] font-medium text-[var(--app-ink-muted)]" aria-live="polite">
+                  {isError ? '조회 실패' : '미제공'}
+                </span>
+              )}
+            </div>
             
             {isError ? (
-              <DataErrorState compact onRetry={() => void refetch()} />
+              <div className="mt-3 flex min-h-[200px] items-center">
+                <div className="w-full">
+                  <DataErrorState compact onRetry={() => void refetch()} />
+                </div>
+              </div>
             ) : isLoading ? (
               <div className="mt-3 flex h-[200px] w-full items-end space-x-2">
                 {[40, 70, 45, 90, 60, 30, 80, 50, 100, 60, 85, 40].map((h, i) => (
@@ -208,8 +239,12 @@ export const ItemDetail = () => {
                 ))}
               </div>
             ) : (
-              <Suspense fallback={<div className="flex h-[100px] items-center justify-center rounded-xl bg-[var(--app-surface-subtle)] text-[12px] text-[var(--app-ink-muted)]">가격 흐름 준비 중...</div>}>
-                <PriceChart history={itemData?.recentHistory || []} />
+              <Suspense fallback={<div className="mt-3 flex h-[200px] items-center justify-center rounded-xl bg-[var(--app-surface-subtle)] text-[12px] text-[var(--app-ink-muted)]">가격 흐름 준비 중...</div>}>
+                <div className="mt-3 flex min-h-[200px] items-center">
+                  <div className="w-full">
+                    <PriceChart history={itemData?.recentHistory || []} />
+                  </div>
+                </div>
               </Suspense>
             )}
           </div>
@@ -220,13 +255,13 @@ export const ItemDetail = () => {
             <div className="space-y-2">
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="h-8 w-full animate-pulse rounded bg-[var(--app-hairline)]" />
+                  <div key={i} className="h-10 w-full animate-pulse rounded bg-[var(--app-hairline)]" />
                 ))
               ) : (
                 serverPrices.map(s => {
                   const isLowest = s.minPrice > 0 && s.minPrice === absoluteMin;
                   return (
-                    <div key={s.serverName} className={`flex items-center justify-between rounded-lg p-2 transition-colors ${isLowest ? 'bg-[var(--app-surface)]' : 'hover:bg-[var(--app-surface)]'}`}>
+                    <div key={s.serverName} className={`flex min-h-10 items-center justify-between rounded-lg p-2 transition-colors ${isLowest ? 'bg-[var(--app-surface)]' : 'hover:bg-[var(--app-surface)]'}`}>
                       <div className="flex items-center space-x-2">
                         <span className={`text-[14px] font-bold ${isLowest ? 'text-[var(--app-accent)]' : 'text-[var(--app-ink)]'}`}>
                           {s.serverName}
@@ -255,7 +290,11 @@ export const ItemDetail = () => {
           장터 둘러보기
         </button>
       </div>
-      {!isLoading && !isError && <PurchasePlanner key={itemId} listings={data?.listings ?? []} />}
+      <PurchasePlanner
+        key={itemId}
+        listings={data?.listings ?? []}
+        status={data ? 'ready' : isError ? 'error' : 'loading'}
+      />
       </div>
       </div>
     </>

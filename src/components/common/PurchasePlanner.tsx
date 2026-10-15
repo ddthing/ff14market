@@ -5,10 +5,14 @@ import { useServerStore } from '../../store/useServerStore';
 import { getAbsoluteMinPrice, getServerMinPrices } from '../../utils/marketListings';
 import type { KoreaDCResponse } from '../../types/market';
 
+type PurchasePlannerStatus = 'loading' | 'error' | 'ready';
+
 export function PurchasePlanner({
   listings,
+  status = 'ready',
 }: {
   listings: NonNullable<KoreaDCResponse['listings']>;
+  status?: PurchasePlannerStatus;
 }) {
   const [quantity, setQuantity] = useState('1');
   const [quality, setQuality] = useState('all');
@@ -26,6 +30,15 @@ export function PurchasePlanner({
     [listings, quality],
   );
   const minimum = getAbsoluteMinPrice(prices);
+  const marketStatusMessage = status === 'loading'
+    ? '시세 조회 중'
+    : status === 'error'
+      ? '시세 조회 실패'
+      : minimum > 0
+        ? '선택한 품질의 서버별 최저가 기준'
+        : quality === 'all'
+          ? '현재 등록된 매물이 없습니다.'
+          : '선택한 품질에 매물이 없습니다.';
   const count = Number(quantity);
   const valid = Number.isSafeInteger(count) && count >= 1 && count <= 9999;
   const homePrice = prices.find((price) => price.serverName === homeName)?.minPrice ?? 0;
@@ -71,6 +84,9 @@ export function PurchasePlanner({
           수량은 1~9,999 사이의 정수로 입력해 주세요.
         </p>
       )}
+      <p className="table-note min-h-[2.25rem]" role="status" aria-live="polite">
+        {marketStatusMessage}
+      </p>
       <div className="planner-results" aria-live="polite">
         {prices.map((price) => (
           <div
@@ -82,14 +98,20 @@ export function PurchasePlanner({
               {minimum > 0 && price.minPrice === minimum && <small>최저가</small>}
             </span>
             <strong>
-              {valid && price.minPrice > 0
-                ? `${(price.minPrice * count).toLocaleString()} G`
-                : '계산 불가'}
+              {status === 'loading'
+                ? '조회 중'
+                : status === 'error'
+                  ? '조회 실패'
+                  : !valid
+                    ? '계산 불가'
+                    : price.minPrice > 0
+                      ? `${(price.minPrice * count).toLocaleString()} G`
+                      : '매물 없음'}
             </strong>
           </div>
         ))}
       </div>
-      {valid && minimum > 0 && homePrice > minimum && (
+      {status === 'ready' && valid && minimum > 0 && homePrice > minimum && (
         <p className="planner-saving">
           {homeName} 서버 대비 예상 차액{' '}
           <strong>{((homePrice - minimum) * count).toLocaleString()} G</strong>

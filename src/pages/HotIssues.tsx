@@ -118,11 +118,17 @@ export const HotIssues = () => {
         description="파이널판타지14 한국 서버의 거래 활발 품목, 최근 7일 가격 하락 신호, 최저 매물가 상위 품목을 확인하세요."
         path="/hot-issues"
       />
-      <div className="w-full space-y-6 animate-fade-in">
+      <div className="w-full space-y-6">
       <header className="flex flex-col gap-4 px-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="mb-2 text-[12px] font-bold uppercase tracking-[0.16em] text-[var(--app-accent)]">
-            {getMarketServerLabel(server)} · {snapshotStale ? '이전 수집 데이터' : '수집 스냅샷'}
+            {getMarketServerLabel(server)} · {isLoading
+              ? '스냅샷 조회 중'
+              : isError
+                ? '스냅샷 조회 실패'
+                : snapshotStale
+                  ? '이전 수집 데이터'
+                  : '수집 스냅샷'}
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-[24px] font-bold tracking-[-0.03em] text-[var(--app-ink)] sm:text-[28px]">
@@ -243,12 +249,8 @@ export const HotIssues = () => {
                     : '높은 값부터 정렬'}
               </span>
             </div>
-            {visibleItems.map((item, index) => (
-              <div
-                key={`${activeTab}-${item.id}`}
-                className="animate-fade-in"
-                style={{ animationDelay: `${index * 20}ms` }}
-              >
+            {visibleItems.map((item) => (
+              <div key={`${activeTab}-${item.id}`}>
                 <ItemListItem
                   item={item}
                   signal={activeTab === 'volume' && isHistoryPreview

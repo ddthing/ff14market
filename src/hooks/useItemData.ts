@@ -30,13 +30,14 @@ export interface EnrichedItem {
 export const getMarketSnapshotQueryKey = (server: string) => ['market-snapshot', server] as const;
 export const getBulkQueryKey = getMarketSnapshotQueryKey;
 
-export const useItemData = () => {
+export const useItemData = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const { server } = useServerStore();
 
   // 현재 선택된 서버의 요약 지표와 사전 계산된 순위를 한 번에 조회
   const { data: snapshot, isLoading, isError, error, refetch } = useQuery<MarketSnapshotResponse>({
     queryKey: getMarketSnapshotQueryKey(server),
     queryFn: ({ signal }) => fetchMarketSnapshot(server, signal),
+    enabled,
     staleTime: 300000, // 5 minutes (모달에서 수동으로 덮어씌운 최신 캐시가 백그라운드 리패치에 의해 과거 벌크 데이터로 즉시 롤백되는 현상 방지)
     gcTime: 900000,
     refetchOnWindowFocus: false,
