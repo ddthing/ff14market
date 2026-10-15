@@ -227,9 +227,9 @@ export const ItemDetail = ({ initialItem }: ItemDetailProps = {}) => {
             <div className="flex justify-between items-end mb-2">
               <span className="text-[14px] font-bold text-[var(--app-ink)]">한국 전체 최저가</span>
               {isLoading ? (
-                <div className="h-10 w-24 animate-pulse rounded bg-[var(--app-hairline)]" />
+                <div className="h-14 w-24 animate-pulse rounded bg-[var(--app-hairline)]" />
               ) : (
-                <div className="flex min-h-10 flex-col justify-center text-right">
+                <div className="flex min-h-14 flex-col justify-center text-right">
                   <div className="text-[20px] font-bold leading-none text-[var(--app-ink)]">
                     {globalMinPrice > 0 ? `${globalMinPrice.toLocaleString()} G` : emptyPriceLabel}
                   </div>

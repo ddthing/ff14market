@@ -10,6 +10,39 @@ import {
   serializeItemDetailBootstrap,
 } from '../src/routes/itemBootstrap.ts';
 import type { ItemCatalogEntry } from '../src/api/itemCatalog.ts';
+import { withCachedItemDocument } from '../functions/_lib/item-document-cache.ts';
+
+test('public item documents reuse edge entries without browser caching or sharing hosts', async () => {
+  const entries = new Map<string, Response>();
+  const cache = {
+    match: async (key: Request) => entries.get(key.url)?.clone(),
+    put: async (key: Request, value: Response) => { entries.set(key.url, value.clone()); },
+  };
+  const context = {
+    request: new Request('https://market.example/item/5064?from=search'),
+    params: { itemId: '5064' }, env: {},
+  };
+  let renders = 0;
+  const render = async () => {
+    renders += 1;
+    return new Response('<h1>공개 아이템 정보</h1>', { headers: { 'Cache-Control': 'no-cache' } });
+  };
+  const first = await withCachedItemDocument(context, render, cache);
+  assert.equal(first.headers.get('X-Item-Document-Cache'), 'MISS');
+  assert.equal(first.headers.get('Cache-Control'), 'no-cache');
+  assert.equal([...entries.values()][0].headers.get('Cache-Control'), 'public, max-age=60');
+  const next = await withCachedItemDocument({ ...context, request: new Request('https://market.example/item/5064/') }, render, cache);
+  assert.equal(next.headers.get('X-Item-Document-Cache'), 'HIT');
+  assert.equal(next.headers.get('Cache-Control'), 'no-cache');
+  assert.equal(await next.text(), '<h1>공개 아이템 정보</h1>');
+  assert.equal(renders, 1);
+  await withCachedItemDocument({ ...context, request: new Request('https://preview.example/item/5064') }, render, cache);
+  assert.equal(renders, 2);
+  await withCachedItemDocument({ ...context, params: { itemId: '999' } }, async () => new Response('unavailable', { status: 503 }), cache);
+  assert.equal(entries.size, 2, 'Failures must not become cached item documents');
+  const brokenCache = { ...cache, match: async (): Promise<Response | undefined> => { throw new Error('cache unavailable'); }, put: async () => { throw new Error('cache unavailable'); } };
+  assert.equal((await withCachedItemDocument(context, render, brokenCache)).status, 200);
+});
 
 const templateDocument = (id: number) => injectItemDetailTemplateData(`<!doctype html>
 <html lang="ko"><head>
